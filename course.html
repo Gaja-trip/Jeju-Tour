@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>코스 | 제주도 2박 3일 자전거 여행</title>
+  <meta name="description" content="제주도 2박 3일 자전거 여행 코스와 네이버지도 연동">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Tour</a>
+      <nav class="nav-links" aria-label="주요 페이지">
+        <a href="index.html">홈</a>
+        <a class="active" href="course.html">코스</a>
+        <a href="schedule.html">일정표</a>
+        <a href="live.html">실시간 확인</a>
+        <a href="transport.html">출발·배편·복귀</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero compact">
+      <div class="wrap hero-inner">
+        <div>
+          <p class="eyebrow">Route</p>
+          <h1>3일 연속 라이딩 코스</h1>
+          <p class="hero-copy">제주항에서 시작해 서쪽으로 돌아<br>남부를 지나 성산에서 2박,<br>마지막 날 동북부 해안도로로 제주항에 복귀합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Naver Map</p>
+            <h2>네이버지도 맵</h2>
+          </div>
+          <p class="lead">아래 지도에서 제주 자전거길과<br>주요 경유지를 확인합니다.<br>구간별 버튼으로 네이버지도 검색 화면을<br>새 창에서 열 수 있습니다.</p>
+        </div>
+
+        <div class="map-grid">
+          <article class="map-card">
+            <iframe
+              class="naver-map"
+              title="네이버지도 제주 자전거 코스"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%95%AD%20%EC%9A%A9%EB%91%90%EC%95%94%20%EC%95%A0%EC%9B%94%20%ED%98%91%EC%9E%AC%20%EB%AA%A8%EC%8A%AC%ED%8F%AC%20%EC%84%B1%EC%82%B0%20%EC%9B%94%EC%A0%95%EB%A6%AC%20%ED%95%A8%EB%8D%95%20%EC%9E%90%EC%A0%84%EA%B1%B0%EA%B8%B8">
+            </iframe>
+            <div class="action-list" style="margin-top:12px">
+              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%95%AD%20%EC%9A%A9%EB%91%90%EC%95%94%20%EC%95%A0%EC%9B%94%20%ED%98%91%EC%9E%AC%20%EB%AA%A8%EC%8A%AC%ED%8F%AC%20%EC%84%B1%EC%82%B0%20%EC%9B%94%EC%A0%95%EB%A6%AC%20%ED%95%A8%EB%8D%95%20%EC%9E%90%EC%A0%84%EA%B1%B0%EA%B8%B8">네이버지도 새 창</a>
+            </div>
+          </article>
+
+          <aside class="panel">
+            <h3>구간별 네이버지도</h3>
+            <div class="route-list" data-route-cards></div>
+            <div class="notice" style="margin-top:18px">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2V9h2z"/></svg>
+              <div>지도 화면이 브라우저 보안 정책으로 보이지 않는 경우, 같은 구간의 네이버지도 새 창 버튼을 사용하면 됩니다.</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:#f8fbfb">
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Visual Route</p>
+            <h2>코스 시각화</h2>
+          </div>
+        </div>
+
+        <article class="map-card">
+          <svg class="static-map" viewBox="0 0 920 760" role="img" aria-label="제주 2박 3일 자전거 코스">
+            <rect x="0" y="0" width="920" height="760" rx="18" fill="#eef6f7"/>
+            <path d="M168 349c18-84 76-153 165-197 103-51 234-62 360-24 98 30 177 91 204 172 25 74-6 145-74 192-60 42-140 65-216 90-94 30-173 72-266 51-91-20-161-84-190-159-16-42-10-82 17-125Z" fill="#d7f2d9" stroke="#147d91" stroke-width="5"/>
+            <path d="M205 354c23-66 72-117 143-154 97-50 216-57 331-24 83 24 151 75 172 139 19 58-9 115-64 152-58 40-133 56-201 80-89 31-158 50-236 27-73-21-126-76-148-137-10-29-9-55 3-83Z" fill="#f7f9f6" opacity=".92"/>
+            <path d="M388 392c-7-65 25-122 86-146 69-27 143 0 165 57 21 55-20 111-87 132-62 19-155 13-164-43Z" fill="#d8e1e8" opacity=".75"/>
+            <text x="455" y="390" text-anchor="middle" fill="#6d7b89" font-size="22" font-weight="900">한라산</text>
+            <polyline class="route-line" fill="none" stroke="#f47c48" points="455,146 357,140 262,180 182,267 145,367 183,475 302,587"/>
+            <polyline class="route-line" fill="none" stroke="#356ac3" points="302,587 354,648 481,660 612,615 746,521 823,410"/>
+            <polyline class="route-line" fill="none" stroke="#2e7d5b" points="823,410 824,306 770,223 662,163 548,134 455,146"/>
+            <g class="pin" transform="translate(455 146)"><circle r="18"/><text>0</text></g>
+            <g class="pin" transform="translate(183 475)"><circle r="18"/><text>1</text></g>
+            <g class="pin" transform="translate(302 587)"><circle r="18"/><text>2</text></g>
+            <g class="pin" transform="translate(612 615)"><circle r="18"/><text>3</text></g>
+            <g class="pin" transform="translate(823 410)"><circle r="18"/><text>4</text></g>
+            <g class="pin" transform="translate(770 223)"><circle r="18"/><text>5</text></g>
+            <g class="pin" transform="translate(548 134)"><circle r="18"/><text>6</text></g>
+            <text class="map-label" x="470" y="105">제주항/용두암</text>
+            <text class="map-label" x="92" y="472">신창풍차</text>
+            <text class="map-label" x="242" y="630">모슬포/대정 1박</text>
+            <text class="map-label" x="580" y="690">서귀포</text>
+            <text class="map-label" x="800" y="455">성산 2박</text>
+            <text class="map-label" x="782" y="208">월정리</text>
+            <text class="map-label" x="515" y="102">함덕</text>
+          </svg>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>코스 페이지</strong>
+      <p>실제 주행 전에는 네이버지도 경로, 현장 자전거길 표지, 공사 구간, 기상 상황을 함께 확인하세요.</p>
+    </div>
+  </footer>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
