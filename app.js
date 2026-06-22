@@ -36,6 +36,35 @@ const jejuBikeNodes = [
   { name: "삼양", lat: 33.5262, lng: 126.5865, elevation: 8 }
 ];
 
+const jejuRoutePlaces = [
+  { name: "제주항", aliases: ["제주항연안여객터미널", "제주 여객선터미널"], lat: 33.5162, lng: 126.5280, elevation: 8 },
+  { name: "용두암", aliases: ["용두암해안도로"], lat: 33.5161, lng: 126.5117, elevation: 12 },
+  { name: "이호테우", aliases: ["이호테우해변", "이호해수욕장"], lat: 33.4971, lng: 126.4522, elevation: 10 },
+  { name: "애월", aliases: ["애월항", "애월해안도로"], lat: 33.4637, lng: 126.3096, elevation: 18 },
+  { name: "곽지", aliases: ["곽지해수욕장"], lat: 33.4501, lng: 126.3046, elevation: 14 },
+  { name: "한림", aliases: ["한림항"], lat: 33.4144, lng: 126.2634, elevation: 12 },
+  { name: "협재", aliases: ["협재해수욕장", "금능"], lat: 33.3945, lng: 126.2397, elevation: 12 },
+  { name: "신창풍차해안도로", aliases: ["신창", "풍차해안도로"], lat: 33.3459, lng: 126.1746, elevation: 9 },
+  { name: "차귀도", aliases: ["자구내포구"], lat: 33.3080, lng: 126.1668, elevation: 12 },
+  { name: "모슬포", aliases: ["모슬포항", "대정"], lat: 33.2208, lng: 126.2496, elevation: 20 },
+  { name: "송악산", aliases: ["송악산둘레길"], lat: 33.2066, lng: 126.2902, elevation: 48 },
+  { name: "산방산", aliases: ["산방산탄산온천"], lat: 33.2391, lng: 126.3130, elevation: 74 },
+  { name: "중문", aliases: ["중문관광단지"], lat: 33.2497, lng: 126.4124, elevation: 64 },
+  { name: "법환바당", aliases: ["법환포구"], lat: 33.2376, lng: 126.5159, elevation: 20 },
+  { name: "서귀포", aliases: ["서귀포항", "천지연"], lat: 33.2461, lng: 126.5615, elevation: 42 },
+  { name: "쇠소깍", aliases: ["하효항"], lat: 33.2525, lng: 126.6231, elevation: 16 },
+  { name: "남원", aliases: ["남원포구"], lat: 33.2791, lng: 126.7209, elevation: 19 },
+  { name: "표선", aliases: ["표선해수욕장"], lat: 33.3244, lng: 126.8324, elevation: 18 },
+  { name: "섭지코지", aliases: ["신양섭지"], lat: 33.4241, lng: 126.9291, elevation: 26 },
+  { name: "성산", aliases: ["성산일출봉", "성산항"], lat: 33.4585, lng: 126.9348, elevation: 24 },
+  { name: "세화", aliases: ["세화해변"], lat: 33.5260, lng: 126.8567, elevation: 14 },
+  { name: "월정리", aliases: ["월정리해변"], lat: 33.5568, lng: 126.7952, elevation: 12 },
+  { name: "김녕", aliases: ["김녕해수욕장"], lat: 33.5576, lng: 126.7593, elevation: 10 },
+  { name: "함덕", aliases: ["함덕해수욕장"], lat: 33.5437, lng: 126.6692, elevation: 11 },
+  { name: "삼양", aliases: ["삼양해수욕장"], lat: 33.5262, lng: 126.5865, elevation: 8 },
+  { name: "동문시장", aliases: ["제주동문시장"], lat: 33.5117, lng: 126.5260, elevation: 10 }
+];
+
 const routeChoices = {
   day1: [
     {
@@ -420,7 +449,7 @@ function mapRouteSegment(dayId, savedRoute) {
     rideTime: savedRoute.rideTime || "지도 기준",
     stops,
     query: `${stops.join(" ")} 자전거길`,
-    summary: `V-World 지도에서 선택한 출발/도착 지점을 제주 해안 자전거 루프에 맞춰 자동 생성한 코스입니다. 예상 상승 ${ascent}m, 하강 ${descent}m입니다.`,
+    summary: `${savedRoute.sourceName || "제주 환상 자전거길 GPX"} 기준으로 선택한 출발/도착 지점을 트랙에 맞춰 자동 생성한 코스입니다. 예상 상승 ${ascent}m, 하강 ${descent}m입니다. ${savedRoute.elevationSource || ""}`,
     metrics: [
       { value: distance ? `${distance.toFixed(1)}km` : "지도", label: "예상 거리" },
       { value: `${ascent}m`, label: "상승 고도" },
@@ -543,6 +572,146 @@ function distanceKm(a, b) {
   return 2 * earthRadiusKm * Math.asin(Math.sqrt(h));
 }
 
+function estimateElevation(point) {
+  const nearest = jejuRoutePlaces
+    .map((place) => ({ ...place, distance: Math.max(0.15, distanceKm(point, place)) }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 4);
+  const weighted = nearest.reduce((sum, place) => sum + place.elevation / place.distance, 0);
+  const weights = nearest.reduce((sum, place) => sum + 1 / place.distance, 0);
+  return weights ? weighted / weights : 10;
+}
+
+let preparedGpxRoute = null;
+let preparedRoutePlaces = null;
+
+function getPreparedGpxRoute() {
+  if (preparedGpxRoute) return preparedGpxRoute;
+  const rawPoints = Array.isArray(window.JEJU_FANTASY_GPX?.points) ? window.JEJU_FANTASY_GPX.points : [];
+  const hasGpxElevation = rawPoints.some((point) => Number(point[2]) > 0);
+  let totalDistanceKm = 0;
+  const points = [];
+
+  rawPoints.forEach((point, index) => {
+    const lat = Number(point[0]);
+    const lng = Number(point[1]);
+    const gpxElevation = Number(point[2] || 0);
+    if (index > 0) totalDistanceKm += distanceKm(points[index - 1], { lat, lng });
+    const current = {
+      lat,
+      lng,
+      elevation: hasGpxElevation ? gpxElevation : estimateElevation({ lat, lng }),
+      gpxElevation,
+      index,
+      distanceFromStart: totalDistanceKm
+    };
+    points.push(current);
+  });
+
+  preparedGpxRoute = {
+    name: window.JEJU_FANTASY_GPX?.name || "제주환상자전거길.gpx",
+    points,
+    totalDistanceKm,
+    hasGpxElevation
+  };
+  return preparedGpxRoute;
+}
+
+function nearestRoutePoint(point) {
+  const route = getPreparedGpxRoute();
+  if (!route.points.length) return null;
+  return route.points.reduce((closest, candidate) => {
+    const distance = distanceKm(point, candidate);
+    return !closest || distance < closest.distance ? { ...candidate, distance } : closest;
+  }, null);
+}
+
+function getPreparedRoutePlaces() {
+  if (preparedRoutePlaces) return preparedRoutePlaces;
+  preparedRoutePlaces = jejuRoutePlaces.map((place) => {
+    const nearest = nearestRoutePoint(place);
+    return {
+      ...place,
+      routeIndex: nearest?.index ?? 0,
+      routeDistance: nearest?.distanceFromStart ?? 0,
+      snapDistanceKm: nearest?.distance ?? 0
+    };
+  });
+  return preparedRoutePlaces;
+}
+
+function normalizeText(value) {
+  return String(value || "").replace(/\s+/g, "").toLowerCase();
+}
+
+function findLocalPlace(query) {
+  const normalized = normalizeText(query);
+  if (!normalized) return null;
+  return getPreparedRoutePlaces().find((place) => {
+    const names = [place.name, ...(place.aliases || [])];
+    return names.some((name) => normalizeText(name).includes(normalized) || normalized.includes(normalizeText(name)));
+  }) || null;
+}
+
+function parseCoordinateQuery(query) {
+  const match = String(query).match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const first = Number(match[1]);
+  const second = Number(match[2]);
+  if (first > 32 && first < 34 && second > 125 && second < 128) return { lat: first, lng: second, name: "입력 좌표" };
+  if (second > 32 && second < 34 && first > 125 && first < 128) return { lat: second, lng: first, name: "입력 좌표" };
+  return null;
+}
+
+async function searchVWorldLocation(query) {
+  const endpoint = "https://api.vworld.kr/req/search";
+  const common = `service=search&request=search&version=2.0&crs=EPSG:4326&size=1&page=1&format=json&key=${encodeURIComponent(vworldApiKey)}&query=${encodeURIComponent(query)}`;
+  const urls = [
+    `${endpoint}?${common}&type=PLACE`,
+    `${endpoint}?${common}&type=ADDRESS`
+  ];
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) continue;
+      const data = await response.json();
+      const item = data?.response?.result?.items?.[0];
+      const x = Number(item?.point?.x);
+      const y = Number(item?.point?.y);
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        return { lat: y, lng: x, name: item.title || query };
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+  return null;
+}
+
+function snapLocationToRoute(point, fallbackName = "선택 지점") {
+  const nearest = nearestRoutePoint(point);
+  if (!nearest) {
+    return {
+      lat: point.lat,
+      lng: point.lng,
+      elevation: point.elevation || estimateElevation(point),
+      routeIndex: 0,
+      placeName: point.name || fallbackName
+    };
+  }
+
+  return {
+    lat: nearest.lat,
+    lng: nearest.lng,
+    elevation: nearest.elevation,
+    routeIndex: nearest.index,
+    routeDistance: nearest.distanceFromStart,
+    snapDistanceKm: nearest.distance,
+    placeName: point.name || fallbackName
+  };
+}
+
 function nearestBikeNode(point) {
   return jejuBikeNodes
     .map((node, index) => ({ ...node, index, distance: distanceKm(point, node) }))
@@ -567,7 +736,35 @@ function circularPath(startIndex, endIndex, direction) {
   return result;
 }
 
-function buildBikeRoute(startPoint, endPoint) {
+function routeIndexProgress(index, startIndex, endIndex, direction, totalCount) {
+  if (direction === "backward") {
+    return index <= startIndex ? startIndex - index : startIndex + totalCount - index;
+  }
+  return index >= startIndex ? index - startIndex : totalCount - startIndex + index;
+}
+
+function sliceGpxPath(startIndex, endIndex, direction = "auto") {
+  const route = getPreparedGpxRoute();
+  const points = route.points;
+  if (!points.length) return [];
+  const totalCount = points.length;
+  const forwardLength = routeIndexProgress(endIndex, startIndex, endIndex, "forward", totalCount);
+  const backwardLength = routeIndexProgress(endIndex, startIndex, endIndex, "backward", totalCount);
+  const selectedDirection = direction === "backward" || (direction === "auto" && backwardLength < forwardLength) ? "backward" : "forward";
+  const path = [];
+  let index = startIndex;
+
+  while (true) {
+    path.push({ ...points[index], routeIndex: index });
+    if (index === endIndex) break;
+    index = selectedDirection === "forward" ? (index + 1) % totalCount : (index - 1 + totalCount) % totalCount;
+    if (path.length > totalCount + 1) break;
+  }
+
+  return { path, direction: selectedDirection };
+}
+
+function buildFallbackBikeRoute(startPoint, endPoint) {
   const startNode = nearestBikeNode(startPoint);
   const endNode = nearestBikeNode(endPoint);
   const forward = circularPath(startNode.index, endNode.index, "forward");
@@ -595,7 +792,70 @@ function buildBikeRoute(startPoint, endPoint) {
     descentM: descent,
     startName: path[0].name,
     endName: path[path.length - 1].name,
-    stops: path.map((point) => point.name)
+    stops: path.map((point) => point.name),
+    waypoints: path
+  };
+}
+
+function routePlacesOnPath(startIndex, endIndex, direction) {
+  const route = getPreparedGpxRoute();
+  const totalCount = route.points.length;
+  const selectedLength = routeIndexProgress(endIndex, startIndex, endIndex, direction, totalCount);
+  return getPreparedRoutePlaces()
+    .map((place) => ({
+      ...place,
+      progress: routeIndexProgress(place.routeIndex, startIndex, endIndex, direction, totalCount)
+    }))
+    .filter((place) => place.progress > 12 && place.progress < selectedLength - 12)
+    .sort((a, b) => a.progress - b.progress);
+}
+
+function buildBikeRoute(startPoint, endPoint, direction = "auto") {
+  const route = getPreparedGpxRoute();
+  if (!route.points.length) return buildFallbackBikeRoute(startPoint, endPoint);
+
+  const start = snapLocationToRoute(startPoint, startPoint.placeName || startPoint.name || "선택 지점");
+  const end = snapLocationToRoute(endPoint, endPoint.placeName || endPoint.name || "선택 지점");
+  const sliced = sliceGpxPath(start.routeIndex, end.routeIndex, direction);
+  const path = sliced.path.map((point, index) => ({
+    ...point,
+    name: index === 0 ? `출발지(${start.placeName})` : index === sliced.path.length - 1 ? `도착지(${end.placeName})` : "GPX 트랙"
+  }));
+  const distance = pathDistance(path);
+  let ascent = 0;
+  let descent = 0;
+
+  path.slice(1).forEach((point, index) => {
+    const delta = point.elevation - path[index].elevation;
+    if (delta > 0) ascent += delta;
+    if (delta < 0) descent += Math.abs(delta);
+  });
+
+  const placeStops = routePlacesOnPath(start.routeIndex, end.routeIndex, sliced.direction);
+  const waypoints = [
+    { ...path[0], name: `출발지(${start.placeName})` },
+    ...placeStops.map((place) => ({
+      lat: place.lat,
+      lng: place.lng,
+      elevation: place.elevation,
+      routeIndex: place.routeIndex,
+      name: place.name
+    })),
+    { ...path[path.length - 1], name: `도착지(${end.placeName})` }
+  ];
+
+  return {
+    path,
+    distanceKm: distance,
+    ascentM: ascent,
+    descentM: descent,
+    startName: path[0].name,
+    endName: path[path.length - 1].name,
+    stops: waypoints.map((point) => point.name),
+    waypoints,
+    direction: sliced.direction,
+    sourceName: route.name,
+    elevationSource: route.hasGpxElevation ? "GPX 고도" : "GPX 고도값 없음 · 장소 기준 추정"
   };
 }
 
@@ -615,7 +875,7 @@ function addMinutesToTime(baseHour, baseMinute, minutesToAdd) {
 }
 
 function routeCheckpoints(route) {
-  const points = route.path;
+  const points = route.waypoints?.length ? route.waypoints : route.path;
   const total = route.distanceKm || 1;
   let accumulated = 0;
 
@@ -634,12 +894,14 @@ function elevationSvg(route) {
   if (!route || !route.path.length) return "";
   const width = 360;
   const height = 120;
-  const elevations = route.path.map((point) => point.elevation);
+  const step = Math.max(1, Math.ceil(route.path.length / 160));
+  const profilePoints = route.path.filter((point, index) => index % step === 0 || index === route.path.length - 1);
+  const elevations = profilePoints.map((point) => point.elevation);
   const min = Math.min(...elevations);
   const max = Math.max(...elevations);
   const range = Math.max(1, max - min);
   const points = elevations.map((elevation, index) => {
-    const x = route.path.length === 1 ? 0 : index / (route.path.length - 1) * width;
+    const x = profilePoints.length === 1 ? 0 : index / (profilePoints.length - 1) * width;
     const y = height - ((elevation - min) / range * (height - 22) + 11);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(" ");
@@ -649,6 +911,7 @@ function elevationSvg(route) {
       <rect width="${width}" height="${height}" rx="14" fill="#eef7f4"/>
       <polyline points="${points}" fill="none" stroke="#087c83" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
       <text x="12" y="24" fill="#607176" font-size="12" font-weight="800">고도 ${Math.round(min)}m~${Math.round(max)}m</text>
+      ${route.elevationSource ? `<text x="12" y="44" fill="#607176" font-size="10" font-weight="700">${route.elevationSource}</text>` : ""}
     </svg>
   `;
 }
@@ -664,6 +927,16 @@ function setupVWorldRouteEditor() {
   const saveButton = root.querySelector("[data-map-save]");
   const resultTarget = root.querySelector("[data-map-result]");
   const statusTarget = root.querySelector("[data-map-status]");
+  const placeInput = root.querySelector("[data-place-search]");
+  const placeList = root.querySelector("[data-place-list]");
+  const placeApplyButtons = root.querySelectorAll("[data-place-apply]");
+  const viewTabs = root.querySelectorAll("[data-panel-view-tab]");
+  const panelViews = root.querySelectorAll("[data-panel-view]");
+  const panelToggleButtons = root.querySelectorAll("[data-panel-toggle]");
+  const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
+  const overlaySchedule = root.querySelector("[data-overlay-schedule]");
+  const overlayTransport = root.querySelector("[data-overlay-transport]");
+  const overlayPlan = root.querySelector("[data-overlay-plan]");
 
   let currentDay = activeDay();
   let mode = "start";
@@ -671,14 +944,32 @@ function setupVWorldRouteEditor() {
   let endPoint = null;
   let calculatedRoute = null;
   let map = null;
+  let baseRouteLine = null;
   let routeLine = null;
   let startMarker = null;
   let endMarker = null;
+  let placeLayer = null;
+  let overlayScheduleFilter = "all";
+  let currentView = "course";
 
   const renderDayTabs = () => {
     dayTabs.innerHTML = Object.entries(dayLabels).map(([dayId, label]) => `
       <button type="button" class="${dayId === currentDay ? "active" : ""}" data-map-day="${dayId}">${label}</button>
     `).join("");
+  };
+
+  const setPanelView = (view) => {
+    currentView = view;
+    panelViews.forEach((section) => {
+      section.hidden = section.dataset.panelView !== view;
+    });
+    viewTabs.forEach((button) => {
+      const active = button.dataset.panelViewTab === view;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    if (view !== "course") renderOverlayViews();
+    window.setTimeout(() => map?.invalidateSize(), 80);
   };
 
   const setStatus = (message) => {
@@ -695,6 +986,17 @@ function setupVWorldRouteEditor() {
     setStatus(mode === "start" ? "지도에서 출발지를 클릭하세요." : "지도에서 도착지를 클릭하세요.");
   };
 
+  const setPanelCollapsed = (collapsed) => {
+    root.classList.toggle("panel-collapsed", collapsed);
+    panelToggleButtons.forEach((button) => {
+      button.setAttribute("aria-expanded", String(!collapsed));
+      if (!button.classList.contains("sheet-handle")) {
+        button.textContent = collapsed ? "패널 열기" : "패널 숨기기";
+      }
+    });
+    window.setTimeout(() => map?.invalidateSize(), 220);
+  };
+
   const drawRoute = () => {
     if (!map || !calculatedRoute) return;
     const latLngs = calculatedRoute.path.map((point) => [point.lat, point.lng]);
@@ -708,12 +1010,24 @@ function setupVWorldRouteEditor() {
     map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
   };
 
+  const drawEndpointMarker = (type, point) => {
+    const markerTitle = type === "start" ? "출발지" : "도착지";
+    const popup = `${markerTitle}: ${point.placeName || point.name || "선택 지점"}`;
+    if (type === "start") {
+      if (startMarker) startMarker.remove();
+      startMarker = L.marker([point.lat, point.lng], { title: markerTitle }).addTo(map).bindPopup(popup);
+    } else {
+      if (endMarker) endMarker.remove();
+      endMarker = L.marker([point.lat, point.lng], { title: markerTitle }).addTo(map).bindPopup(popup);
+    }
+  };
+
   const updateResult = () => {
     if (!calculatedRoute) {
       resultTarget.innerHTML = `
         <span class="tag">대기</span>
         <h2>코스를 선택하세요</h2>
-        <p>출발지와 도착지를 선택하면 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
+        <p>출발지와 도착지를 선택하면 GPX 기준 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
       `;
       saveButton.disabled = true;
       return;
@@ -729,6 +1043,7 @@ function setupVWorldRouteEditor() {
         <div><strong>${estimatedRideTime(calculatedRoute.distanceKm)}</strong><span>예상 주행</span></div>
       </div>
       ${elevationSvg(calculatedRoute)}
+      <p class="route-source-note">${calculatedRoute.sourceName || "제주 환상 자전거길 GPX"} · ${calculatedRoute.elevationSource || "예상 고도"}</p>
       <div class="checkpoint-flow">${calculatedRoute.stops.map((stop) => `<span>${stop}</span>`).join("")}</div>
       <div class="timeline">${checkpoints.map((item) => `<div class="stop"><strong>${item.time} · ${item.place}</strong> ${item.detail}</div>`).join("")}</div>
     `;
@@ -747,17 +1062,15 @@ function setupVWorldRouteEditor() {
     setStatus("코스가 자동 생성되었습니다. 저장하면 일정표와 전체계획표에 반영됩니다.");
   };
 
-  const setPoint = (latlng) => {
-    const point = { lat: latlng.lat, lng: latlng.lng };
+  const setPoint = (latlng, label) => {
+    const point = snapLocationToRoute({ lat: latlng.lat, lng: latlng.lng, name: label }, label || "지도 선택 지점");
     if (mode === "start") {
       startPoint = point;
-      if (startMarker) startMarker.remove();
-      startMarker = L.marker([point.lat, point.lng], { title: "출발지" }).addTo(map).bindPopup("출발지");
+      drawEndpointMarker("start", point);
       setMode("end");
     } else {
       endPoint = point;
-      if (endMarker) endMarker.remove();
-      endMarker = L.marker([point.lat, point.lng], { title: "도착지" }).addTo(map).bindPopup("도착지");
+      drawEndpointMarker("end", point);
     }
     recalculate();
   };
@@ -776,6 +1089,27 @@ function setupVWorldRouteEditor() {
     updateResult();
   };
 
+  const storagePath = (path) => {
+    const step = Math.max(1, Math.ceil(path.length / 900));
+    return path
+      .filter((point, index) => index === 0 || index === path.length - 1 || index % step === 0)
+      .map((point) => ({
+        name: point.name,
+        lat: point.lat,
+        lng: point.lng,
+        elevation: point.elevation,
+        routeIndex: point.routeIndex
+      }));
+  };
+
+  const storageWaypoints = (waypoints) => waypoints.map((point) => ({
+    name: point.name,
+    lat: point.lat,
+    lng: point.lng,
+    elevation: point.elevation,
+    routeIndex: point.routeIndex
+  }));
+
   const saveRoute = () => {
     if (!calculatedRoute) return;
     const plan = getRoutePlan();
@@ -789,22 +1123,142 @@ function setupVWorldRouteEditor() {
       rideTime: estimatedRideTime(calculatedRoute.distanceKm),
       stops: calculatedRoute.stops,
       checkpoints: routeCheckpoints(calculatedRoute),
-      path: calculatedRoute.path.map((point) => ({
-        name: point.name,
-        lat: point.lat,
-        lng: point.lng,
-        elevation: point.elevation
-      }))
+      path: storagePath(calculatedRoute.path),
+      waypoints: storageWaypoints(calculatedRoute.waypoints || []),
+      sourceName: calculatedRoute.sourceName,
+      elevationSource: calculatedRoute.elevationSource,
+      direction: calculatedRoute.direction,
+      startPoint,
+      endPoint
     };
     saveRoutePlan(plan);
     setActiveDay(currentDay);
+    renderOverlayViews();
     setStatus(`${dayLabels[currentDay]} 코스를 저장했습니다. 일정표와 전체계획표에 반영되었습니다.`);
     showToast(`${dayLabels[currentDay]} 지도 코스를 저장했습니다.`);
+  };
+
+  const renderOverlaySchedule = () => {
+    if (!overlayScheduleTabs || !overlaySchedule) return;
+    const segments = resolveSegments();
+    overlayScheduleTabs.innerHTML = `<button type="button" data-overlay-schedule-filter="all">전체</button>${segments.map((segment) => `<button type="button" data-overlay-schedule-filter="${segment.id}">${segment.day}</button>`).join("")}`;
+    overlayScheduleTabs.querySelectorAll("[data-overlay-schedule-filter]").forEach((button) => {
+      const active = button.dataset.overlayScheduleFilter === overlayScheduleFilter;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    overlaySchedule.innerHTML = segments
+      .filter((segment) => overlayScheduleFilter === "all" || segment.id === overlayScheduleFilter)
+      .map((segment) => renderScheduleCard(segment))
+      .join("");
+    setupNaverMapLinks(overlaySchedule);
+  };
+
+  const renderOverlayTransport = () => {
+    if (!overlayTransport) return;
+    const selectedId = getSelectedTransportId();
+    const selected = transportOptions.find((option) => option.id === selectedId) || transportOptions[0];
+    overlayTransport.innerHTML = `
+      <article class="route-result-card">
+        <span class="tag">확정 교통편</span>
+        <h2>${selected.title}</h2>
+        <p>${selected.summary}</p>
+        <ul class="plain-check-list">${selected.checks.map((check) => `<li>${check}</li>`).join("")}</ul>
+      </article>
+      <div class="overlay-card-list">${transportOptions.map((option) => renderTransportChoice(option, option.id === selectedId)).join("")}</div>
+    `;
+    setupNaverMapLinks(overlayTransport);
+  };
+
+  const renderOverlayPlan = () => {
+    if (!overlayPlan) return;
+    const segments = resolveSegments();
+    const selectedTransport = transportOptions.find((option) => option.id === getSelectedTransportId()) || transportOptions[0];
+    const rideDistance = segments
+      .map((segment) => distanceValueKm(segment.distance))
+      .filter(Number.isFinite)
+      .reduce((sum, distance) => sum + distance, 0);
+
+    overlayPlan.innerHTML = `
+      <div class="master-summary">
+        <div><strong>${selectedTransport.title}</strong><span>확정 교통편</span></div>
+        <div><strong>${rideDistance ? formatDistanceKm(rideDistance) : "직접"}</strong><span>예상 라이딩</span></div>
+        <div><strong>8명</strong><span>라이더</span></div>
+        <div><strong>트럭 1대</strong><span>승하선/짐 지원</span></div>
+      </div>
+      <div class="master-flow">
+        <article><span>출발</span><h3>전주 → 항구</h3><p>${selectedTransport.outbound}</p></article>
+        <article><span>제주 라이딩</span><h3>1~3일차 자전거 이동</h3><p>${segments.slice(0, 3).map((segment) => segment.title).join(" / ")}</p></article>
+        <article><span>복귀</span><h3>4일차 복귀 운영</h3><p>${selectedTransport.returnPlan}</p></article>
+      </div>
+      <div class="planner-schedule-grid master-day-grid">
+        ${segments.map((segment) => renderScheduleCard(segment)).join("")}
+      </div>
+      <div class="master-columns">
+        <section>
+          <h3>교통 체크리스트</h3>
+          <ul class="plain-check-list">${selectedTransport.checks.map((check) => `<li>${check}</li>`).join("")}</ul>
+        </section>
+        <section>
+          <h3>실시간 확인 링크</h3>
+          <div class="source-list">${selectedTransport.links.map((link) => `<a class="btn light small" target="_blank" rel="noreferrer" href="${link.href}" data-naver-map>${link.label}</a>`).join("")}</div>
+        </section>
+      </div>
+    `;
+    setupNaverMapLinks(overlayPlan);
+  };
+
+  function renderOverlayViews() {
+    renderOverlaySchedule();
+    renderOverlayTransport();
+    renderOverlayPlan();
+  }
+
+  const resolveLocation = async (query) => {
+    const local = findLocalPlace(query);
+    if (local) return { lat: local.lat, lng: local.lng, name: local.name };
+    const coordinates = parseCoordinateQuery(query);
+    if (coordinates) return coordinates;
+    return searchVWorldLocation(query);
+  };
+
+  const applySearchLocation = async (type) => {
+    const query = placeInput?.value.trim();
+    if (!query) {
+      setStatus("장소명이나 주소를 입력하세요.");
+      return;
+    }
+    setStatus(`'${query}' 위치를 찾는 중입니다.`);
+    const found = await resolveLocation(query);
+    if (!found) {
+      setStatus("장소를 찾지 못했습니다. 제주 지명 또는 위도,경도 형식으로 다시 입력하세요.");
+      return;
+    }
+    setMode(type);
+    setPoint(found, found.name || query);
+    map.flyTo([found.lat, found.lng], Math.max(map.getZoom(), 13));
+  };
+
+  const loadSavedRoute = () => {
+    const saved = getRoutePlan()[currentDay];
+    if (!saved?.mapRoute) return;
+    const savedStart = saved.startPoint || saved.path?.[0];
+    const savedEnd = saved.endPoint || saved.path?.[saved.path.length - 1];
+    if (!savedStart || !savedEnd) return;
+    startPoint = snapLocationToRoute(savedStart, savedStart.placeName || savedStart.name || "저장 출발지");
+    endPoint = snapLocationToRoute(savedEnd, savedEnd.placeName || savedEnd.name || "저장 도착지");
+    drawEndpointMarker("start", startPoint);
+    drawEndpointMarker("end", endPoint);
+    calculatedRoute = buildBikeRoute(startPoint, endPoint, saved.direction || "auto");
+    drawRoute();
+    updateResult();
   };
 
   renderDayTabs();
   updateResult();
   setMode("start");
+  renderOverlayViews();
+  setPanelView("course");
 
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
@@ -821,15 +1275,45 @@ function setupVWorldRouteEditor() {
     attribution: 'Map data &copy; <a href="https://www.vworld.kr/">V-World</a>'
   }).addTo(map);
 
-  const saved = getRoutePlan()[currentDay];
-  if (saved?.mapRoute && Array.isArray(saved.path) && saved.path.length >= 2) {
-    startPoint = saved.path[0];
-    endPoint = saved.path[saved.path.length - 1];
-    startMarker = L.marker([startPoint.lat, startPoint.lng], { title: "출발지" }).addTo(map).bindPopup("출발지");
-    endMarker = L.marker([endPoint.lat, endPoint.lng], { title: "도착지" }).addTo(map).bindPopup("도착지");
-    calculatedRoute = buildBikeRoute(startPoint, endPoint);
-    drawRoute();
+  const gpxRoute = getPreparedGpxRoute();
+  if (gpxRoute.points.length) {
+    baseRouteLine = L.polyline(gpxRoute.points.map((point) => [point.lat, point.lng]), {
+      color: "#087c83",
+      weight: 4,
+      opacity: 0.58,
+      lineJoin: "round"
+    }).addTo(map);
+    map.fitBounds(baseRouteLine.getBounds(), { padding: [28, 28] });
+    setStatus(`${gpxRoute.name} ${gpxRoute.points.length.toLocaleString()}개 트랙포인트를 불러왔습니다. 출발지를 선택하세요.`);
+  } else {
+    setStatus("GPX 경로 데이터를 불러오지 못했습니다. gpx-route.js 파일을 확인하세요.");
   }
+
+  placeLayer = L.layerGroup().addTo(map);
+  getPreparedRoutePlaces().forEach((place) => {
+    const marker = L.circleMarker([place.lat, place.lng], {
+      radius: 6,
+      color: "#0b5d67",
+      weight: 2,
+      fillColor: "#fff7d7",
+      fillOpacity: 0.95
+    }).addTo(placeLayer);
+    marker.bindTooltip(place.name, { direction: "top", offset: [0, -4] });
+    marker.on("click", (event) => {
+      L.DomEvent.stopPropagation(event);
+      setPoint(place, place.name);
+    });
+  });
+
+  if (placeList) {
+    placeList.innerHTML = getPreparedRoutePlaces()
+      .flatMap((place) => [place.name, ...(place.aliases || [])])
+      .map((name) => `<option value="${name}"></option>`)
+      .join("");
+  }
+
+  loadSavedRoute();
+
   dayTabs.addEventListener("click", (event) => {
     const button = event.target.closest("[data-map-day]");
     if (!button) return;
@@ -837,16 +1321,9 @@ function setupVWorldRouteEditor() {
     setActiveDay(currentDay);
     renderDayTabs();
     clearRoute();
-    const savedRoute = getRoutePlan()[currentDay];
-    if (savedRoute?.mapRoute && Array.isArray(savedRoute.path) && savedRoute.path.length >= 2) {
-      startPoint = savedRoute.path[0];
-      endPoint = savedRoute.path[savedRoute.path.length - 1];
-      startMarker = L.marker([startPoint.lat, startPoint.lng], { title: "출발지" }).addTo(map).bindPopup("출발지");
-      endMarker = L.marker([endPoint.lat, endPoint.lng], { title: "도착지" }).addTo(map).bindPopup("도착지");
-      calculatedRoute = buildBikeRoute(startPoint, endPoint);
-      drawRoute();
-      updateResult();
-    }
+    overlayScheduleFilter = currentDay;
+    loadSavedRoute();
+    renderOverlayViews();
   });
 
   modeButtons.forEach((button) => {
@@ -855,6 +1332,35 @@ function setupVWorldRouteEditor() {
   clearButton.addEventListener("click", clearRoute);
   saveButton.addEventListener("click", saveRoute);
   map.on("click", (event) => setPoint(event.latlng));
+  placeApplyButtons.forEach((button) => {
+    button.addEventListener("click", () => applySearchLocation(button.dataset.placeApply));
+  });
+  placeInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      applySearchLocation(mode);
+    }
+  });
+  viewTabs.forEach((button) => {
+    button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
+  });
+  panelToggleButtons.forEach((button) => {
+    button.addEventListener("click", () => setPanelCollapsed(!root.classList.contains("panel-collapsed")));
+  });
+  overlayScheduleTabs?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-overlay-schedule-filter]");
+    if (!button) return;
+    overlayScheduleFilter = button.dataset.overlayScheduleFilter;
+    if (overlayScheduleFilter !== "all") setActiveDay(overlayScheduleFilter);
+    renderOverlaySchedule();
+  });
+  overlayTransport?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-transport-select]");
+    if (!button) return;
+    writeStorage(storageKeys.transport, button.dataset.transportSelect);
+    showToast("교통편을 전체계획표에 반영했습니다.");
+    renderOverlayViews();
+  });
 }
 
 function setupCourseBuilderPage() {

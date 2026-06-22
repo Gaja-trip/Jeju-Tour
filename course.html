@@ -12,47 +12,86 @@
   <main class="route-map-shell" data-vworld-route-editor>
     <div id="vworldMap" class="vworld-map" aria-label="V-World 지도"></div>
 
-    <aside class="route-map-panel">
+    <button class="route-panel-float-toggle" type="button" data-panel-toggle aria-expanded="true">패널 숨기기</button>
+
+    <aside class="route-map-panel" data-route-panel>
+      <button class="sheet-handle" type="button" data-panel-toggle aria-label="패널 열고 닫기"></button>
       <div class="route-panel-top">
         <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Planner</a>
         <div class="panel-nav">
-          <a href="schedule.html">일정표</a>
-          <a href="live.html">교통편</a>
-          <a href="transport.html">계획표</a>
+          <button type="button" data-panel-view-tab="course">코스</button>
+          <button type="button" data-panel-view-tab="schedule">일정표</button>
+          <button type="button" data-panel-view-tab="transport">교통편</button>
+          <button type="button" data-panel-view-tab="plan">계획표</button>
         </div>
       </div>
 
-      <div class="route-panel-heading">
-        <p class="kicker">V-World Route Editor</p>
-        <h1>지도에서 코스 선택</h1>
-        <p>1~4일차를 고른 뒤 출발지와 도착지를 지도에서 클릭하면 제주 해안 자전거 루프 기준으로 코스가 자동 생성됩니다.</p>
+      <div class="panel-view" data-panel-view="course">
+        <div class="route-panel-heading">
+          <p class="kicker">GPX Route Editor</p>
+          <h1>제주 환상 자전거길</h1>
+          <p>GPX 트랙 위에서 출발지와 도착지를 선택하거나 장소·주소를 입력하면 해당 구간이 자동 생성됩니다.</p>
+        </div>
+
+        <div class="segmented-control route-map-days" data-map-day-tabs></div>
+
+        <div class="map-tool-row">
+          <button class="btn dark small" type="button" data-map-mode="start">출발 선택</button>
+          <button class="btn light small" type="button" data-map-mode="end">도착 선택</button>
+          <button class="btn light small" type="button" data-map-clear>초기화</button>
+        </div>
+
+        <div class="map-search-row">
+          <input type="search" list="jejuPlaceList" data-place-search placeholder="장소·주소 입력 예: 협재, 성산일출봉, 제주항">
+          <datalist id="jejuPlaceList" data-place-list></datalist>
+          <button class="btn dark small" type="button" data-place-apply="start">출발 적용</button>
+          <button class="btn light small" type="button" data-place-apply="end">도착 적용</button>
+        </div>
+
+        <div class="route-status" data-map-status>출발 선택 버튼을 누르고 지도나 장소 마커에서 출발지를 선택하세요.</div>
+
+        <article class="route-result-card" data-map-result>
+          <span class="tag">대기</span>
+          <h2>코스를 선택하세요</h2>
+          <p>출발지와 도착지를 선택하면 GPX 기준 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
+        </article>
+
+        <div class="map-tool-row route-save-row">
+          <button class="btn dark small" type="button" data-map-save disabled>이 코스를 일자에 저장</button>
+          <button class="btn light small" type="button" data-panel-view-tab="schedule">일정표 보기</button>
+        </div>
       </div>
 
-      <div class="segmented-control route-map-days" data-map-day-tabs></div>
-
-      <div class="map-tool-row">
-        <button class="btn dark small" type="button" data-map-mode="start">출발 선택</button>
-        <button class="btn light small" type="button" data-map-mode="end">도착 선택</button>
-        <button class="btn light small" type="button" data-map-clear>초기화</button>
+      <div class="panel-view" data-panel-view="schedule" hidden>
+        <div class="route-panel-heading compact">
+          <p class="kicker">Linked Schedule</p>
+          <h1>일정표</h1>
+        </div>
+        <div class="segmented-control route-map-days" data-overlay-schedule-tabs></div>
+        <div class="overlay-scroll" data-overlay-schedule></div>
       </div>
 
-      <div class="route-status" data-map-status>출발 선택 버튼을 누르고 지도에서 출발지를 클릭하세요.</div>
+      <div class="panel-view" data-panel-view="transport" hidden>
+        <div class="route-panel-heading compact">
+          <p class="kicker">Live Transport</p>
+          <h1>교통편</h1>
+        </div>
+        <div class="overlay-scroll" data-overlay-transport></div>
+      </div>
 
-      <article class="route-result-card" data-map-result>
-        <span class="tag">대기</span>
-        <h2>코스를 선택하세요</h2>
-        <p>출발지와 도착지를 선택하면 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
-      </article>
-
-      <div class="map-tool-row route-save-row">
-        <button class="btn dark small" type="button" data-map-save disabled>이 코스를 일자에 저장</button>
-        <a class="btn light small" href="schedule.html">일정표 보기</a>
+      <div class="panel-view" data-panel-view="plan" hidden>
+        <div class="route-panel-heading compact">
+          <p class="kicker">Master Plan</p>
+          <h1>전체 계획표</h1>
+        </div>
+        <div class="overlay-scroll" data-overlay-plan></div>
       </div>
     </aside>
   </main>
 
   <div class="toast" data-toast role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="gpx-route.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
