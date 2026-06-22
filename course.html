@@ -3,106 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>코스 선택 | 제주 자전거 여행</title>
-  <meta name="description" content="네이버지도 기반 제주 자전거 여행 1~4일차 코스 선택">
+  <title>지도 코스 선택 | 제주 자전거 여행</title>
+  <meta name="description" content="V-World 지도 기반 제주 자전거 여행 1~4일차 코스 자동 생성">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="wrap nav">
-      <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Planner</a>
-      <nav class="nav-links" aria-label="주요 페이지">
-        <a href="index.html">홈</a>
-        <a class="active" href="course.html">코스 선택</a>
-        <a href="schedule.html">일정표</a>
-        <a href="live.html">교통편</a>
-        <a href="transport.html">전체계획표</a>
-      </nav>
-    </div>
-  </header>
+<body class="route-map-page">
+  <main class="route-map-shell" data-vworld-route-editor>
+    <div id="vworldMap" class="vworld-map" aria-label="V-World 지도"></div>
 
-  <nav class="mobile-section-nav" aria-label="모바일 주요 페이지">
-    <div class="wrap">
-      <a class="active" href="course.html">코스</a>
-      <a href="schedule.html">일정표</a>
-      <a href="live.html">교통편</a>
-      <a href="transport.html">계획표</a>
-    </div>
-  </nav>
-
-  <main data-course-builder>
-    <section class="hero compact">
-      <div class="wrap hero-inner">
-        <div>
-          <p class="eyebrow">Step 1</p>
-          <h1>지도에서 1~4일차 코스 선택</h1>
-          <p class="hero-copy">일자별 추천 코스를 선택하거나 경유지를 직접 입력하면 세부코스와 네이버지도 링크가 자동으로 바뀝니다.</p>
+    <aside class="route-map-panel">
+      <div class="route-panel-top">
+        <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Planner</a>
+        <div class="panel-nav">
+          <a href="schedule.html">일정표</a>
+          <a href="live.html">교통편</a>
+          <a href="transport.html">계획표</a>
         </div>
       </div>
-    </section>
 
-    <section>
-      <div class="wrap builder-layout">
-        <article class="map-card">
-          <div class="planner-map-top">
-            <div>
-              <p class="kicker">Naver Map</p>
-              <h2>선택 코스 지도</h2>
-            </div>
-            <a class="btn dark small" target="_blank" rel="noreferrer" data-course-map-link data-naver-map>지도 열기</a>
-          </div>
-          <iframe
-            class="planner-map-frame"
-            title="선택한 제주 자전거 코스 네이버지도"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            data-course-map-frame>
-          </iframe>
-          <div class="notice" style="margin-top:14px">
-            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2V9h2z"/></svg>
-            <div>네이버지도 화면에서 직접 만든 경로는 외부 지도 보안 정책상 자동으로 읽어올 수 없습니다. 아래 경유지 직접 입력을 사용하면 이 웹앱 일정표에 자동 반영됩니다.</div>
-          </div>
-        </article>
-
-        <aside class="panel course-builder-panel">
-          <p class="kicker">Day Select</p>
-          <h2>일자 선택</h2>
-          <div class="segmented-control course-day-tabs" data-course-day-tabs></div>
-
-          <h3>추천 코스</h3>
-          <div class="route-option-grid" data-course-options></div>
-
-          <form class="custom-route-form" data-course-custom-form>
-            <label for="customRoute"><strong>임의 코스 직접 입력</strong></label>
-            <textarea id="customRoute" data-course-custom-input rows="4" placeholder="예: 제주항, 애월, 협재, 모슬포"></textarea>
-            <button class="btn dark small" type="submit">직접 입력 코스로 저장</button>
-          </form>
-        </aside>
+      <div class="route-panel-heading">
+        <p class="kicker">V-World Route Editor</p>
+        <h1>지도에서 코스 선택</h1>
+        <p>1~4일차를 고른 뒤 출발지와 도착지를 지도에서 클릭하면 제주 해안 자전거 루프 기준으로 코스가 자동 생성됩니다.</p>
       </div>
-    </section>
 
-    <section class="linked-section">
-      <div class="wrap">
-        <div class="section-title">
-          <div>
-            <p class="kicker">Auto Detail</p>
-            <h2>자동 세부코스</h2>
-          </div>
-          <p class="lead">선택한 일자의 코스가 아래에 자동으로 표시되고, 일정표 페이지에도 그대로 연동됩니다.</p>
-        </div>
-        <article class="route-detail-panel" data-course-detail></article>
+      <div class="segmented-control route-map-days" data-map-day-tabs></div>
+
+      <div class="map-tool-row">
+        <button class="btn dark small" type="button" data-map-mode="start">출발 선택</button>
+        <button class="btn light small" type="button" data-map-mode="end">도착 선택</button>
+        <button class="btn light small" type="button" data-map-clear>초기화</button>
       </div>
-    </section>
+
+      <div class="route-status" data-map-status>출발 선택 버튼을 누르고 지도에서 출발지를 클릭하세요.</div>
+
+      <article class="route-result-card" data-map-result>
+        <span class="tag">대기</span>
+        <h2>코스를 선택하세요</h2>
+        <p>출발지와 도착지를 선택하면 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
+      </article>
+
+      <div class="map-tool-row route-save-row">
+        <button class="btn dark small" type="button" data-map-save disabled>이 코스를 일자에 저장</button>
+        <a class="btn light small" href="schedule.html">일정표 보기</a>
+      </div>
+    </aside>
   </main>
 
-  <footer>
-    <div class="wrap">
-      <strong>코스 선택 페이지</strong>
-      <p>선택한 코스는 브라우저에 저장되며 일정표, 교통편, 전체계획표 페이지에 자동 반영됩니다.</p>
-    </div>
-  </footer>
-
   <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
