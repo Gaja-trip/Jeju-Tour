@@ -21,21 +21,60 @@
     </div>
   </header>
 
+  <nav class="mobile-section-nav" aria-label="모바일 주요 페이지">
+    <div class="wrap">
+      <a href="course.html">코스</a>
+      <a class="active" href="schedule.html">일정표</a>
+      <a href="live.html">실시간 확인</a>
+      <a href="transport.html">운영안</a>
+    </div>
+  </nav>
+
   <main>
     <section class="hero compact">
       <div class="wrap hero-inner">
         <div>
           <p class="eyebrow">Daily Plan</p>
           <h1>일자별 세부 일정표</h1>
-          <p class="hero-copy">평균 이동속도 16~18km/h, 식사와 사진 휴식 포함 하루 7~9시간 운영 기준입니다.</p>
+          <p class="hero-copy">전체 3일 일정과<br>일자별 세부 코스를<br>골라서 볼 수 있습니다.</p>
         </div>
       </div>
     </section>
 
     <section>
       <div class="wrap">
-        <div class="days">
-          <article class="day-card">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Schedule Filter</p>
+            <h2>일정 선택</h2>
+          </div>
+          <p class="lead">아래 버튼으로 전체 일정과<br>각 일자별 세부 일정만<br>골라서 볼 수 있습니다.</p>
+        </div>
+
+        <div class="segmented-control" data-schedule-tabs aria-label="일정 선택">
+          <button class="active" type="button" data-schedule-filter="all">전체 3일</button>
+          <button type="button" data-schedule-filter="day1">1일차</button>
+          <button type="button" data-schedule-filter="day2">2일차</button>
+          <button type="button" data-schedule-filter="day3">3일차</button>
+        </div>
+
+        <div class="schedule-summary" data-schedule-summary>
+          <article class="summary-card" data-summary-day="day1">
+            <strong>DAY 1 · 82km</strong>
+            <span>제주항/용두암 → 모슬포/대정, 서부 해안 적응일</span>
+          </article>
+          <article class="summary-card" data-summary-day="day2">
+            <strong>DAY 2 · 96km</strong>
+            <span>모슬포/대정 → 성산, 가장 긴 핵심 구간</span>
+          </article>
+          <article class="summary-card" data-summary-day="day3">
+            <strong>DAY 3 · 64km</strong>
+            <span>성산 → 제주항, 북동부 해안 복귀 구간</span>
+          </article>
+        </div>
+
+        <div class="days" data-schedule-cards>
+          <article class="day-card" data-day-card="day1">
             <div class="day-head">
               <span>DAY 1</span>
               <h3>제주항 → 모슬포/대정</h3>
@@ -57,7 +96,7 @@
             </div>
           </article>
 
-          <article class="day-card">
+          <article class="day-card" data-day-card="day2">
             <div class="day-head">
               <span>DAY 2</span>
               <h3>모슬포/대정 → 성산</h3>
@@ -79,7 +118,7 @@
             </div>
           </article>
 
-          <article class="day-card">
+          <article class="day-card" data-day-card="day3">
             <div class="day-head">
               <span>DAY 3</span>
               <h3>성산 → 제주항</h3>

@@ -21,13 +21,22 @@
     </div>
   </header>
 
+  <nav class="mobile-section-nav" aria-label="모바일 주요 페이지">
+    <div class="wrap">
+      <a href="course.html">코스</a>
+      <a href="schedule.html">일정표</a>
+      <a class="active" href="live.html">실시간 확인</a>
+      <a href="transport.html">운영안</a>
+    </div>
+  </nav>
+
   <main>
     <section class="hero compact">
       <div class="wrap hero-inner">
         <div>
           <p class="eyebrow">Live Links</p>
           <h1>실시간 확인 연동</h1>
-          <p class="hero-copy">네이버지도, 배편, 기차편, 버스편, 숙소, 기상 정보를 공식 사이트에서 바로 확인합니다.</p>
+          <p class="hero-copy">지도, 배편, 기차, 버스,<br>숙소, 기상 메뉴를 선택해<br>필요한 정보만 빠르게 확인합니다.</p>
         </div>
       </div>
     </section>
@@ -40,64 +49,75 @@
           <span id="dateHint">출발일을 선택하면 브라우저에 저장됩니다.</span>
         </div>
 
-        <div class="transport-grid">
-          <article class="transport-card">
-            <h3>네이버지도</h3>
-            <p>전주에서 완도항 접근, 제주 구간별 경로, 숙소 주변 편의시설을 확인합니다.</p>
-            <div class="action-list">
-              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%AD%EC%97%90%EC%84%9C%20%EC%99%84%EB%8F%84%EC%97%AC%EA%B0%9D%EC%84%A0%ED%84%B0%EB%AF%B8%EB%84%90">전주 → 완도항</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%95%AD%20%EC%9A%A9%EB%91%90%EC%95%94">제주항/용두암</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%99%98%EC%83%81%EC%9E%90%EC%A0%84%EA%B1%B0%EA%B8%B8">제주 자전거길</a>
-            </div>
-          </article>
+        <div class="live-layout">
+          <div class="live-menu" data-live-tabs aria-label="실시간 확인 메뉴">
+            <button class="active" type="button" data-live-tab="map">네이버지도 <small>경로</small></button>
+            <button type="button" data-live-tab="ferry">배편 <small>완도/목포</small></button>
+            <button type="button" data-live-tab="train">기차편 <small>코레일/SRT</small></button>
+            <button type="button" data-live-tab="bus">버스편 <small>고속/시외</small></button>
+            <button type="button" data-live-tab="stay">숙소 <small>보관/주차</small></button>
+            <button type="button" data-live-tab="weather">기상 <small>해상예보</small></button>
+          </div>
 
-          <article class="transport-card">
-            <h3>배편</h3>
-            <p>기본안은 완도항입니다. 일정이나 선박검사에 따라 목포항도 대안으로 확인하세요.</p>
-            <div class="action-list">
-              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.hanilexpress.co.kr/service/sailingSchedule.do">한일 완도-제주</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.hanilexpress.co.kr/">한일 예매</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.seaferry.co.kr/">씨월드 목포-제주</a>
-            </div>
-          </article>
+          <div>
+            <article class="transport-card live-panel active" data-live-panel="map">
+              <h3>네이버지도</h3>
+              <p>전주에서 완도항 접근, 제주 구간별 경로, 숙소 주변 편의시설을 확인합니다.</p>
+              <div class="action-list">
+                <a class="btn dark small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%AD%EC%97%90%EC%84%9C%20%EC%99%84%EB%8F%84%EC%97%AC%EA%B0%9D%EC%84%A0%ED%84%B0%EB%AF%B8%EB%84%90">전주 → 완도항</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%95%AD%20%EC%9A%A9%EB%91%90%EC%95%94">제주항/용두암</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%99%98%EC%83%81%EC%9E%90%EC%A0%84%EA%B1%B0%EA%B8%B8">제주 자전거길</a>
+              </div>
+            </article>
 
-          <article class="transport-card">
-            <h3>기차편</h3>
-            <p>트럭 탑승 인원이 부족하면 일부 인원은 기차와 버스 조합으로 항구 접근이 가능합니다.</p>
-            <div class="action-list">
-              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.letskorail.com/">코레일 실시간</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://etk.srail.kr/">SRT 실시간</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%AD%EC%97%90%EC%84%9C%20%EA%B4%91%EC%A3%BC%EC%86%A1%EC%A0%95%EC%97%AD">전주역 → 광주송정역</a>
-            </div>
-          </article>
+            <article class="transport-card live-panel" data-live-panel="ferry">
+              <h3>배편</h3>
+              <p>기본안은 완도항입니다. 일정이나 선박검사에 따라 목포항도 대안으로 확인하세요.</p>
+              <div class="action-list">
+                <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.hanilexpress.co.kr/service/sailingSchedule.do">한일 완도-제주</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.hanilexpress.co.kr/">한일 예매</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.seaferry.co.kr/">씨월드 목포-제주</a>
+              </div>
+            </article>
 
-          <article class="transport-card">
-            <h3>버스편</h3>
-            <p>전주, 광주, 목포, 완도 구간은 운영사가 나뉠 수 있어 고속버스와 시외버스를 모두 확인합니다.</p>
-            <div class="action-list">
-              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.kobus.co.kr/">코버스</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.bustago.or.kr/">버스타고</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://txbus.t-money.co.kr/">티머니 시외버스</a>
-            </div>
-          </article>
+            <article class="transport-card live-panel" data-live-panel="train">
+              <h3>기차편</h3>
+              <p>트럭 탑승 인원이 부족하면 일부 인원은 기차와 버스 조합으로 항구 접근이 가능합니다.</p>
+              <div class="action-list">
+                <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.letskorail.com/">코레일 실시간</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://etk.srail.kr/">SRT 실시간</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%AD%EC%97%90%EC%84%9C%20%EA%B4%91%EC%A3%BC%EC%86%A1%EC%A0%95%EC%97%AD">전주역 → 광주송정역</a>
+              </div>
+            </article>
 
-          <article class="transport-card">
-            <h3>숙소 검색</h3>
-            <p>1박은 모슬포/대정, 2박은 성산 권역이 효율적입니다. 자전거 보관과 트럭 주차를 확인하세요.</p>
-            <div class="action-list">
-              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EB%AA%A8%EC%8A%AC%ED%8F%AC%20%EC%88%99%EC%86%8C%20%EC%9E%90%EC%A0%84%EA%B1%B0%20%EB%B3%B4%EA%B4%80">모슬포 숙소</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%84%B1%EC%82%B0%20%EC%88%99%EC%86%8C%20%EC%9E%90%EC%A0%84%EA%B1%B0%20%EB%B3%B4%EA%B4%80">성산 숙소</a>
-            </div>
-          </article>
+            <article class="transport-card live-panel" data-live-panel="bus">
+              <h3>버스편</h3>
+              <p>전주, 광주, 목포, 완도 구간은 운영사가 나뉠 수 있어 고속버스와 시외버스를 모두 확인합니다.</p>
+              <div class="action-list">
+                <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.kobus.co.kr/">코버스</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.bustago.or.kr/">버스타고</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://txbus.t-money.co.kr/">티머니 시외버스</a>
+              </div>
+            </article>
 
-          <article class="transport-card">
-            <h3>기상과 안전</h3>
-            <p>제주는 바람이 일정 난도를 크게 바꿉니다. 강풍특보, 비, 풍랑특보를 함께 점검하세요.</p>
-            <div class="action-list">
-              <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.weather.go.kr/">기상청</a>
-              <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.weather.go.kr/w/ocean/prediction/daily-forecast.do">해상예보</a>
-            </div>
-          </article>
+            <article class="transport-card live-panel" data-live-panel="stay">
+              <h3>숙소 검색</h3>
+              <p>1박은 모슬포/대정, 2박은 성산 권역이 효율적입니다. 자전거 보관과 트럭 주차를 확인하세요.</p>
+              <div class="action-list">
+                <a class="btn dark small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EB%AA%A8%EC%8A%AC%ED%8F%AC%20%EC%88%99%EC%86%8C%20%EC%9E%90%EC%A0%84%EA%B1%B0%20%EB%B3%B4%EA%B4%80">모슬포 숙소</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://map.naver.com/p/search/%EC%84%B1%EC%82%B0%20%EC%88%99%EC%86%8C%20%EC%9E%90%EC%A0%84%EA%B1%B0%20%EB%B3%B4%EA%B4%80">성산 숙소</a>
+              </div>
+            </article>
+
+            <article class="transport-card live-panel" data-live-panel="weather">
+              <h3>기상과 안전</h3>
+              <p>제주는 바람이 일정 난도를 크게 바꿉니다. 강풍특보, 비, 풍랑특보를 함께 점검하세요.</p>
+              <div class="action-list">
+                <a class="btn dark small" target="_blank" rel="noreferrer" href="https://www.weather.go.kr/">기상청</a>
+                <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.weather.go.kr/w/ocean/prediction/daily-forecast.do">해상예보</a>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
     </section>

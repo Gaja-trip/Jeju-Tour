@@ -54,6 +54,65 @@ function renderRouteCards() {
   });
 }
 
+function setupScheduleTabs() {
+  const tabs = document.querySelector("[data-schedule-tabs]");
+  if (!tabs) return;
+
+  const buttons = [...tabs.querySelectorAll("[data-schedule-filter]")];
+  const cards = [...document.querySelectorAll("[data-day-card]")];
+  const summaries = [...document.querySelectorAll("[data-summary-day]")];
+
+  const setFilter = (filter) => {
+    buttons.forEach((button) => {
+      const active = button.dataset.scheduleFilter === filter;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+
+    cards.forEach((card) => {
+      card.hidden = filter !== "all" && card.dataset.dayCard !== filter;
+    });
+
+    summaries.forEach((summary) => {
+      summary.hidden = filter !== "all" && summary.dataset.summaryDay !== filter;
+    });
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => setFilter(button.dataset.scheduleFilter));
+  });
+
+  setFilter("all");
+}
+
+function setupLiveTabs() {
+  const menu = document.querySelector("[data-live-tabs]");
+  if (!menu) return;
+
+  const buttons = [...menu.querySelectorAll("[data-live-tab]")];
+  const panels = [...document.querySelectorAll("[data-live-panel]")];
+
+  const setTab = (tab) => {
+    buttons.forEach((button) => {
+      const active = button.dataset.liveTab === tab;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+
+    panels.forEach((panel) => {
+      const active = panel.dataset.livePanel === tab;
+      panel.classList.toggle("active", active);
+      panel.hidden = !active;
+    });
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => setTab(button.dataset.liveTab));
+  });
+
+  setTab(buttons[0]?.dataset.liveTab || "map");
+}
+
 function setupShare() {
   const buttons = document.querySelectorAll("[data-share]");
   const toast = document.querySelector("[data-toast]");
@@ -111,5 +170,7 @@ function setupTripDate() {
 }
 
 renderRouteCards();
+setupScheduleTabs();
+setupLiveTabs();
 setupShare();
 setupTripDate();
