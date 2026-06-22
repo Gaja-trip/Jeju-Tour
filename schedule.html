@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>일정표 | 제주도 1~4일차 자전거 여행</title>
-  <meta name="description" content="제주도 자전거 여행 1~4일차 자동 일정표">
+  <title>일정표 | 제주 자전거 여행</title>
+  <meta name="description" content="코스 선택과 연동되는 제주 자전거 여행 자동 일정표">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="site-header">
     <div class="wrap nav">
-      <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Tour</a>
+      <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Planner</a>
       <nav class="nav-links" aria-label="주요 페이지">
         <a href="index.html">홈</a>
-        <a href="course.html">코스</a>
+        <a href="course.html">코스 선택</a>
         <a class="active" href="schedule.html">일정표</a>
         <a href="live.html">교통편</a>
-        <a href="transport.html">출발·배편·복귀</a>
+        <a href="transport.html">전체계획표</a>
       </nav>
     </div>
   </header>
@@ -26,7 +26,7 @@
       <a href="course.html">코스</a>
       <a class="active" href="schedule.html">일정표</a>
       <a href="live.html">교통편</a>
-      <a href="transport.html">운영안</a>
+      <a href="transport.html">계획표</a>
     </div>
   </nav>
 
@@ -34,9 +34,9 @@
     <section class="hero compact">
       <div class="wrap hero-inner">
         <div>
-          <p class="eyebrow">Daily Plan</p>
-          <h1>일자별 세부 일정표</h1>
-          <p class="hero-copy">코스 페이지에서 선택한 일자가<br>자동으로 열리고,<br>전체 4일 운영표도 한 번에 볼 수 있습니다.</p>
+          <p class="eyebrow">Step 2</p>
+          <h1>코스 선택값 연동 일정표</h1>
+          <p class="hero-copy">코스 선택 페이지에서 저장한 1~4일차 코스가 이 페이지의 세부 일정표로 자동 표시됩니다.</p>
         </div>
       </div>
     </section>
@@ -45,17 +45,20 @@
       <div class="wrap">
         <div class="section-title">
           <div>
-            <p class="eyebrow">Schedule Filter</p>
+            <p class="kicker">Linked Schedule</p>
             <h2>일정 선택</h2>
           </div>
-          <p class="lead">1~3일차 라이딩과 4일차 복귀 운영을<br>전체 또는 일자별로 골라서 확인합니다.</p>
+          <p class="lead">전체 일정 또는 일자별 일정만 골라 볼 수 있습니다. 코스 페이지에서 바꾸면 새로고침 시 바로 반영됩니다.</p>
         </div>
 
-        <div class="segmented-control" data-schedule-tabs aria-label="일정 선택"></div>
+        <div class="segmented-control" data-linked-schedule-tabs aria-label="일정 선택"></div>
+        <div class="schedule-summary" data-linked-schedule-summary></div>
+        <div class="days" data-linked-schedule-cards></div>
 
-        <div class="schedule-summary" data-schedule-summary></div>
-
-        <div class="days" data-schedule-cards></div>
+        <div class="action-list linked-actions">
+          <a class="btn dark small" href="course.html">코스 다시 선택</a>
+          <a class="btn light small" href="live.html">교통편 확인으로 이동</a>
+        </div>
       </div>
     </section>
   </main>
@@ -63,7 +66,7 @@
   <footer>
     <div class="wrap">
       <strong>일정표 페이지</strong>
-      <p>강풍이나 비가 있으면 2일차를 서귀포 또는 표선에서 끊고, 3일차 일부 구간과 4일차 배편 운영을 함께 조정하세요.</p>
+      <p>기상, 피로도, 배편 마감 시간에 따라 거리와 도착 시간을 조정하세요.</p>
     </div>
   </footer>
   <script src="app.js"></script>
