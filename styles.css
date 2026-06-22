@@ -1049,11 +1049,531 @@ footer {
   transform: translateX(-50%) translateY(0);
 }
 
+.planner-body {
+  background: #f2f1e7;
+}
+
+.planner-header .nav {
+  min-height: 64px;
+}
+
+.header-share {
+  white-space: nowrap;
+}
+
+.planner-hero {
+  padding: 42px 0 34px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 84% 4%, rgba(69,224,193,.2), transparent 30%),
+    linear-gradient(145deg, #06161e, #0b3b44);
+}
+
+.planner-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: end;
+}
+
+.planner-hero h1 {
+  max-width: 920px;
+  font-size: clamp(2.25rem, 5vw, 4.7rem);
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+}
+
+.planner-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.planner-quick-stats div {
+  min-width: 0;
+  padding: 16px 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  background: rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+}
+
+.planner-quick-stats strong,
+.planner-quick-stats span {
+  display: block;
+}
+
+.planner-quick-stats strong {
+  color: var(--mint);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.planner-quick-stats span {
+  margin-top: 6px;
+  color: rgba(255,255,255,.72);
+  font-size: .84rem;
+  font-weight: 900;
+}
+
+.planner-map-section {
+  padding-top: 28px;
+}
+
+.planner-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .36fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.planner-map-card,
+.planner-control-panel,
+.transport-detail-card,
+.master-plan {
+  border: 1px solid rgba(6,24,32,.08);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.planner-map-card {
+  padding: 16px;
+  overflow: hidden;
+}
+
+.planner-map-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.planner-map-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #e7f0ef, #f6fbf7);
+}
+
+.planner-map-frame {
+  width: 100%;
+  min-height: min(66vh, 680px);
+  height: 640px;
+  display: block;
+  border: 0;
+  border-radius: inherit;
+  background: #e7f0ef;
+}
+
+.planner-map-overlay {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, .58fr) minmax(220px, .42fr);
+  gap: 14px;
+  align-items: end;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 18px;
+  background: rgba(255,253,247,.86);
+  box-shadow: 0 18px 50px rgba(25,52,59,.16);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.planner-map-overlay svg {
+  width: 100%;
+  max-height: 210px;
+  display: block;
+}
+
+.planner-map-overlay strong,
+.planner-map-overlay span {
+  display: block;
+}
+
+.planner-map-overlay strong {
+  color: var(--ink);
+  font-size: 1.2rem;
+}
+
+.planner-map-overlay span {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.planner-control-panel {
+  position: sticky;
+  top: 86px;
+  padding: 18px;
+}
+
+.panel-heading {
+  margin-bottom: 14px;
+}
+
+.map-route-tabs,
+.transport-choice-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.map-route-tabs button,
+.transport-choice {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(6,24,32,.1);
+  border-radius: 16px;
+  padding: 14px;
+  background: #f4faf6;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.map-route-tabs button:hover,
+.transport-choice:hover,
+.map-route-tabs button.active,
+.transport-choice.active {
+  border-color: rgba(69,224,193,.72);
+  background: #e5fff7;
+  transform: translateY(-1px);
+}
+
+.map-route-tabs button span,
+.transport-choice span {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 950;
+}
+
+.map-route-tabs button strong,
+.transport-choice strong {
+  font-size: 1rem;
+}
+
+.map-route-tabs button small,
+.transport-choice small {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.route-focus-card {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #092b36, #0e5d67);
+  color: #fff;
+}
+
+.route-focus-card h3 {
+  margin-top: 10px;
+}
+
+.route-focus-card p {
+  margin-top: 10px;
+  color: rgba(255,255,255,.74);
+  font-size: .92rem;
+}
+
+.checkpoint-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.checkpoint-flow span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.86);
+  font-size: .76rem;
+  font-weight: 900;
+}
+
+.planner-schedule-section,
+.planner-transport-section,
+.planner-final-section {
+  padding-top: 48px;
+}
+
+.planner-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.planner-day-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(6,24,32,.08);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: 0 14px 34px rgba(25,52,59,.08);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.planner-day-card.active {
+  border-color: rgba(69,224,193,.72);
+  box-shadow: 0 0 0 4px rgba(69,224,193,.16), var(--shadow);
+}
+
+.planner-day-badge {
+  width: fit-content;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 950;
+}
+
+.planner-day-card p {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+.planner-day-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.planner-day-metrics span {
+  min-width: 0;
+  padding: 8px 6px;
+  border-radius: 12px;
+  background: #eef7f4;
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.planner-day-metrics b {
+  display: block;
+  color: var(--ocean);
+  font-size: .96rem;
+  line-height: 1.1;
+}
+
+.planner-day-card ol {
+  display: grid;
+  gap: 9px;
+  margin: 15px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.planner-day-card li {
+  display: grid;
+  gap: 2px;
+  padding-left: 13px;
+  border-left: 3px solid #dce9e5;
+}
+
+.planner-day-card li strong {
+  color: var(--ink);
+  font-size: .9rem;
+}
+
+.planner-day-card li span {
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.planner-transport-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .58fr) minmax(0, .42fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.compact-title {
+  margin-bottom: 18px;
+}
+
+.transport-detail-card {
+  padding: 22px;
+  position: sticky;
+  top: 86px;
+}
+
+.transport-detail-card h3 {
+  margin-top: 12px;
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+}
+
+.transport-detail-card p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.transport-lines {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+}
+
+.transport-lines div {
+  margin: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f0f6f3;
+}
+
+.transport-lines dt {
+  color: var(--ocean);
+  font-size: .78rem;
+  font-weight: 950;
+}
+
+.transport-lines dd {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.master-plan {
+  padding: 20px;
+}
+
+.master-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.master-summary div {
+  padding: 14px;
+  border-radius: 16px;
+  background: #eef7f4;
+}
+
+.master-summary strong,
+.master-summary span {
+  display: block;
+}
+
+.master-summary strong {
+  color: var(--ocean);
+  font-size: 1.12rem;
+}
+
+.master-summary span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 900;
+}
+
+.master-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.master-flow article {
+  min-height: 156px;
+  padding: 18px;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(145deg, #082733, #0e5d67);
+}
+
+.master-flow span {
+  color: var(--mint-soft);
+  font-size: .78rem;
+  font-weight: 950;
+}
+
+.master-flow h3 {
+  margin-top: 8px;
+}
+
+.master-flow p {
+  margin-top: 10px;
+  color: rgba(255,255,255,.74);
+}
+
+.master-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.master-columns section {
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8fbf6;
+}
+
+.compact-plan-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.compact-plan-list div {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.compact-plan-list div.active {
+  outline: 2px solid var(--mint);
+}
+
+.compact-plan-list b {
+  color: var(--ocean);
+}
+
+.compact-plan-list span,
+.plain-check-list {
+  color: var(--muted);
+}
+
+.plain-check-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
 @media (max-width: 980px) {
   .hero-grid,
   .map-grid,
-  .live-layout {
-    grid-template-columns: 1fr;
+  .live-layout,
+  .planner-map-layout,
+  .planner-transport-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .page-grid,
@@ -1061,8 +1581,21 @@ footer {
   .days,
   .transport-grid,
   .info-grid,
-  .schedule-summary {
+  .schedule-summary,
+  .planner-schedule-grid,
+  .master-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .planner-hero-grid,
+  .master-flow,
+  .master-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-control-panel,
+  .transport-detail-card {
+    position: static;
   }
 
   .hero-visual {
@@ -1073,6 +1606,10 @@ footer {
 @media (max-width: 680px) {
   body {
     padding-bottom: 86px;
+  }
+
+  .planner-body {
+    padding-bottom: 0;
   }
 
   .wrap {
@@ -1095,6 +1632,172 @@ footer {
 
   .nav-links {
     display: none;
+  }
+
+  .planner-header .nav {
+    min-height: 58px;
+  }
+
+  .header-share {
+    display: none;
+  }
+
+  .planner-hero {
+    padding: 28px 0 24px;
+  }
+
+  .planner-hero-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
+
+  .planner-hero h1 {
+    margin-top: 14px;
+    font-size: clamp(1.9rem, 8vw, 2.35rem);
+    line-height: 1.08;
+  }
+
+  .planner-quick-stats {
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .planner-quick-stats div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    border-radius: 14px;
+  }
+
+  .planner-quick-stats strong {
+    font-size: 1.08rem;
+  }
+
+  .planner-quick-stats span {
+    font-size: .72rem;
+  }
+
+  .planner-map-section {
+    padding-top: 18px;
+  }
+
+  .planner-map-card,
+  .planner-control-panel,
+  .transport-detail-card,
+  .master-plan {
+    border-radius: 18px;
+  }
+
+  .planner-map-top {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .planner-map-frame {
+    min-height: 300px;
+    height: 36vh;
+    border-radius: 14px;
+  }
+
+  .planner-map-overlay {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .planner-map-overlay svg {
+    max-height: 110px;
+  }
+
+  .planner-map-overlay strong {
+    font-size: .95rem;
+  }
+
+  .planner-map-overlay span {
+    display: none;
+  }
+
+  .planner-control-panel {
+    padding: 14px;
+  }
+
+  .map-route-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .map-route-tabs button,
+  .transport-choice {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .map-route-tabs button strong,
+  .transport-choice strong {
+    font-size: .92rem;
+  }
+
+  .map-route-tabs button small,
+  .transport-choice small {
+    font-size: .76rem;
+  }
+
+  .route-focus-card {
+    border-radius: 16px;
+  }
+
+  .planner-schedule-section,
+  .planner-transport-section,
+  .planner-final-section {
+    padding-top: 36px;
+  }
+
+  .planner-schedule-grid,
+  .transport-choice-grid,
+  .master-summary,
+  .master-flow,
+  .master-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .planner-day-card {
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .planner-day-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .transport-detail-card {
+    padding: 17px;
+  }
+
+  .source-list .btn,
+  .planner-map-top .btn,
+  .planner-final-section .btn {
+    width: 100%;
+  }
+
+  .master-plan {
+    padding: 14px;
+  }
+
+  .master-flow article {
+    min-height: auto;
+  }
+
+  .compact-plan-list div {
+    grid-template-columns: 58px 1fr;
   }
 
   .mobile-section-nav {

@@ -3,141 +3,132 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전주 출발 제주도 2박 3일 자전거 여행</title>
-  <meta name="description" content="전주 출발, 배편 이용, 제주도 2박 3일 자전거 여행 공유 웹앱">
+  <title>전주 출발 제주 자전거 여행 자동 계획표</title>
+  <meta name="description" content="네이버지도 코스와 교통편 선택에 따라 제주 자전거 여행 일정표를 자동 구성하는 공유 웹앱">
   <meta name="theme-color" content="#071b24">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <header class="site-header">
+<body class="planner-body">
+  <header class="site-header planner-header">
     <div class="wrap nav">
-      <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Tour</a>
-      <nav class="nav-links" aria-label="주요 페이지">
-        <a class="active" href="index.html">홈</a>
-        <a href="course.html">코스</a>
-        <a href="schedule.html">일정표</a>
-        <a href="live.html">실시간 확인</a>
-        <a href="transport.html">운영안</a>
-      </nav>
+      <a class="brand" href="index.html"><span class="brand-mark">J</span> Jeju Bike Planner</a>
+      <button class="btn dark small header-share" type="button" data-share></button>
     </div>
   </header>
 
-  <nav class="mobile-section-nav" aria-label="모바일 하단 메뉴">
-    <div class="wrap">
-      <a href="course.html">코스</a>
-      <a href="schedule.html">일정표</a>
-      <a href="live.html">실시간 확인</a>
-      <a href="transport.html">운영안</a>
-    </div>
-  </nav>
-
-  <main>
-    <section class="hero">
-      <div class="wrap hero-inner">
-        <div class="hero-grid">
-          <div>
-            <p class="eyebrow">Jeonju to Jeju</p>
-            <h1>제주 234km<br>자전거 원정</h1>
-            <p class="hero-copy">전주에서 완도항으로 이동해 배를 타고 제주에 들어갑니다. 8명이 2박 3일 동안 제주 해안 일주형 코스를 계속 자전거로 이동하고, 더블캡 트럭은 항구 승하선과 짐 이동, 비상 회수 용도로만 활용합니다.</p>
-            <div class="hero-actions">
-              <a class="btn primary" href="course.html">코스 보기</a>
-              <a class="btn" href="schedule.html">일정표</a>
-              <button class="btn" type="button" data-share></button>
-            </div>
-          </div>
-
-          <div class="hero-visual" aria-hidden="true">
-            <div class="route-board">
-              <svg viewBox="0 0 590 410">
-                <defs>
-                  <linearGradient id="islandGradient" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#c9fff2"/>
-                    <stop offset="100%" stop-color="#45e0c1"/>
-                  </linearGradient>
-                </defs>
-                <path d="M95 202c25-83 105-142 216-155 116-14 229 28 267 102 32 64 3 132-77 170-77 37-168 22-253 44-76 20-145-21-172-83-12-27-10-53 19-78Z" fill="#031e26" opacity=".5" transform="translate(0 18)"/>
-                <path d="M95 202c25-83 105-142 216-155 116-14 229 28 267 102 32 64 3 132-77 170-77 37-168 22-253 44-76 20-145-21-172-83-12-27-10-53 19-78Z" fill="url(#islandGradient)" stroke="rgba(255,255,255,.58)" stroke-width="3"/>
-                <path d="M297 71c-62 4-128 28-168 76-42 51-38 104 4 146 48 47 111 57 181 37 79-23 156-23 203-77 42-48 26-108-35-145-45-28-110-42-185-37Z" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 13"/>
-                <circle cx="286" cy="68" r="11" fill="#ffc85c" stroke="#fff" stroke-width="4"/>
-                <circle cx="111" cy="214" r="9" fill="#ff745f" stroke="#fff" stroke-width="4"/>
-                <circle cx="286" cy="350" r="9" fill="#45e0c1" stroke="#fff" stroke-width="4"/>
-                <circle cx="517" cy="252" r="9" fill="#ffc85c" stroke="#fff" stroke-width="4"/>
-              </svg>
-            </div>
-            <div class="scene-card port"><b>완도 → 제주</b><span>배편·차량 선적 확인</span></div>
-            <div class="scene-card team"><b>8명 라이딩</b><span>트럭은 지원 용도</span></div>
-          </div>
+  <main class="planner-app" data-planner-app>
+    <section class="planner-hero">
+      <div class="wrap planner-hero-grid">
+        <div>
+          <p class="eyebrow">Route Builder</p>
+          <h1>지도 코스 선택으로<br>일정표 자동 생성</h1>
+          <p class="hero-copy">전주 출발, 완도항 배편, 제주 라이딩,<br>4일차 복귀 운영까지 정리합니다.</p>
+        </div>
+        <div class="planner-quick-stats" aria-label="여행 요약">
+          <div><strong>8명</strong><span>라이더</span></div>
+          <div><strong>1대</strong><span>더블캡 트럭</span></div>
+          <div><strong>4일</strong><span>운영표</span></div>
         </div>
       </div>
     </section>
 
-    <div class="wrap">
-      <div class="stats" aria-label="여행 요약">
-        <div class="stat"><strong>8명</strong><span>라이더 전원 자전거 이동</span></div>
-        <div class="stat"><strong>2박 3일</strong><span>제주항 기준 해안 일주형</span></div>
-        <div class="stat"><strong>약 240km</strong><span>일자별 실제 경로에 따라 변동</span></div>
-        <div class="stat"><strong>트럭 1대</strong><span>승하선, 짐, 비상 지원</span></div>
-      </div>
-    </div>
+    <section class="planner-map-section">
+      <div class="wrap planner-map-layout">
+        <article class="planner-map-card">
+          <div class="planner-map-top">
+            <div>
+              <p class="kicker">Naver Map</p>
+              <h2>네이버지도 코스</h2>
+            </div>
+            <a class="btn dark small" target="_blank" rel="noreferrer" data-planner-map-link data-naver-map>지도 새 창</a>
+          </div>
+          <div class="planner-map-stage">
+            <iframe
+              class="planner-map-frame"
+              title="네이버지도 제주 자전거 코스"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              data-planner-map-frame
+              src="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%95%AD%20%EC%9A%A9%EB%91%90%EC%95%94%20%EC%95%A0%EC%9B%94%20%ED%98%91%EC%9E%AC%20%EA%B8%88%EB%8A%A5%20%EC%8B%A0%EC%B0%BD%ED%92%8D%EC%B0%A8%ED%95%B4%EC%95%88%EB%8F%84%EB%A1%9C%20%EB%AA%A8%EC%8A%AC%ED%8F%AC%20%EC%9E%90%EC%A0%84%EA%B1%B0%EA%B8%B8">
+            </iframe>
+            <div class="planner-map-overlay" aria-hidden="true">
+              <svg viewBox="0 0 420 260">
+                <path d="M57 126c20-58 75-98 151-108 82-10 162 19 189 71 23 45 2 95-55 122-54 26-119 16-179 31-53 14-102-14-121-58-9-20-7-38 15-58Z" fill="#dff6ea" stroke="#087c83" stroke-width="3"/>
+                <path d="M210 30c-55 9-110 35-140 79-26 38-16 82 24 108 37 24 83 24 132 7 55-19 109-20 139-55 29-34 15-78-34-104-32-17-75-28-121-35Z" fill="none" stroke="#ff745f" stroke-width="8" stroke-linecap="round" stroke-dasharray="12 12"/>
+                <g fill="#061820" font-size="14" font-weight="900">
+                  <text x="196" y="28">제주항</text>
+                  <text x="38" y="132">애월</text>
+                  <text x="95" y="224">모슬포</text>
+                  <text x="300" y="210">성산</text>
+                  <text x="330" y="92">함덕</text>
+                </g>
+              </svg>
+              <div>
+                <strong data-map-overlay-title>1일차 서부 해안 적응</strong>
+                <span>지도 버튼은 네이버지도 앱/웹으로 연결됩니다.</span>
+              </div>
+            </div>
+          </div>
+        </article>
 
-    <section>
+        <aside class="planner-control-panel">
+          <div class="panel-heading">
+            <p class="kicker">Course</p>
+            <h2>코스 선택</h2>
+          </div>
+          <div class="map-route-tabs" data-planner-route-tabs></div>
+          <div class="route-focus-card" data-planner-route-focus></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="planner-schedule-section">
       <div class="wrap">
         <div class="section-title">
           <div>
-            <p class="kicker">Dashboard</p>
-            <h2>여행 정보를 한눈에</h2>
+            <p class="kicker">Auto Schedule</p>
+            <h2>자동 일정표</h2>
           </div>
-          <p class="lead">첨부 예시의 대시보드 느낌을 살려, 실제 팀 공유에 필요한 정보만 네 개의 화면으로 나눴습니다. 모바일에서는 화면 아래 패널에서 바로 이동할 수 있습니다.</p>
+          <p class="lead">선택한 지도 코스를 기준으로 1일차부터 4일차까지의 이동, 숙박, 복귀 운영을 자동 정렬합니다.</p>
         </div>
+        <div class="planner-schedule-grid" data-planner-schedule></div>
+      </div>
+    </section>
 
-        <div class="page-grid">
-          <a class="page-card" href="course.html">
-            <span>1</span>
-            <h3>코스</h3>
-            <p>제주 전체 코스, 네이버지도 맵, 일자별 구간 링크를 확인합니다.</p>
-          </a>
-          <a class="page-card" href="schedule.html">
-            <span>2</span>
-            <h3>일정표</h3>
-            <p>전체 3일 일정과 1일차, 2일차, 3일차 세부 일정을 골라 봅니다.</p>
-          </a>
-          <a class="page-card" href="live.html">
-            <span>3</span>
-            <h3>실시간 확인</h3>
-            <p>지도, 배편, 기차, 버스, 숙소, 기상 정보를 메뉴별로 확인합니다.</p>
-          </a>
-          <a class="page-card" href="transport.html">
-            <span>4</span>
-            <h3>운영안</h3>
-            <p>전주 출발, 완도항 승선, 제주항 복귀, 트럭 운영을 정리합니다.</p>
-          </a>
+    <section class="planner-transport-section">
+      <div class="wrap planner-transport-layout">
+        <div>
+          <div class="section-title compact-title">
+            <div>
+              <p class="kicker">Transport</p>
+              <h2>교통편</h2>
+            </div>
+            <p class="lead">교통편을 정하면 출발, 배편, 제주 이동, 복귀가 포함된 전체 계획표가 자동으로 바뀝니다.</p>
+          </div>
+          <div class="transport-choice-grid" data-transport-options></div>
         </div>
+        <article class="transport-detail-card" data-transport-detail></article>
+      </div>
+    </section>
 
-        <div class="ferry-board">
-          <div class="port-box">
-            <small>START</small>
-            <strong>전주 → 완도항</strong>
-            <p>트럭, 기차, 버스 조합으로 항구 접근</p>
+    <section class="planner-final-section">
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <p class="kicker">Master Plan</p>
+            <h2>전체 계획표</h2>
           </div>
-          <div class="sailing-line">
-            <b>FERRY CHECK</b>
-            <div class="line"></div>
-            <b>차량·자전거 선적</b>
-          </div>
-          <div class="port-box">
-            <small>RIDE</small>
-            <strong>제주항 → 제주 일주</strong>
-            <p>3일 연속 자전거 이동 후 제주항 복귀</p>
-          </div>
+          <button class="btn light small" type="button" data-share></button>
         </div>
+        <div class="master-plan" data-master-plan></div>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="wrap">
-      <strong>제주도 2박 3일 자전거 여행 공유 웹앱</strong>
-      <p>출발 전날 배편, 기상, 숙소 주차 및 자전거 보관을 다시 확인하세요.</p>
+      <strong>제주 자전거 여행 자동 계획표</strong>
+      <p>네이버지도와 교통편 사이트에서 실제 출발 전 운항, 교통, 기상, 자전거 선적 가능 여부를 다시 확인하세요.</p>
     </div>
   </footer>
 

@@ -83,7 +83,7 @@ const routeSegments = [
     query: "제주항 완도여객선터미널 전주 복귀",
     summary: "야간 또는 익일 도착 배편까지 포함해 보는 복귀 운영일입니다. 트럭은 선적과 하선, 최종 복귀 적재 용도로만 사용합니다.",
     metrics: [
-      { value: "배편", label: "실시간 확인" },
+      { value: "배편", label: "교통편 확인" },
       { value: "8명", label: "인원 점검" },
       { value: "1대", label: "더블캡 트럭" }
     ],
@@ -93,6 +93,69 @@ const routeSegments = [
       { place: "완도항 하선", detail: "자전거 파손 여부와 개인 장비 누락 확인" },
       { place: "전주 복귀", detail: "운전자 휴식 시간을 확보하고, 야간 이동이면 교대 운전 계획 적용" },
       { place: "도착 후 정리", detail: "공용 장비 회수, 정산, 다음 라이딩을 위한 정비 목록 작성" }
+    ]
+  }
+];
+
+const transportOptions = [
+  {
+    id: "truck-ferry",
+    badge: "추천",
+    title: "더블캡 트럭 + 완도 배편",
+    summary: "8명 장비와 자전거 선적을 한 번에 관리하기 좋은 기본 운영안입니다.",
+    outbound: "전주 집결 → 완도항 차량 이동 → 완도항 승선 → 제주항 하선",
+    returnPlan: "제주항 승선 → 완도항 하선 → 자전거/짐 재적재 → 전주 복귀",
+    truck: "트럭은 항구 승하선, 짐 이동, 비상 회수 용도로만 사용",
+    checks: ["차량 선적 예약", "8명 신분증", "자전거 고정 스트랩", "운전자 휴식"],
+    links: [
+      { label: "전주 → 완도항 지도", href: "https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%90%EC%84%9C%20%EC%99%84%EB%8F%84%EC%97%AC%EA%B0%9D%EC%84%A0%ED%84%B0%EB%AF%B8%EB%84%90" },
+      { label: "배편 확인", href: "https://island.haewoon.co.kr/" },
+      { label: "제주항 지도", href: "https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%ED%95%AD" }
+    ]
+  },
+  {
+    id: "train-ferry",
+    badge: "대체",
+    title: "기차 + 현지 이동 + 배편",
+    summary: "차량 운전 부담을 줄이는 방식입니다. 자전거 포장, 환승 동선, 항구 접근 시간이 핵심입니다.",
+    outbound: "전주역 → 광주송정/목포권 환승 → 완도 또는 목포 항구 이동 → 제주행 배편",
+    returnPlan: "제주항 또는 목포/완도 도착 → 기차역 이동 → 전주역 복귀",
+    truck: "트럭은 별도 선적하지 않거나, 장비 운반 전담 차량으로 분리 운영",
+    checks: ["자전거 포장 규정", "역-항구 환승 시간", "단체 승차권", "우천 시 택시/밴 대안"],
+    links: [
+      { label: "코레일", href: "https://www.letskorail.com/" },
+      { label: "전주역 → 광주송정역", href: "https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%AD%EC%97%90%EC%84%9C%20%EA%B4%91%EC%A3%BC%EC%86%A1%EC%A0%95%EC%97%AD" },
+      { label: "배편 확인", href: "https://island.haewoon.co.kr/" }
+    ]
+  },
+  {
+    id: "bus-ferry",
+    badge: "예비",
+    title: "버스 + 배편",
+    summary: "트럭 운행이 어려울 때 쓰는 예비안입니다. 자전거 적재 가능 여부를 출발 전에 반드시 확인해야 합니다.",
+    outbound: "전주터미널 → 광주/해남/완도권 버스 → 완도항 이동 → 제주행 배편",
+    returnPlan: "완도항 하선 → 터미널 이동 → 전주행 버스 복귀",
+    truck: "트럭 미사용 또는 항구 구간 보조 차량으로만 제한 운영",
+    checks: ["버스 자전거 적재 가능 여부", "터미널-항구 이동", "단체 수하물", "막차 시간"],
+    links: [
+      { label: "고속버스", href: "https://www.kobus.co.kr/" },
+      { label: "시외버스", href: "https://txbus.t-money.co.kr/" },
+      { label: "완도항 지도", href: "https://map.naver.com/p/search/%EC%99%84%EB%8F%84%EC%97%AC%EA%B0%9D%EC%84%A0%ED%84%B0%EB%AF%B8%EB%84%90" }
+    ]
+  },
+  {
+    id: "mokpo-ferry",
+    badge: "대안",
+    title: "목포항 대체 배편",
+    summary: "완도 배편 시간대가 맞지 않을 때 검토하는 대안입니다. 제주 도착 항구와 첫날 코스를 다시 맞춥니다.",
+    outbound: "전주 → 목포항 이동 → 제주행 배편 → 제주항 또는 제주 여객터미널 하선",
+    returnPlan: "제주 출항 → 목포항 하선 → 전주 복귀",
+    truck: "트럭 선적 가능 여부와 항구 주차 동선을 별도로 확인",
+    checks: ["목포 출항 시간", "차량 선적 마감", "제주 도착 항구", "첫날 라이딩 시작점 조정"],
+    links: [
+      { label: "전주 → 목포항 지도", href: "https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%90%EC%84%9C%20%EB%AA%A9%ED%8F%AC%ED%95%AD" },
+      { label: "배편 확인", href: "https://island.haewoon.co.kr/" },
+      { label: "목포항 지도", href: "https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%ED%95%AD%EC%97%AC%EA%B0%9D%ED%84%B0%EB%AF%B8%EB%84%90" }
     ]
   }
 ];
@@ -179,6 +242,191 @@ function renderScheduleCard(segment, options = {}) {
       </div>
     </article>
   `;
+}
+
+function renderPlannerScheduleCard(segment, activeDay) {
+  const active = segment.id === activeDay;
+  return `
+    <article class="planner-day-card${active ? " active" : ""}" data-plan-day="${segment.id}">
+      <div class="planner-day-badge">${segment.day}</div>
+      <h3>${segment.title}</h3>
+      <p>${segment.summary}</p>
+      <div class="planner-day-metrics">
+        ${segment.metrics.map((metric) => `<span><b>${metric.value}</b>${metric.label}</span>`).join("")}
+      </div>
+      <ol>
+        ${segment.schedule.map((stop) => `<li><strong>${stop.place}</strong><span>${stop.detail}</span></li>`).join("")}
+      </ol>
+    </article>
+  `;
+}
+
+function setupPlannerApp() {
+  const app = document.querySelector("[data-planner-app]");
+  if (!app) return;
+
+  const routeTabs = document.querySelector("[data-planner-route-tabs]");
+  const routeFocus = document.querySelector("[data-planner-route-focus]");
+  const mapFrame = document.querySelector("[data-planner-map-frame]");
+  const mapLink = document.querySelector("[data-planner-map-link]");
+  const mapOverlayTitle = document.querySelector("[data-map-overlay-title]");
+  const schedule = document.querySelector("[data-planner-schedule]");
+  const transportTarget = document.querySelector("[data-transport-options]");
+  const transportDetail = document.querySelector("[data-transport-detail]");
+  const masterPlan = document.querySelector("[data-master-plan]");
+
+  if (!routeTabs || !routeFocus || !mapFrame || !mapLink || !schedule || !transportTarget || !transportDetail || !masterPlan) return;
+
+  let selectedDay = getRequestedDay() || getValidDay(readStorage(selectedRouteStorageKey)) || "day1";
+  let selectedTransport = readStorage("jeju-bike-transport") || "truck-ferry";
+  if (!transportOptions.some((option) => option.id === selectedTransport)) selectedTransport = "truck-ferry";
+
+  routeTabs.innerHTML = routeSegments.map((segment) => `
+    <button type="button" data-planner-route="${segment.id}">
+      <span>${segment.day}</span>
+      <strong>${segment.theme}</strong>
+      <small>${segment.distance}</small>
+    </button>
+  `).join("");
+
+  transportTarget.innerHTML = transportOptions.map((option) => `
+    <button type="button" class="transport-choice" data-transport-choice="${option.id}">
+      <span>${option.badge}</span>
+      <strong>${option.title}</strong>
+      <small>${option.summary}</small>
+    </button>
+  `).join("");
+
+  const renderTransportDetail = (option) => `
+    <span class="tag">${option.badge}</span>
+    <h3>${option.title}</h3>
+    <p>${option.summary}</p>
+    <dl class="transport-lines">
+      <div><dt>출발</dt><dd>${option.outbound}</dd></div>
+      <div><dt>복귀</dt><dd>${option.returnPlan}</dd></div>
+      <div><dt>트럭</dt><dd>${option.truck}</dd></div>
+    </dl>
+    <div class="source-list">
+      ${option.links.map((link) => `<a class="btn light small" href="${link.href}" target="_blank" rel="noreferrer" data-naver-map>${link.label}</a>`).join("")}
+    </div>
+  `;
+
+  const renderMasterPlan = (dayId, transportId) => {
+    const activeRoute = getRouteSegment(dayId) || routeSegments[0];
+    const transport = transportOptions.find((option) => option.id === transportId) || transportOptions[0];
+    const totalDistance = routeSegments
+      .map((segment) => Number.parseInt(segment.distance.replace(/[^0-9]/g, ""), 10))
+      .filter(Number.isFinite)
+      .reduce((sum, value) => sum + value, 0);
+
+    return `
+      <div class="master-summary">
+        <div><strong>${transport.title}</strong><span>선택 교통편</span></div>
+        <div><strong>${totalDistance}km</strong><span>예상 라이딩</span></div>
+        <div><strong>${activeRoute.day}</strong><span>지도 선택 코스</span></div>
+        <div><strong>8명</strong><span>운영 인원</span></div>
+      </div>
+      <div class="master-flow">
+        <article>
+          <span>출발</span>
+          <h3>전주 → 항구</h3>
+          <p>${transport.outbound}</p>
+        </article>
+        <article>
+          <span>제주 라이딩</span>
+          <h3>1~3일차 자전거 이동</h3>
+          <p>${routeSegments.slice(0, 3).map((segment) => segment.title).join(" / ")}</p>
+        </article>
+        <article>
+          <span>복귀</span>
+          <h3>4일차 항구 운영</h3>
+          <p>${transport.returnPlan}</p>
+        </article>
+      </div>
+      <div class="master-columns">
+        <section>
+          <h3>일자별 운영</h3>
+          <div class="compact-plan-list">
+            ${routeSegments.map((segment) => `
+              <div class="${segment.id === dayId ? "active" : ""}">
+                <b>${segment.day}</b>
+                <span>${segment.title}</span>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+        <section>
+          <h3>교통 체크</h3>
+          <ul class="plain-check-list">
+            ${transport.checks.map((check) => `<li>${check}</li>`).join("")}
+          </ul>
+        </section>
+      </div>
+    `;
+  };
+
+  const syncNaverLink = (segment) => {
+    const url = naverSearchUrl(segment.query);
+    mapFrame.src = url;
+    mapLink.href = url;
+    mapLink.dataset.naverQuery = segment.query;
+    mapLink.dataset.webUrl = url;
+    mapLink.textContent = `${segment.day} 지도 열기`;
+  };
+
+  const setRoute = (dayId) => {
+    const segment = getRouteSegment(dayId) || routeSegments[0];
+    selectedDay = segment.id;
+    writeStorage(selectedRouteStorageKey, selectedDay);
+
+    routeTabs.querySelectorAll("[data-planner-route]").forEach((button) => {
+      const active = button.dataset.plannerRoute === selectedDay;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+
+    routeFocus.innerHTML = `
+      <span class="tag">${segment.day}</span>
+      <h3>${segment.title}</h3>
+      <p>${segment.summary}</p>
+      <div class="checkpoint-flow">
+        ${segment.stops.map((stop) => `<span>${stop}</span>`).join("")}
+      </div>
+    `;
+
+    syncNaverLink(segment);
+    if (mapOverlayTitle) mapOverlayTitle.textContent = `${segment.day} ${segment.theme}`;
+    schedule.innerHTML = routeSegments.map((item) => renderPlannerScheduleCard(item, selectedDay)).join("");
+    masterPlan.innerHTML = renderMasterPlan(selectedDay, selectedTransport);
+    setupNaverMapLinks(app);
+  };
+
+  const setTransport = (transportId) => {
+    const option = transportOptions.find((item) => item.id === transportId) || transportOptions[0];
+    selectedTransport = option.id;
+    writeStorage("jeju-bike-transport", selectedTransport);
+
+    transportTarget.querySelectorAll("[data-transport-choice]").forEach((button) => {
+      const active = button.dataset.transportChoice === selectedTransport;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+
+    transportDetail.innerHTML = renderTransportDetail(option);
+    masterPlan.innerHTML = renderMasterPlan(selectedDay, selectedTransport);
+    setupNaverMapLinks(transportDetail);
+  };
+
+  routeTabs.querySelectorAll("[data-planner-route]").forEach((button) => {
+    button.addEventListener("click", () => setRoute(button.dataset.plannerRoute));
+  });
+
+  transportTarget.querySelectorAll("[data-transport-choice]").forEach((button) => {
+    button.addEventListener("click", () => setTransport(button.dataset.transportChoice));
+  });
+
+  setRoute(selectedDay);
+  setTransport(selectedTransport);
 }
 
 function renderRouteCards() {
@@ -435,6 +683,7 @@ renderRouteCards();
 setupCourseSelection();
 setupScheduleTabs();
 setupLiveTabs();
+setupPlannerApp();
 setupShare();
 setupTripDate();
 setupNaverMapLinks();
