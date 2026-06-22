@@ -15,6 +15,7 @@ const dayLabels = {
 };
 
 const vworldApiKey = "5880CF73-00D8-30E9-BCF1-3DC6E80FC58B";
+const seaferryBookingUrl = "https://www.seaferry.co.kr/bbs/content.php?co_id=p201";
 
 const jejuBikeNodes = [
   { name: "제주항", lat: 33.5162, lng: 126.5280, elevation: 8 },
@@ -726,7 +727,7 @@ const transportOptions = [
     links: [
       { label: "전주 → 목포항 지도", href: "https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%90%EC%84%9C%20%EB%AA%A9%ED%8F%AC%ED%95%AD" },
       { label: "목포항 주차", href: "https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%ED%95%AD%20%EC%A3%BC%EC%B0%A8%EC%9E%A5" },
-      { label: "씨월드 목포-제주", href: "https://www.seaferry.co.kr/" }
+      { label: "씨월드 목포-제주", href: seaferryBookingUrl }
     ]
   },
   {
@@ -770,7 +771,7 @@ const transportOptions = [
     checks: ["목포 출항 시간", "차량 선적 마감", "제주 도착 항구", "첫날 시작점 조정"],
     links: [
       { label: "전주 → 목포항 지도", href: "https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%90%EC%84%9C%20%EB%AA%A9%ED%8F%AC%ED%95%AD" },
-      { label: "씨월드 목포-제주", href: "https://www.seaferry.co.kr/" },
+      { label: "씨월드 목포-제주", href: seaferryBookingUrl },
       { label: "목포항 지도", href: "https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%ED%95%AD%EC%97%AC%EA%B0%9D%ED%84%B0%EB%AF%B8%EB%84%90" }
     ]
   }
@@ -878,7 +879,7 @@ function renderFerrySearchPanel() {
       <div class="source-list ferry-source-list">
         <a class="btn dark small" target="_blank" rel="noreferrer" href="${ferrySearchUrl("outbound", dates.outbound)}" data-ferry-link="outbound">목포→제주 검색</a>
         <a class="btn light small" target="_blank" rel="noreferrer" href="${ferrySearchUrl("return", dates.returnDate)}" data-ferry-link="return">제주→목포 검색</a>
-        <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.seaferry.co.kr/">씨월드 예매</a>
+        <a class="btn light small" target="_blank" rel="noreferrer" href="${seaferryBookingUrl}">씨월드 예매</a>
       </div>
       <p class="route-source-note">선박 시간, 자전거 선적, 터미널 도착 마감은 운항사 공지 기준으로 최종 확인하세요.</p>
     </article>
@@ -1101,6 +1102,13 @@ function enrichScheduleLegs(segment) {
       : index === 0
         ? 0
         : fallbackLegDistance;
+    const cumulativeDistance = Number.isFinite(stop.cumulativeDistanceKm)
+      ? stop.cumulativeDistanceKm
+      : Number.isFinite(fallbackLegDistance)
+        ? fallbackLegDistance * index
+        : index === 0
+          ? 0
+          : null;
     const elevation = Number.isFinite(stop.elevationM)
       ? stop.elevationM
       : elevationForPlaceName(stop.place);
@@ -1108,6 +1116,7 @@ function enrichScheduleLegs(segment) {
     return {
       ...stop,
       distanceKm: Number.isFinite(distance) ? distance : null,
+      cumulativeDistanceKm: Number.isFinite(cumulativeDistance) ? cumulativeDistance : null,
       elevationM: Number.isFinite(elevation) ? elevation : null
     };
   });
@@ -1117,6 +1126,9 @@ function renderStopMeta(stop, index) {
   const meta = [];
   if (Number.isFinite(stop.distanceKm)) {
     meta.push(index === 0 ? "출발" : `이동 ${formatDistanceKm(stop.distanceKm)}`);
+  }
+  if (index > 0 && Number.isFinite(stop.cumulativeDistanceKm)) {
+    meta.push(`누적 ${formatDistanceKm(stop.cumulativeDistanceKm)}`);
   }
   if (Number.isFinite(stop.elevationM)) {
     meta.push(`예상 고도 ${Math.round(stop.elevationM)}m`);
@@ -1129,7 +1141,7 @@ function renderTimeline(schedule) {
     <div class="stop">
       <strong>${stop.time} · ${stop.place}</strong>
       ${renderStopMeta(stop, index)}
-      <p>${stop.detail}</p>
+      ${stop.detail ? `<p>${stop.detail}</p>` : ""}
     </div>
   `).join("");
 }
@@ -1268,6 +1280,44 @@ function nearestKnownPlace(point) {
   return jejuRoutePlaces
     .map((place) => ({ ...place, distance: distanceKm(point, place) }))
     .sort((a, b) => a.distance - b.distance)[0];
+}
+
+function nearbyRestaurants(point, limit = 2) {
+  return jejuRestaurants
+    .map((restaurant, index) => ({
+      ...restaurant,
+      rank: index + 1,
+      distance: distanceKm(point, restaurant)
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, limit);
+}
+
+function routePlacePopup(place) {
+  const routeText = Number.isFinite(place.routeDistance)
+    ? `자전거길 누적 약 ${formatDistanceKm(place.routeDistance)} 지점`
+    : "자전거길 경유 지점";
+  const elevationText = Number.isFinite(place.elevation)
+    ? `예상 고도 ${Math.round(place.elevation)}m`
+    : "예상 고도 확인 필요";
+  const restaurants = nearbyRestaurants(place, 2)
+    .map((restaurant) => `${restaurant.rank}위 ${restaurant.name}(${formatDistanceKm(restaurant.distance)})`)
+    .join(" · ");
+  const searchTerm = `${place.name} 제주 자전거길`;
+
+  return `
+    <div class="place-popup">
+      <strong>${place.name}</strong>
+      <p>${routeText} · ${elevationText}</p>
+      <p>해안 라이딩 중 속도와 바람 방향을 다시 확인하기 좋은 지점입니다.</p>
+      ${restaurants ? `<p>근처 맛집 후보: ${restaurants}</p>` : ""}
+      <div class="place-popup-links">
+        <a target="_blank" rel="noreferrer" href="${naverSearchUrl(searchTerm)}">네이버</a>
+        <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(searchTerm)}">다음</a>
+        <a target="_blank" rel="noreferrer" href="${googleSearchUrl(`${searchTerm} 설명`)}">구글</a>
+      </div>
+    </div>
+  `;
 }
 
 function learnedAreaName(point) {
@@ -1692,14 +1742,13 @@ function routeCheckpoints(route) {
       time: index === 0 ? "08:30" : addMinutesToTime(8, 30, minutes),
       place: point.name,
       distanceKm: legDistance,
+      cumulativeDistanceKm: accumulated,
       elevationM: Number.isFinite(point.elevation) ? Math.round(point.elevation) : null,
       detail: index === 0
         ? "출발 전 장비 점검"
         : index === points.length - 1
           ? "도착 후 숙소/항구 동선 확인"
-          : point.name.includes("주 경로")
-            ? `접속 구간 포함, 예상 고도 ${Math.round(point.elevation)}m`
-            : `예상 고도 ${Math.round(point.elevation)}m`
+          : ""
     };
   });
 }
@@ -1707,9 +1756,9 @@ function routeCheckpoints(route) {
 function elevationSvg(route) {
   if (!route || !route.path.length) return "";
   const width = 360;
-  const height = 140;
-  const labelHeight = 52;
-  const chartBottom = 14;
+  const height = 120;
+  const labelHeight = 12;
+  const chartBottom = 12;
   const chartHeight = height - labelHeight - chartBottom;
   const step = Math.max(1, Math.ceil(route.path.length / 160));
   const profilePoints = route.path.filter((point, index) => index % step === 0 || index === route.path.length - 1);
@@ -1727,8 +1776,6 @@ function elevationSvg(route) {
     <svg class="elevation-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="예상 고도 그래프">
       <rect width="${width}" height="${height}" rx="14" fill="#eef7f4"/>
       <polyline points="${points}" fill="none" stroke="#087c83" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="12" y="24" fill="#607176" font-size="12" font-weight="800">고도 ${Math.round(min)}m~${Math.round(max)}m</text>
-      ${route.elevationSource ? `<text x="12" y="44" fill="#607176" font-size="10" font-weight="700">${route.elevationSource}</text>` : ""}
     </svg>
   `;
 }
@@ -1752,6 +1799,7 @@ function setupVWorldRouteEditor() {
   const panelToggleButtons = root.querySelectorAll("[data-panel-toggle]");
   const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
   const overlaySchedule = root.querySelector("[data-overlay-schedule]");
+  const overlayRestaurants = root.querySelector("[data-overlay-restaurants]");
   const overlayTransport = root.querySelector("[data-overlay-transport]");
   const overlayPlan = root.querySelector("[data-overlay-plan]");
 
@@ -1895,6 +1943,21 @@ function setupVWorldRouteEditor() {
     recalculate();
   };
 
+  const setRoutePointFromMapClick = (latlng) => {
+    const nearest = nearestRoutePoint({ lat: latlng.lat, lng: latlng.lng });
+    if (!nearest) {
+      setStatus("자전거길을 먼저 불러와야 지도에서 지점을 선택할 수 있습니다.");
+      return;
+    }
+    setPoint({
+      lat: nearest.lat,
+      lng: nearest.lng,
+      elevation: nearest.elevation,
+      name: "자전거길 선택 지점",
+      placeName: "자전거길 선택 지점"
+    }, "자전거길 선택 지점");
+  };
+
   const clearRoute = () => {
     startPoint = null;
     endPoint = null;
@@ -1994,6 +2057,16 @@ function setupVWorldRouteEditor() {
     setupNaverMapLinks(overlayTransport);
   };
 
+  const renderOverlayRestaurants = () => {
+    if (!overlayRestaurants) return;
+    overlayRestaurants.innerHTML = `
+      <div class="restaurant-panel-list">
+        ${renderRestaurantList()}
+      </div>
+    `;
+    setupNaverMapLinks(overlayRestaurants);
+  };
+
   const renderOverlayPlan = () => {
     if (!overlayPlan) return;
     const segments = resolveSegments();
@@ -2041,6 +2114,7 @@ function setupVWorldRouteEditor() {
   };
 
   function renderOverlayViews() {
+    renderOverlayRestaurants();
     renderOverlaySchedule();
     renderOverlayTransport();
     renderOverlayPlan();
@@ -2152,8 +2226,10 @@ function setupVWorldRouteEditor() {
       fillOpacity: 0.95
     }).addTo(placeLayer);
     marker.bindTooltip(place.name, { direction: "top", offset: [0, -4] });
+    marker.bindPopup(routePlacePopup(place));
     marker.on("click", (event) => {
       L.DomEvent.stopPropagation(event);
+      marker.openPopup();
       setPoint(place, place.name);
     });
   });
@@ -2209,7 +2285,7 @@ function setupVWorldRouteEditor() {
   });
   clearButton.addEventListener("click", clearRoute);
   saveButton.addEventListener("click", saveRoute);
-  map.on("click", (event) => setPoint(event.latlng));
+  map.on("click", (event) => setRoutePointFromMapClick(event.latlng));
   placeApplyButtons.forEach((button) => {
     button.addEventListener("click", () => applySearchLocation(button.dataset.placeApply));
   });
@@ -2537,6 +2613,15 @@ function setupShare() {
   });
 }
 
+function setupPdfExport() {
+  document.querySelectorAll("[data-export-pdf]").forEach((button) => {
+    button.addEventListener("click", () => {
+      showToast("PDF 저장 창을 엽니다. 대상에서 PDF 저장을 선택하세요.");
+      window.setTimeout(() => window.print(), 120);
+    });
+  });
+}
+
 function setupTripDate() {
   const tripDate = document.querySelector("#tripDate");
   const dateHint = document.querySelector("#dateHint");
@@ -2598,5 +2683,6 @@ setupTransportPage();
 setupMasterPlanPage();
 setupRestaurantPage();
 setupShare();
+setupPdfExport();
 setupTripDate();
 setupNaverMapLinks();

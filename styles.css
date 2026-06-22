@@ -1956,6 +1956,21 @@ footer {
   font-size: 1.45rem;
 }
 
+.panel-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panel-heading-row h1 {
+  margin: 0;
+}
+
+.panel-heading-row .btn {
+  flex: 0 0 auto;
+}
+
 .route-map-days {
   margin-bottom: 0;
   border-radius: 18px;
@@ -2232,6 +2247,16 @@ footer {
   gap: 10px;
 }
 
+.restaurant-panel-scroll {
+  padding-right: 2px;
+}
+
+.restaurant-panel-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
 .route-map-panel .day-card,
 .route-map-panel .transport-pick-card {
   border-radius: 16px;
@@ -2283,11 +2308,83 @@ footer {
 
 .route-save-row {
   grid-template-columns: 1fr 1fr;
-  margin-top: auto;
+  margin-top: 0;
 }
 
 .leaflet-control-attribution {
   font-size: 10px;
+}
+
+.leaflet-control-layers {
+  max-width: min(230px, calc(100vw - 36px));
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(6,24,32,.18);
+}
+
+.leaflet-control-layers-expanded {
+  height: auto !important;
+  max-height: min(46vh, 320px);
+  overflow: auto;
+  padding: 8px 10px;
+}
+
+.leaflet-control-layers-list {
+  height: auto !important;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+.leaflet-control-layers-base,
+.leaflet-control-layers-overlays {
+  height: auto !important;
+}
+
+.leaflet-control-layers label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  color: var(--ink);
+  font-size: .82rem;
+  font-weight: 850;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.leaflet-control-layers input {
+  flex: 0 0 auto;
+}
+
+.place-popup {
+  display: grid;
+  gap: 6px;
+  max-width: 240px;
+}
+
+.place-popup strong {
+  color: var(--ink);
+  font-size: .98rem;
+}
+
+.place-popup p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+.place-popup-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.place-popup-links a {
+  color: var(--ocean);
+  font-size: .78rem;
+  font-weight: 950;
+  text-decoration: none;
 }
 
 @media (max-width: 980px) {
@@ -3011,5 +3108,41 @@ footer {
 
   .toast {
     bottom: 92px;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
+  }
+
+  .site-header,
+  .mobile-section-nav,
+  .hero,
+  footer,
+  .action-list,
+  [data-share],
+  [data-export-pdf],
+  .toast {
+    display: none !important;
+  }
+
+  .wrap {
+    width: 100%;
+  }
+
+  .master-plan,
+  .day-card,
+  .restaurant-card,
+  .transport-pick-card,
+  .route-result-card {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
   }
 }
