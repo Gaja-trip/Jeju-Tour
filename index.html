@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>전주 출발 제주도 2박 3일 자전거 여행</title>
-  <meta name="description" content="전주 출발, 배편 이용, 제주도 2박 3일 자전거 여행 공유 페이지">
+  <meta name="description" content="전주 출발, 배편 이용, 제주도 2박 3일 자전거 여행 공유 웹앱">
+  <meta name="theme-color" content="#071b24">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,22 +17,55 @@
         <a href="course.html">코스</a>
         <a href="schedule.html">일정표</a>
         <a href="live.html">실시간 확인</a>
-        <a href="transport.html">출발·배편·복귀</a>
+        <a href="transport.html">운영안</a>
       </nav>
     </div>
   </header>
 
+  <nav class="mobile-section-nav" aria-label="모바일 하단 메뉴">
+    <div class="wrap">
+      <a href="course.html">코스</a>
+      <a href="schedule.html">일정표</a>
+      <a href="live.html">실시간 확인</a>
+      <a href="transport.html">운영안</a>
+    </div>
+  </nav>
+
   <main>
     <section class="hero">
       <div class="wrap hero-inner">
-        <div>
-          <p class="eyebrow">Jeonju to Jeju, 2 nights 3 days</p>
-          <h1>전주 출발 제주도<br>2박 3일 자전거 여행</h1>
-          <p class="hero-copy">8명이 제주 해안 일주형 코스를 3일 동안 계속 자전거로 이동합니다. 더블캡 트럭은 항구 승하선, 짐 이동, 비상 회수 용도로만 활용합니다.</p>
-          <div class="hero-actions">
-            <a class="btn primary" href="course.html">코스 보기</a>
-            <a class="btn" href="live.html">실시간 확인</a>
-            <button class="btn" type="button" data-share></button>
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Jeonju to Jeju</p>
+            <h1>제주 234km<br>자전거 원정</h1>
+            <p class="hero-copy">전주에서 완도항으로 이동해 배를 타고 제주에 들어갑니다. 8명이 2박 3일 동안 제주 해안 일주형 코스를 계속 자전거로 이동하고, 더블캡 트럭은 항구 승하선과 짐 이동, 비상 회수 용도로만 활용합니다.</p>
+            <div class="hero-actions">
+              <a class="btn primary" href="course.html">코스 보기</a>
+              <a class="btn" href="schedule.html">일정표</a>
+              <button class="btn" type="button" data-share></button>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-hidden="true">
+            <div class="route-board">
+              <svg viewBox="0 0 590 410">
+                <defs>
+                  <linearGradient id="islandGradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#c9fff2"/>
+                    <stop offset="100%" stop-color="#45e0c1"/>
+                  </linearGradient>
+                </defs>
+                <path d="M95 202c25-83 105-142 216-155 116-14 229 28 267 102 32 64 3 132-77 170-77 37-168 22-253 44-76 20-145-21-172-83-12-27-10-53 19-78Z" fill="#031e26" opacity=".5" transform="translate(0 18)"/>
+                <path d="M95 202c25-83 105-142 216-155 116-14 229 28 267 102 32 64 3 132-77 170-77 37-168 22-253 44-76 20-145-21-172-83-12-27-10-53 19-78Z" fill="url(#islandGradient)" stroke="rgba(255,255,255,.58)" stroke-width="3"/>
+                <path d="M297 71c-62 4-128 28-168 76-42 51-38 104 4 146 48 47 111 57 181 37 79-23 156-23 203-77 42-48 26-108-35-145-45-28-110-42-185-37Z" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 13"/>
+                <circle cx="286" cy="68" r="11" fill="#ffc85c" stroke="#fff" stroke-width="4"/>
+                <circle cx="111" cy="214" r="9" fill="#ff745f" stroke="#fff" stroke-width="4"/>
+                <circle cx="286" cy="350" r="9" fill="#45e0c1" stroke="#fff" stroke-width="4"/>
+                <circle cx="517" cy="252" r="9" fill="#ffc85c" stroke="#fff" stroke-width="4"/>
+              </svg>
+            </div>
+            <div class="scene-card port"><b>완도 → 제주</b><span>배편·차량 선적 확인</span></div>
+            <div class="scene-card team"><b>8명 라이딩</b><span>트럭은 지원 용도</span></div>
           </div>
         </div>
       </div>
@@ -50,33 +84,51 @@
       <div class="wrap">
         <div class="section-title">
           <div>
-            <p class="eyebrow">Pages</p>
-            <h2>공유용 페이지 구성</h2>
+            <p class="kicker">Dashboard</p>
+            <h2>여행 정보를 한눈에</h2>
           </div>
-          <p class="lead">필요한 정보가 섞이지 않도록 코스, 일정표, 실시간 확인, 출발·배편·복귀 운영안을 별도 페이지로 나눴습니다.</p>
+          <p class="lead">첨부 예시의 대시보드 느낌을 살려, 실제 팀 공유에 필요한 정보만 네 개의 화면으로 나눴습니다. 모바일에서는 화면 아래 패널에서 바로 이동할 수 있습니다.</p>
         </div>
 
         <div class="page-grid">
           <a class="page-card" href="course.html">
             <span>1</span>
             <h3>코스</h3>
-            <p>제주 전체 코스 지도, 네이버지도 맵, 일자별 구간 링크를 확인합니다.</p>
+            <p>제주 전체 코스, 네이버지도 맵, 일자별 구간 링크를 확인합니다.</p>
           </a>
           <a class="page-card" href="schedule.html">
             <span>2</span>
             <h3>일정표</h3>
-            <p>3일 라이딩 시간표, 체크포인트, 숙박 권역을 봅니다.</p>
+            <p>전체 3일 일정과 1일차, 2일차, 3일차 세부 일정을 골라 봅니다.</p>
           </a>
           <a class="page-card" href="live.html">
             <span>3</span>
             <h3>실시간 확인</h3>
-            <p>네이버지도, 배편, 기차편, 버스편, 기상 정보를 바로 확인합니다.</p>
+            <p>지도, 배편, 기차, 버스, 숙소, 기상 정보를 메뉴별로 확인합니다.</p>
           </a>
           <a class="page-card" href="transport.html">
             <span>4</span>
-            <h3>출발·배편·복귀</h3>
-            <p>전주 출발, 완도항 승선, 제주항 복귀 운영안을 정리합니다.</p>
+            <h3>운영안</h3>
+            <p>전주 출발, 완도항 승선, 제주항 복귀, 트럭 운영을 정리합니다.</p>
           </a>
+        </div>
+
+        <div class="ferry-board">
+          <div class="port-box">
+            <small>START</small>
+            <strong>전주 → 완도항</strong>
+            <p>트럭, 기차, 버스 조합으로 항구 접근</p>
+          </div>
+          <div class="sailing-line">
+            <b>FERRY CHECK</b>
+            <div class="line"></div>
+            <b>차량·자전거 선적</b>
+          </div>
+          <div class="port-box">
+            <small>RIDE</small>
+            <strong>제주항 → 제주 일주</strong>
+            <p>3일 연속 자전거 이동 후 제주항 복귀</p>
+          </div>
         </div>
       </div>
     </section>
@@ -84,7 +136,7 @@
 
   <footer>
     <div class="wrap">
-      <strong>제주도 2박 3일 자전거 여행 공유 페이지</strong>
+      <strong>제주도 2박 3일 자전거 여행 공유 웹앱</strong>
       <p>출발 전날 배편, 기상, 숙소 주차 및 자전거 보관을 다시 확인하세요.</p>
     </div>
   </footer>
