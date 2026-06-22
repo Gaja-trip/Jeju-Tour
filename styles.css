@@ -1777,18 +1777,32 @@ footer {
   z-index: 7;
   top: 20px;
   left: min(466px, calc(100vw - 140px));
-  min-height: 38px;
-  padding: 8px 12px;
+  width: 42px;
+  min-height: 42px;
+  padding: 0;
   border: 1px solid rgba(255,255,255,.58);
-  border-radius: 999px;
+  border-radius: 50%;
   background: rgba(6,24,32,.86);
   color: #fff;
-  font-size: .8rem;
+  font-size: 0;
   font-weight: 950;
   box-shadow: var(--shadow-dark);
   backdrop-filter: blur(12px);
   cursor: pointer;
   transition: left .24s ease, bottom .24s ease, transform .24s ease;
+}
+
+.route-panel-float-toggle::before {
+  content: "‹";
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.route-map-shell.panel-collapsed .route-panel-float-toggle::before {
+  content: "›";
 }
 
 .route-map-shell.panel-collapsed .route-map-panel {
@@ -1808,26 +1822,33 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
 
 .route-panel-top .brand {
-  font-size: .95rem;
+  flex: 0 0 auto;
+  font-size: .84rem;
+  white-space: nowrap;
 }
 
 .panel-nav {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
+  gap: 4px;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .panel-nav a,
 .panel-nav button {
   min-height: 32px;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  padding: 6px 9px;
+  padding: 6px 5px;
   border: 0;
   border-radius: 999px;
   background: #eef4f1;
@@ -1871,10 +1892,19 @@ footer {
 .route-map-days {
   margin-bottom: 0;
   border-radius: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex-wrap: nowrap;
 }
 
 .route-map-days button {
-  flex: 1 1 70px;
+  min-width: 0;
+  width: 100%;
+  padding-inline: 6px;
+}
+
+.route-map-days[data-overlay-schedule-tabs] {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .map-tool-row {
@@ -1930,6 +1960,77 @@ footer {
   background: #fff;
 }
 
+.learning-card {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid rgba(6,24,32,.08);
+  border-radius: 16px;
+  background: #f9fbf4;
+}
+
+.learning-card:empty {
+  display: none;
+}
+
+.learning-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.learning-head strong {
+  color: var(--ink);
+  font-size: .86rem;
+  text-align: right;
+}
+
+.learning-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.learning-stats div {
+  padding: 8px 6px;
+  border-radius: 12px;
+  background: #e8f8f4;
+  text-align: center;
+}
+
+.learning-stats strong,
+.learning-stats span {
+  display: block;
+}
+
+.learning-stats strong {
+  color: var(--ocean);
+  font-size: .9rem;
+}
+
+.learning-stats span,
+.learning-card p {
+  color: var(--muted);
+  font-size: .73rem;
+  font-weight: 850;
+}
+
+.learned-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.learned-chip-row span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: #52656a;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
 .route-result-card h2 {
   font-size: 1.45rem;
 }
@@ -1953,6 +2054,54 @@ footer {
 .overlay-card-list {
   display: grid;
   gap: 12px;
+}
+
+.plan-food-section,
+.restaurant-list {
+  display: grid;
+  gap: 10px;
+}
+
+.plan-food-section h3 {
+  font-size: 1.05rem;
+}
+
+.restaurant-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(6,24,32,.08);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.restaurant-card > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.restaurant-card strong,
+.restaurant-card span {
+  display: block;
+}
+
+.restaurant-card span,
+.restaurant-card p {
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.restaurant-card em {
+  justify-self: start;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff3c4;
+  color: #7a3d00;
+  font-style: normal;
+  font-size: .78rem;
+  font-weight: 950;
 }
 
 .route-map-panel .day-card,
@@ -2283,10 +2432,19 @@ footer {
     transform: translateX(-50%);
   }
 
+  .route-panel-float-toggle::before {
+    content: "⌄";
+    font-size: 1.35rem;
+  }
+
   .route-map-shell.panel-collapsed .route-panel-float-toggle {
     left: 50%;
     bottom: 12px;
     transform: translateX(-50%);
+  }
+
+  .route-map-shell.panel-collapsed .route-panel-float-toggle::before {
+    content: "⌃";
   }
 
   .sheet-handle {
@@ -2319,7 +2477,7 @@ footer {
 
   .panel-nav {
     justify-content: flex-end;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .route-panel-heading h1 {
