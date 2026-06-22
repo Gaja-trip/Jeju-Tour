@@ -2,7 +2,9 @@ const storageKeys = {
   routePlan: "jeju-bike-route-plan-v2",
   activeDay: "jeju-bike-active-day-v2",
   transport: "jeju-bike-transport-v2",
-  tripDate: "jeju-bike-trip-date"
+  tripDate: "jeju-bike-trip-date",
+  ferryOutboundDate: "jeju-bike-ferry-outbound-date",
+  ferryReturnDate: "jeju-bike-ferry-return-date"
 };
 
 const dayLabels = {
@@ -155,6 +157,366 @@ const jejuRestaurants = [
     lng: 126.9338,
     sentiment: 83,
     summary: "성산 숙박일 저녁 또는 아침 식사 후보로 넣기 좋은 위치입니다."
+  },
+  {
+    name: "고집돌우럭 중문점",
+    area: "중문",
+    category: "우럭조림",
+    lat: 33.2507,
+    lng: 126.4120,
+    sentiment: 82,
+    summary: "중문 숙박일 저녁 식사 후보입니다. 단체 식사 동선으로 잡기 좋습니다."
+  },
+  {
+    name: "칠돈가 본점",
+    area: "제주시",
+    category: "흑돼지",
+    lat: 33.5035,
+    lng: 126.5059,
+    sentiment: 81,
+    summary: "제주시권 흑돼지 저녁 후보입니다. 첫날 또는 복귀 전 식사로 붙이기 좋습니다."
+  },
+  {
+    name: "늘봄흑돼지",
+    area: "제주시",
+    category: "흑돼지",
+    lat: 33.4815,
+    lng: 126.4874,
+    sentiment: 80,
+    summary: "단체 좌석을 확인해볼 만한 제주시 흑돼지 후보입니다."
+  },
+  {
+    name: "흑돈가 제주본점",
+    area: "제주시",
+    category: "흑돼지",
+    lat: 33.4800,
+    lng: 126.4850,
+    sentiment: 79,
+    summary: "공항·제주시 숙박권 저녁 동선에 넣기 쉬운 흑돼지 후보입니다."
+  },
+  {
+    name: "순옥이네명가",
+    area: "도두",
+    category: "전복물회/전복죽",
+    lat: 33.5064,
+    lng: 126.4674,
+    sentiment: 78,
+    summary: "도두·이호테우 부근 해산물 점심 후보입니다."
+  },
+  {
+    name: "도두해녀의집",
+    area: "도두",
+    category: "물회/성게미역국",
+    lat: 33.5068,
+    lng: 126.4695,
+    sentiment: 77,
+    summary: "제주시 서쪽 해안 이동 중 해산물 식사 후보로 보기 좋습니다."
+  },
+  {
+    name: "제주김만복 본점",
+    area: "제주시",
+    category: "전복김밥",
+    lat: 33.5005,
+    lng: 126.5241,
+    sentiment: 76,
+    summary: "간단한 포장 보급이나 이동 전 간식 후보로 쓰기 좋습니다."
+  },
+  {
+    name: "삼보식당",
+    area: "서귀포",
+    category: "해물뚝배기",
+    lat: 33.2473,
+    lng: 126.5614,
+    sentiment: 75,
+    summary: "서귀포 시내 숙박권에서 해물뚝배기 후보로 확인하기 좋습니다."
+  },
+  {
+    name: "네거리식당",
+    area: "서귀포",
+    category: "갈치조림",
+    lat: 33.2502,
+    lng: 126.5657,
+    sentiment: 74,
+    summary: "서귀포권 갈치조림 후보입니다. 남부 라이딩 종료 후 저녁으로 맞습니다."
+  },
+  {
+    name: "천짓골식당",
+    area: "서귀포",
+    category: "돔베고기",
+    lat: 33.2477,
+    lng: 126.5594,
+    sentiment: 73,
+    summary: "서귀포 시내 돔베고기 후보입니다. 고단백 저녁 식사로 좋습니다."
+  },
+  {
+    name: "쌍둥이횟집",
+    area: "서귀포",
+    category: "회/해산물",
+    lat: 33.2452,
+    lng: 126.5638,
+    sentiment: 72,
+    summary: "서귀포권 회식형 저녁 후보입니다. 8명은 예약 가능 여부를 확인하세요."
+  },
+  {
+    name: "미영이네식당",
+    area: "모슬포",
+    category: "고등어회",
+    lat: 33.2176,
+    lng: 126.2491,
+    sentiment: 71,
+    summary: "모슬포·대정권 숙박일 저녁 후보로 넣기 좋은 고등어회 식당입니다."
+  },
+  {
+    name: "덕승식당",
+    area: "모슬포",
+    category: "갈치/생선요리",
+    lat: 33.2189,
+    lng: 126.2504,
+    sentiment: 70,
+    summary: "모슬포항 근처 생선요리 후보입니다. 1일차 서부 종료 후 동선이 좋습니다."
+  },
+  {
+    name: "산방식당",
+    area: "대정",
+    category: "밀면/수육",
+    lat: 33.2208,
+    lng: 126.2520,
+    sentiment: 69,
+    summary: "대정권에서 가볍게 먹기 좋은 식사 후보입니다."
+  },
+  {
+    name: "안녕협재씨",
+    area: "협재",
+    category: "딱새우장/해산물",
+    lat: 33.3940,
+    lng: 126.2390,
+    sentiment: 68,
+    summary: "협재·금능 구간 점심 후보입니다. 해안 경유와 연결하기 쉽습니다."
+  },
+  {
+    name: "수우동",
+    area: "협재",
+    category: "우동/일식",
+    lat: 33.3946,
+    lng: 126.2396,
+    sentiment: 67,
+    summary: "서부 해안 구간에서 면 요리 후보로 확인할 만합니다."
+  },
+  {
+    name: "협재칼국수",
+    area: "협재",
+    category: "칼국수",
+    lat: 33.3931,
+    lng: 126.2398,
+    sentiment: 66,
+    summary: "바람이 강한 날 따뜻한 점심 후보로 무난합니다."
+  },
+  {
+    name: "곰막식당",
+    area: "구좌",
+    category: "회국수/성게국수",
+    lat: 33.5310,
+    lng: 126.8550,
+    sentiment: 65,
+    summary: "구좌 해안 동선에서 가볍게 넣기 좋은 국수·해산물 후보입니다."
+  },
+  {
+    name: "해월정",
+    area: "구좌",
+    category: "보말죽/해산물",
+    lat: 33.5328,
+    lng: 126.8472,
+    sentiment: 64,
+    summary: "동부 해안에서 따뜻한 한 끼가 필요할 때 확인할 만합니다."
+  },
+  {
+    name: "소금바치순이네",
+    area: "구좌",
+    category: "돌문어볶음",
+    lat: 33.5259,
+    lng: 126.8587,
+    sentiment: 63,
+    summary: "동부 구간 매콤한 식사 후보입니다. 라이딩 전후 위장 부담은 조절하세요."
+  },
+  {
+    name: "벵디",
+    area: "구좌",
+    category: "문어덮밥",
+    lat: 33.5325,
+    lng: 126.8421,
+    sentiment: 62,
+    summary: "구좌권 점심 후보입니다. 대기와 영업일 확인이 필요합니다."
+  },
+  {
+    name: "상춘재",
+    area: "조천",
+    category: "비빔밥/정식",
+    lat: 33.5390,
+    lng: 126.6682,
+    sentiment: 61,
+    summary: "함덕·조천 구간에서 정식류 식사를 원할 때 후보로 좋습니다."
+  },
+  {
+    name: "오조해녀의집",
+    area: "성산",
+    category: "전복죽/해녀식",
+    lat: 33.4674,
+    lng: 126.9146,
+    sentiment: 60,
+    summary: "성산권 아침 또는 점심 후보입니다. 해안 동선과 잘 맞습니다."
+  },
+  {
+    name: "맛나식당",
+    area: "성산",
+    category: "갈치조림",
+    lat: 33.4623,
+    lng: 126.9324,
+    sentiment: 59,
+    summary: "성산권 갈치조림 후보입니다. 회전율과 대기 시간을 확인하세요."
+  },
+  {
+    name: "가시아방국수",
+    area: "성산",
+    category: "고기국수",
+    lat: 33.4494,
+    lng: 126.9160,
+    sentiment: 58,
+    summary: "성산권에서 고기국수를 먹고 싶을 때 넣기 좋은 후보입니다."
+  },
+  {
+    name: "해녀촌",
+    area: "구좌",
+    category: "회국수",
+    lat: 33.5420,
+    lng: 126.8376,
+    sentiment: 57,
+    summary: "세화·구좌 해안 구간에서 회국수 후보로 많이 찾는 곳입니다."
+  },
+  {
+    name: "월정리갈비밥",
+    area: "월정리",
+    category: "갈비밥",
+    lat: 33.5569,
+    lng: 126.7955,
+    sentiment: 56,
+    summary: "월정리 해안 경유 중 든든한 점심 후보로 확인할 만합니다."
+  },
+  {
+    name: "평대스낵",
+    area: "평대",
+    category: "분식/튀김",
+    lat: 33.5329,
+    lng: 126.8385,
+    sentiment: 55,
+    summary: "동부 해안 라이딩 중 간식성 보급 후보입니다."
+  },
+  {
+    name: "남양수산",
+    area: "성산",
+    category: "회/해산물",
+    lat: 33.4614,
+    lng: 126.9285,
+    sentiment: 54,
+    summary: "성산권 회·해산물 저녁 후보입니다. 단체 방문 전 좌석을 확인하세요."
+  },
+  {
+    name: "모닥식탁",
+    area: "함덕",
+    category: "제주가정식",
+    lat: 33.5420,
+    lng: 126.6652,
+    sentiment: 53,
+    summary: "함덕 숙박 또는 동부 복귀 구간에서 편하게 볼 수 있는 식사 후보입니다."
+  },
+  {
+    name: "고집돌우럭 함덕점",
+    area: "함덕",
+    category: "우럭조림",
+    lat: 33.5425,
+    lng: 126.6679,
+    sentiment: 52,
+    summary: "함덕권 단체 식사 후보입니다. 계획표의 동부 복귀일과 잘 맞습니다."
+  },
+  {
+    name: "대우정",
+    area: "제주시",
+    category: "전복돌솥밥",
+    lat: 33.5113,
+    lng: 126.5250,
+    sentiment: 51,
+    summary: "제주시내 전복돌솥밥 후보입니다. 항구 복귀 전후 동선이 좋습니다."
+  },
+  {
+    name: "어우늘",
+    area: "제주시",
+    category: "전복돌솥밥/해산물",
+    lat: 33.5066,
+    lng: 126.5313,
+    sentiment: 50,
+    summary: "제주시권 해산물 식사 후보로 확인해볼 만합니다."
+  },
+  {
+    name: "용출횟집",
+    area: "제주시",
+    category: "회/해산물",
+    lat: 33.5165,
+    lng: 126.5180,
+    sentiment: 49,
+    summary: "제주항 가까운 회·해산물 후보입니다. 복귀 전 저녁 동선으로 맞습니다."
+  },
+  {
+    name: "바다풍경",
+    area: "제주시",
+    category: "해물탕/해산물",
+    lat: 33.5168,
+    lng: 126.5190,
+    sentiment: 48,
+    summary: "제주항권 해산물 식사 후보입니다. 영업시간과 예약 가능 여부를 확인하세요."
+  },
+  {
+    name: "만선식당",
+    area: "서귀포",
+    category: "생선구이/해산물",
+    lat: 33.2489,
+    lng: 126.5622,
+    sentiment: 47,
+    summary: "서귀포 시내권 생선구이 후보입니다. 2일차 남부 구간과 잘 붙습니다."
+  },
+  {
+    name: "덕성원",
+    area: "서귀포",
+    category: "중식/게짬뽕",
+    lat: 33.2475,
+    lng: 126.5628,
+    sentiment: 46,
+    summary: "서귀포권 색다른 식사 후보입니다. 매운 음식은 라이딩 컨디션에 맞춰 선택하세요."
+  },
+  {
+    name: "제주분식",
+    area: "제주시",
+    category: "분식/모닥치기",
+    lat: 33.5117,
+    lng: 126.5260,
+    sentiment: 45,
+    summary: "동문시장·제주시내 간단 식사 후보입니다."
+  },
+  {
+    name: "동문시장 야시장",
+    area: "제주시",
+    category: "시장/간식",
+    lat: 33.5117,
+    lng: 126.5260,
+    sentiment: 44,
+    summary: "복귀 전 가볍게 여러 메뉴를 나눠 먹기 좋은 시장 후보입니다."
+  },
+  {
+    name: "우도 로뎀가든",
+    area: "우도",
+    category: "한라산볶음밥",
+    lat: 33.5050,
+    lng: 126.9525,
+    sentiment: 43,
+    summary: "우도 추가 일정이 생길 때만 넣는 보너스 후보입니다. 배편과 자전거 반입 조건을 확인하세요."
   }
 ];
 
@@ -477,6 +839,83 @@ function getSelectedTransportId() {
   return transportOptions.some((option) => option.id === saved) ? saved : "truck-ferry";
 }
 
+function getFerryDates() {
+  return {
+    outbound: readStorage(storageKeys.ferryOutboundDate) || "",
+    returnDate: readStorage(storageKeys.ferryReturnDate) || ""
+  };
+}
+
+function ferrySearchQuery(direction, date) {
+  const route = direction === "return"
+    ? "제주항 목포항 배편"
+    : "목포항 제주항 배편";
+  return `${route} ${date || ""} 자전거 선적 씨월드고속훼리`.trim();
+}
+
+function ferrySearchUrl(direction, date) {
+  return naverSearchUrl(ferrySearchQuery(direction, date));
+}
+
+function renderFerrySearchPanel() {
+  const dates = getFerryDates();
+  return `
+    <article class="ferry-search-card">
+      <div class="ferry-search-head">
+        <span class="tag">목포항 ↔ 제주항 왕복</span>
+        <h3>배편 날짜 검색</h3>
+      </div>
+      <div class="ferry-date-row">
+        <label class="ferry-date-field">
+          <span>출발일</span>
+          <input type="date" value="${dates.outbound}" data-ferry-date="outbound" aria-label="목포항에서 제주항 출발일">
+        </label>
+        <label class="ferry-date-field">
+          <span>도착일</span>
+          <input type="date" value="${dates.returnDate}" data-ferry-date="return" aria-label="제주항에서 목포항 복귀일">
+        </label>
+      </div>
+      <div class="source-list ferry-source-list">
+        <a class="btn dark small" target="_blank" rel="noreferrer" href="${ferrySearchUrl("outbound", dates.outbound)}" data-ferry-link="outbound">목포→제주 검색</a>
+        <a class="btn light small" target="_blank" rel="noreferrer" href="${ferrySearchUrl("return", dates.returnDate)}" data-ferry-link="return">제주→목포 검색</a>
+        <a class="btn light small" target="_blank" rel="noreferrer" href="https://www.seaferry.co.kr/">씨월드 예매</a>
+      </div>
+      <p class="route-source-note">선박 시간, 자전거 선적, 터미널 도착 마감은 운항사 공지 기준으로 최종 확인하세요.</p>
+    </article>
+  `;
+}
+
+function setupFerrySearchPanel(scope = document) {
+  const root = scope.querySelector("[data-ferry-search]");
+  if (!root) return;
+  const isReady = root.dataset.ferryReady === "true";
+  root.innerHTML = renderFerrySearchPanel();
+
+  const updateLinks = () => {
+    const outbound = root.querySelector('[data-ferry-date="outbound"]')?.value || "";
+    const returnDate = root.querySelector('[data-ferry-date="return"]')?.value || "";
+    const outboundLink = root.querySelector('[data-ferry-link="outbound"]');
+    const returnLink = root.querySelector('[data-ferry-link="return"]');
+    if (outboundLink) outboundLink.href = ferrySearchUrl("outbound", outbound);
+    if (returnLink) returnLink.href = ferrySearchUrl("return", returnDate);
+  };
+
+  if (!isReady) {
+    root.addEventListener("change", (event) => {
+      const input = event.target.closest("[data-ferry-date]");
+      if (!input) return;
+      const key = input.dataset.ferryDate === "return"
+        ? storageKeys.ferryReturnDate
+        : storageKeys.ferryOutboundDate;
+      writeStorage(key, input.value);
+      updateLinks();
+    });
+    root.dataset.ferryReady = "true";
+  }
+  updateLinks();
+  setupNaverMapLinks(root);
+}
+
 function getRequestedDay() {
   const params = new URLSearchParams(window.location.search);
   const day = params.get("day") || params.get("route");
@@ -550,7 +989,7 @@ function mapRouteSegment(dayId, savedRoute) {
     rideTime: savedRoute.rideTime || "지도 기준",
     stops,
     query: `${stops.join(" ")} 자전거길`,
-    summary: `${savedRoute.sourceName || "제주 환상 자전거길 GPX"} 기준으로 선택한 출발/도착 지점을 트랙에 맞춰 자동 생성한 코스입니다. 예상 상승 ${ascent}m, 하강 ${descent}m입니다. ${savedRoute.elevationSource || ""}`,
+    summary: `선택한 출발/도착 지점을 기준으로 자동 생성한 코스입니다. 예상 상승 ${ascent}m, 하강 ${descent}m입니다.`,
     metrics: [
       { value: distance ? `${distance.toFixed(1)}km` : "지도", label: "예상 거리" },
       { value: `${ascent}m`, label: "상승 고도" },
@@ -622,8 +1061,77 @@ function renderMetrics(metrics) {
   return metrics.map((metric) => `<div class="mini-metric"><strong>${metric.value}</strong><span>${metric.label}</span></div>`).join("");
 }
 
+function cleanPlaceName(value = "") {
+  return String(value)
+    .split(/[\/,>|·]/)[0]
+    .replace(/\([^)]*\)/g, "")
+    .trim();
+}
+
+function compactPlaceName(value = "") {
+  return cleanPlaceName(value)
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[-_]/g, "");
+}
+
+function elevationForPlaceName(placeName) {
+  const compact = compactPlaceName(placeName);
+  if (!compact) return null;
+  const match = jejuRoutePlaces.find((place) => {
+    const names = [place.name, ...(place.aliases || [])];
+    return names.some((name) => {
+      const candidate = compactPlaceName(name);
+      return candidate && (candidate.includes(compact) || compact.includes(candidate));
+    });
+  });
+  return Number.isFinite(match?.elevation) ? Math.round(match.elevation) : null;
+}
+
+function enrichScheduleLegs(segment) {
+  const schedule = Array.isArray(segment.schedule) ? segment.schedule : [];
+  const knownDistance = distanceValueKm(segment.distance);
+  const fallbackLegDistance = Number.isFinite(knownDistance) && schedule.length > 1
+    ? knownDistance / (schedule.length - 1)
+    : null;
+
+  return schedule.map((stop, index) => {
+    const distance = Number.isFinite(stop.distanceKm)
+      ? stop.distanceKm
+      : index === 0
+        ? 0
+        : fallbackLegDistance;
+    const elevation = Number.isFinite(stop.elevationM)
+      ? stop.elevationM
+      : elevationForPlaceName(stop.place);
+
+    return {
+      ...stop,
+      distanceKm: Number.isFinite(distance) ? distance : null,
+      elevationM: Number.isFinite(elevation) ? elevation : null
+    };
+  });
+}
+
+function renderStopMeta(stop, index) {
+  const meta = [];
+  if (Number.isFinite(stop.distanceKm)) {
+    meta.push(index === 0 ? "출발" : `이동 ${formatDistanceKm(stop.distanceKm)}`);
+  }
+  if (Number.isFinite(stop.elevationM)) {
+    meta.push(`예상 고도 ${Math.round(stop.elevationM)}m`);
+  }
+  return meta.length ? `<span class="stop-meta">${meta.join(" · ")}</span>` : "";
+}
+
 function renderTimeline(schedule) {
-  return schedule.map((stop) => `<div class="stop"><strong>${stop.time} · ${stop.place}</strong> ${stop.detail}</div>`).join("");
+  return schedule.map((stop, index) => `
+    <div class="stop">
+      <strong>${stop.time} · ${stop.place}</strong>
+      ${renderStopMeta(stop, index)}
+      <p>${stop.detail}</p>
+    </div>
+  `).join("");
 }
 
 function renderScheduleCard(segment, compact = false) {
@@ -640,7 +1148,7 @@ function renderScheduleCard(segment, compact = false) {
         ${segment.accessDistanceKm ? `<p class="route-source-note">숙소/장소 접속 구간 약 ${segment.accessDistanceKm.toFixed(1)}km 포함</p>` : ""}
         ${hasMappedPath ? elevationSvg(segment) : ""}
         <div class="checkpoint-flow">${segment.stops.map((stop) => `<span>${stop}</span>`).join("")}</div>
-        <div class="timeline">${renderTimeline(segment.schedule)}</div>
+        <div class="timeline">${renderTimeline(enrichScheduleLegs(segment))}</div>
         ${compact ? `<div class="action-list selected-actions"><a class="btn dark small" href="schedule.html?day=${segment.id}">일정표 연동 보기</a><a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(segment.query)}" data-naver-map data-naver-query="${segment.query}" data-web-url="${naverSearchUrl(segment.query)}">네이버지도 열기</a></div>` : ""}
       </div>
     </article>
@@ -654,7 +1162,7 @@ function renderCourseDetail(segment) {
     <p>${segment.summary}</p>
     <div class="metric-row">${renderMetrics(segment.metrics)}</div>
     <div class="checkpoint-flow">${segment.stops.map((stop) => `<span>${stop}</span>`).join("")}</div>
-    <div class="timeline">${renderTimeline(segment.schedule)}</div>
+    <div class="timeline">${renderTimeline(enrichScheduleLegs(segment))}</div>
     <div class="action-list selected-actions">
       <a class="btn dark small" href="schedule.html?day=${segment.id}">이 코스로 일정표 보기</a>
       <a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(segment.query)}" data-naver-map data-naver-query="${segment.query}" data-web-url="${naverSearchUrl(segment.query)}">네이버지도 열기</a>
@@ -805,7 +1313,7 @@ function getLearnedCyclingNetwork() {
   const points = route.points;
   if (!points.length) {
     learnedCyclingNetwork = {
-      sourceName: "GPX 없음",
+    sourceName: "기본 자전거 경로",
       routeCount: 0,
       pointCount: 0,
       totalDistanceKm: 0,
@@ -944,6 +1452,47 @@ function pathDistance(nodes) {
   return nodes.slice(1).reduce((sum, node, index) => sum + distanceKm(nodes[index], node), 0);
 }
 
+function interpolatePoint(start, end, ratio, name) {
+  const elevation = Number(start.elevation || 0) + (Number(end.elevation || 0) - Number(start.elevation || 0)) * ratio;
+  return {
+    lat: start.lat + (end.lat - start.lat) * ratio,
+    lng: start.lng + (end.lng - start.lng) * ratio,
+    elevation,
+    name
+  };
+}
+
+function buildRoadLikeConnector(start, end, label = "도로 접속 경로") {
+  const directDistance = distanceKm(start, end);
+  if (directDistance < 0.03) return [start, end];
+
+  const lngFirst = Math.abs(end.lng - start.lng) >= Math.abs(end.lat - start.lat);
+  const elbowA = lngFirst
+    ? { ...interpolatePoint(start, end, 0.45, label), lat: start.lat }
+    : { ...interpolatePoint(start, end, 0.45, label), lng: start.lng };
+  const elbowB = lngFirst
+    ? { ...interpolatePoint(start, end, 0.70, label), lng: end.lng }
+    : { ...interpolatePoint(start, end, 0.70, label), lat: end.lat };
+  const controls = [start, elbowA, elbowB, end]
+    .filter((point, index, array) => index === 0 || distanceKm(array[index - 1], point) > 0.01);
+  const path = [];
+
+  controls.slice(1).forEach((point, index) => {
+    const previous = controls[index];
+    const segments = Math.max(1, Math.ceil(distanceKm(previous, point) / 0.35));
+    for (let step = 0; step <= segments; step += 1) {
+      if (path.length && step === 0) continue;
+      const ratio = step / segments;
+      const generated = interpolatePoint(previous, point, ratio, label);
+      if (step === 0) path.push(previous);
+      else if (step === segments) path.push(point);
+      else path.push(generated);
+    }
+  });
+
+  return path.length ? path : [start, end];
+}
+
 function circularPath(startIndex, endIndex, direction) {
   const result = [];
   let index = startIndex;
@@ -992,10 +1541,12 @@ function buildFallbackBikeRoute(startPoint, endPoint) {
   const forward = circularPath(startNode.index, endNode.index, "forward");
   const backward = circularPath(startNode.index, endNode.index, "backward");
   const loopNodes = pathDistance(forward) <= pathDistance(backward) ? forward : backward;
+  const startActual = { ...startPoint, name: `출발지(${startNode.name} 인근)`, elevation: startNode.elevation };
+  const endActual = { ...endPoint, name: `도착지(${endNode.name} 인근)`, elevation: endNode.elevation };
   const path = [
-    { ...startPoint, name: `출발지(${startNode.name} 인근)`, elevation: startNode.elevation },
-    ...loopNodes,
-    { ...endPoint, name: `도착지(${endNode.name} 인근)`, elevation: endNode.elevation }
+    ...buildRoadLikeConnector(startActual, loopNodes[0], "도로 접속 경로"),
+    ...loopNodes.slice(1),
+    ...buildRoadLikeConnector(loopNodes[loopNodes.length - 1], endActual, "도로 이탈 경로").slice(1)
   ];
   const distance = pathDistance(path);
   let ascent = 0;
@@ -1007,8 +1558,7 @@ function buildFallbackBikeRoute(startPoint, endPoint) {
     if (delta < 0) descent += Math.abs(delta);
   });
 
-  const accessDistanceKm = (start.accessDistanceKm || 0) + (end.accessDistanceKm || 0);
-  const result = {
+  return {
     path,
     distanceKm: distance,
     ascentM: ascent,
@@ -1016,7 +1566,10 @@ function buildFallbackBikeRoute(startPoint, endPoint) {
     startName: path[0].name,
     endName: path[path.length - 1].name,
     stops: path.map((point) => point.name),
-    waypoints: path
+    waypoints: path,
+    sourceName: "기본 자전거 경로",
+    elevationSource: "장소 기준 추정 고도",
+    accessDistanceKm: 0
   };
 }
 
@@ -1042,7 +1595,7 @@ function buildBikeRoute(startPoint, endPoint, direction = "auto") {
   const sliced = sliceGpxPath(start.routeIndex, end.routeIndex, direction);
   const mainPath = sliced.path.map((point, index) => ({
     ...point,
-    name: index === 0 ? `GPX 접속(${start.placeName})` : index === sliced.path.length - 1 ? `GPX 이탈(${end.placeName})` : "GPX 트랙"
+    name: index === 0 ? `주 경로 접속(${start.placeName})` : index === sliced.path.length - 1 ? `주 경로 이탈(${end.placeName})` : "주 경로"
   }));
   const startActual = {
     lat: start.actualLat,
@@ -1060,10 +1613,12 @@ function buildBikeRoute(startPoint, endPoint, direction = "auto") {
     name: `도착지(${end.placeName})`,
     access: true
   };
+  const startConnector = buildRoadLikeConnector(startActual, mainPath[0], "도로 접속 경로");
+  const endConnector = buildRoadLikeConnector(mainPath[mainPath.length - 1], endActual, "도로 이탈 경로");
   const path = [
-    startActual,
-    ...mainPath,
-    endActual
+    ...startConnector,
+    ...mainPath.slice(1),
+    ...endConnector.slice(1)
   ].filter((point, index, array) => index === 0 || distanceKm(array[index - 1], point) > 0.005);
   const distance = pathDistance(path);
   let ascent = 0;
@@ -1078,7 +1633,7 @@ function buildBikeRoute(startPoint, endPoint, direction = "auto") {
   const placeStops = routePlacesOnPath(start.routeIndex, end.routeIndex, sliced.direction);
   const waypoints = [
     startActual,
-    ...(start.accessDistanceKm > 0.3 ? [{ ...mainPath[0], name: `GPX 본선 접속(${start.placeName} 인근)` }] : []),
+    ...(start.accessDistanceKm > 0.3 ? [{ ...mainPath[0], name: `주 경로 접속(${start.placeName} 인근)` }] : []),
     ...placeStops.map((place) => ({
       lat: place.lat,
       lng: place.lng,
@@ -1086,7 +1641,7 @@ function buildBikeRoute(startPoint, endPoint, direction = "auto") {
       routeIndex: place.routeIndex,
       name: place.name
     })),
-    ...(end.accessDistanceKm > 0.3 ? [{ ...mainPath[mainPath.length - 1], name: `GPX 본선 이탈(${end.placeName} 인근)` }] : []),
+    ...(end.accessDistanceKm > 0.3 ? [{ ...mainPath[mainPath.length - 1], name: `주 경로 이탈(${end.placeName} 인근)` }] : []),
     endActual
   ];
 
@@ -1102,7 +1657,7 @@ function buildBikeRoute(startPoint, endPoint, direction = "auto") {
     waypoints,
     direction: sliced.direction,
     sourceName: route.name,
-    elevationSource: route.hasGpxElevation ? "GPX 고도" : "GPX 고도값 없음 · 장소 기준 추정",
+    elevationSource: route.hasGpxElevation ? "예상 고도" : "장소 기준 추정 고도",
     accessDistanceKm
   };
   result.learnedMatch = learnedMatchPercent(result);
@@ -1130,16 +1685,19 @@ function routeCheckpoints(route) {
   let accumulated = 0;
 
   return points.map((point, index) => {
-    if (index > 0) accumulated += distanceKm(points[index - 1], point);
+    const legDistance = index > 0 ? distanceKm(points[index - 1], point) : 0;
+    if (index > 0) accumulated += legDistance;
     const minutes = Math.round(accumulated / total * Math.max(60, route.distanceKm / 15 * 60));
     return {
       time: index === 0 ? "08:30" : addMinutesToTime(8, 30, minutes),
       place: point.name,
+      distanceKm: legDistance,
+      elevationM: Number.isFinite(point.elevation) ? Math.round(point.elevation) : null,
       detail: index === 0
         ? "출발 전 장비 점검"
         : index === points.length - 1
           ? "도착 후 숙소/항구 동선 확인"
-          : point.name.includes("GPX 본선")
+          : point.name.includes("주 경로")
             ? `접속 구간 포함, 예상 고도 ${Math.round(point.elevation)}m`
             : `예상 고도 ${Math.round(point.elevation)}m`
     };
@@ -1149,7 +1707,10 @@ function routeCheckpoints(route) {
 function elevationSvg(route) {
   if (!route || !route.path.length) return "";
   const width = 360;
-  const height = 120;
+  const height = 140;
+  const labelHeight = 52;
+  const chartBottom = 14;
+  const chartHeight = height - labelHeight - chartBottom;
   const step = Math.max(1, Math.ceil(route.path.length / 160));
   const profilePoints = route.path.filter((point, index) => index % step === 0 || index === route.path.length - 1);
   const elevations = profilePoints.map((point) => point.elevation);
@@ -1158,7 +1719,7 @@ function elevationSvg(route) {
   const range = Math.max(1, max - min);
   const points = elevations.map((elevation, index) => {
     const x = profilePoints.length === 1 ? 0 : index / (profilePoints.length - 1) * width;
-    const y = height - ((elevation - min) / range * (height - 22) + 11);
+    const y = labelHeight + chartHeight - ((elevation - min) / range * chartHeight);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(" ");
 
@@ -1183,7 +1744,6 @@ function setupVWorldRouteEditor() {
   const saveButton = root.querySelector("[data-map-save]");
   const resultTarget = root.querySelector("[data-map-result]");
   const statusTarget = root.querySelector("[data-map-status]");
-  const learningTarget = root.querySelector("[data-learning-summary]");
   const placeInput = root.querySelector("[data-place-search]");
   const placeList = root.querySelector("[data-place-list]");
   const placeApplyButtons = root.querySelectorAll("[data-place-apply]");
@@ -1288,7 +1848,7 @@ function setupVWorldRouteEditor() {
       resultTarget.innerHTML = `
         <span class="tag">대기</span>
         <h2>코스를 선택하세요</h2>
-        <p>출발지와 도착지를 선택하면 GPX 기준 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
+        <p>출발지와 도착지를 선택하면 거리, 예상 고도, 세부 경유지가 표시됩니다.</p>
       `;
       saveButton.disabled = true;
       return;
@@ -1304,10 +1864,8 @@ function setupVWorldRouteEditor() {
         <div><strong>${estimatedRideTime(calculatedRoute.distanceKm)}</strong><span>예상 주행</span></div>
       </div>
       ${elevationSvg(calculatedRoute)}
-      <p class="route-source-note">${calculatedRoute.sourceName || "제주 환상 자전거길 GPX"} · ${calculatedRoute.elevationSource || "예상 고도"}</p>
-      <p class="route-source-note">학습 경로 일치 ${calculatedRoute.learnedMatch || learnedMatchPercent(calculatedRoute)}% · 접속 구간 ${Number(calculatedRoute.accessDistanceKm || 0).toFixed(1)}km</p>
       <div class="checkpoint-flow">${calculatedRoute.stops.map((stop) => `<span>${stop}</span>`).join("")}</div>
-      <div class="timeline">${checkpoints.map((item) => `<div class="stop"><strong>${item.time} · ${item.place}</strong> ${item.detail}</div>`).join("")}</div>
+      <div class="timeline">${renderTimeline(checkpoints)}</div>
     `;
     saveButton.disabled = false;
   };
@@ -1423,6 +1981,7 @@ function setupVWorldRouteEditor() {
     const selectedId = getSelectedTransportId();
     const selected = transportOptions.find((option) => option.id === selectedId) || transportOptions[0];
     overlayTransport.innerHTML = `
+      <div data-ferry-search></div>
       <article class="route-result-card">
         <span class="tag">확정 교통편</span>
         <h2>${selected.title}</h2>
@@ -1431,6 +1990,7 @@ function setupVWorldRouteEditor() {
       </article>
       <div class="overlay-card-list">${transportOptions.map((option) => renderTransportChoice(option, option.id === selectedId)).join("")}</div>
     `;
+    setupFerrySearchPanel(overlayTransport);
     setupNaverMapLinks(overlayTransport);
   };
 
@@ -1459,8 +2019,11 @@ function setupVWorldRouteEditor() {
         ${segments.map((segment) => renderScheduleCard(segment)).join("")}
       </div>
       <section class="plan-food-section">
-        <h3>맛집 후보</h3>
-        <p class="route-source-note">지도 마커와 함께 확인하세요. 평판 점수는 공개 검색 노출과 여행자 리뷰 경향을 요약한 내부 참고값입니다.</p>
+        <div class="section-mini-head">
+          <h3>맛집 후보 TOP 6</h3>
+          <a class="btn light small" href="restaurants.html">50선 전체 보기</a>
+        </div>
+        <p class="route-source-note">지도 마커와 함께 확인하세요. 50선은 라이딩 동선에서 쓰기 좋은 식사 후보 순서로 정리했습니다.</p>
         <div class="restaurant-list">${renderRestaurantList(6)}</div>
       </section>
       <div class="master-columns">
@@ -1526,7 +2089,6 @@ function setupVWorldRouteEditor() {
   renderDayTabs();
   updateResult();
   setMode("start");
-  if (learningTarget) learningTarget.innerHTML = renderLearningSummary();
   renderOverlayViews();
   setPanelView("course");
 
@@ -1558,9 +2120,9 @@ function setupVWorldRouteEditor() {
       lineJoin: "round"
     }).addTo(map);
     map.fitBounds(baseRouteLine.getBounds(), { padding: [28, 28] });
-    setStatus(`${gpxRoute.name} ${gpxRoute.points.length.toLocaleString()}개 트랙포인트를 불러왔습니다. 출발지를 선택하세요.`);
+    setStatus("출발지를 선택하세요.");
   } else {
-    setStatus("GPX 경로 데이터를 불러오지 못했습니다. gpx-route.js 파일을 확인하세요.");
+    setStatus("기본 경로 데이터를 불러오지 못했습니다. 경로 파일을 확인하세요.");
   }
 
   learnedRouteLayer = L.layerGroup().addTo(map);
@@ -1597,7 +2159,7 @@ function setupVWorldRouteEditor() {
   });
 
   restaurantLayer = L.layerGroup().addTo(map);
-  jejuRestaurants.forEach((restaurant) => {
+  jejuRestaurants.forEach((restaurant, index) => {
     const marker = L.circleMarker([restaurant.lat, restaurant.lng], {
       radius: 7,
       color: "#7a3d00",
@@ -1606,19 +2168,18 @@ function setupVWorldRouteEditor() {
       fillOpacity: 0.95
     }).addTo(restaurantLayer);
     marker.bindPopup(`
-      <strong>${restaurant.name}</strong><br>
+      <strong>${index + 1}위 · ${restaurant.name}</strong><br>
       ${restaurant.area} · ${restaurant.category}<br>
-      평판 점수 ${restaurant.sentiment}<br>
       ${restaurant.summary}<br>
-      <a target="_blank" rel="noreferrer" href="${naverSearchUrl(`${restaurant.name} 제주`)}">네이버</a>
-      · <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(`${restaurant.name} 제주`)}">다음</a>
-      · <a target="_blank" rel="noreferrer" href="${googleSearchUrl(`${restaurant.name} 제주 리뷰`)}">구글</a>
+      <a target="_blank" rel="noreferrer" href="${naverSearchUrl(restaurantSearchTerm(restaurant))}">네이버</a>
+      · <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(restaurantSearchTerm(restaurant))}">다음</a>
+      · <a target="_blank" rel="noreferrer" href="${googleSearchUrl(`${restaurantSearchTerm(restaurant)} 리뷰`)}">구글</a>
     `);
   });
 
   L.control.layers(
     { "일반지도": baseMapLayer, "항공사진": satelliteLayer },
-    { "학습 경로망": learnedRouteLayer, "장소": placeLayer, "맛집": restaurantLayer },
+    { "자전거길": learnedRouteLayer, "장소": placeLayer, "맛집": restaurantLayer },
     { position: "topright", collapsed: true }
   ).addTo(map);
 
@@ -1818,55 +2379,61 @@ function renderTransportChoice(option, selected) {
   `;
 }
 
-function renderRestaurantList(limit = jejuRestaurants.length) {
-  return jejuRestaurants.slice(0, limit).map((restaurant) => `
+function restaurantSearchTerm(restaurant) {
+  return `${restaurant.name} 제주 ${restaurant.area}`;
+}
+
+function renderRestaurantActions(restaurant) {
+  const term = restaurantSearchTerm(restaurant);
+  return `
+    <div class="restaurant-actions">
+      <a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(term)}" data-naver-map data-naver-query="${term}" data-web-url="${naverSearchUrl(term)}">네이버</a>
+      <a class="btn light small" target="_blank" rel="noreferrer" href="${kakaoSearchUrl(term)}">다음</a>
+      <a class="btn light small" target="_blank" rel="noreferrer" href="${googleSearchUrl(`${term} 리뷰`)}">구글</a>
+    </div>
+  `;
+}
+
+function renderRestaurantCard(restaurant, index) {
+  return `
     <article class="restaurant-card">
       <div>
         <strong>${restaurant.name}</strong>
         <span>${restaurant.area} · ${restaurant.category}</span>
       </div>
-      <em>${restaurant.sentiment}</em>
+      <em>${index + 1}위</em>
       <p>${restaurant.summary}</p>
-      <div class="source-list">
-        <a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(`${restaurant.name} 제주`)}" data-naver-map>네이버</a>
-        <a class="btn light small" target="_blank" rel="noreferrer" href="${kakaoSearchUrl(`${restaurant.name} 제주`)}">다음</a>
-        <a class="btn light small" target="_blank" rel="noreferrer" href="${googleSearchUrl(`${restaurant.name} 제주 리뷰`)}">구글</a>
-      </div>
+      ${renderRestaurantActions(restaurant)}
     </article>
-  `).join("");
+  `;
 }
 
-function renderLearningSummary() {
-  const network = getLearnedCyclingNetwork();
-  if (!network.pointCount) {
-    return `
-      <span class="tag">경로 학습</span>
-      <h2>학습 데이터 없음</h2>
-      <p>GPX 데이터를 불러오면 자전거 경로망을 분석합니다.</p>
-    `;
-  }
+function renderRestaurantList(limit = jejuRestaurants.length) {
+  return jejuRestaurants.slice(0, limit).map((restaurant, index) => renderRestaurantCard(restaurant, index)).join("");
+}
 
-  return `
-    <div class="learning-head">
-      <span class="tag">경로 학습</span>
-      <strong>${network.sourceName}</strong>
+function setupRestaurantPage() {
+  const target = document.querySelector("[data-restaurant-page]");
+  if (!target) return;
+
+  target.innerHTML = `
+    <div class="restaurant-summary-bar">
+      <div><strong>${jejuRestaurants.length}</strong><span>맛집 후보</span></div>
+      <div><strong>3</strong><span>검색 링크</span></div>
+      <div><strong>지도</strong><span>코스 화면 마커 연동</span></div>
     </div>
-    <div class="learning-stats">
-      <div><strong>${network.totalDistanceKm.toFixed(1)}km</strong><span>학습 거리</span></div>
-      <div><strong>${network.pointCount.toLocaleString()}</strong><span>트랙포인트</span></div>
-      <div><strong>${network.segments.length}</strong><span>구간</span></div>
-    </div>
-    <p>${network.note}</p>
-    <div class="learned-chip-row">
-      ${network.segments.slice(0, 6).map((segment) => `<span>${segment.area} · ${segment.title} · ${segment.distanceKm.toFixed(1)}km</span>`).join("")}
+    <div class="restaurant-scroll-list">
+      ${renderRestaurantList()}
     </div>
   `;
+  setupNaverMapLinks(target);
 }
 
 function setupTransportPage() {
   const target = document.querySelector("[data-transport-picker]");
   const selectedTarget = document.querySelector("[data-selected-transport]");
   if (!target || !selectedTarget) return;
+  document.querySelector("#tripDate")?.closest(".date-panel")?.remove();
 
   const render = () => {
     const selectedId = getSelectedTransportId();
@@ -1879,6 +2446,7 @@ function setupTransportPage() {
       <ul class="plain-check-list">${selected.checks.map((check) => `<li>${check}</li>`).join("")}</ul>
       <div class="action-list selected-actions"><a class="btn dark small" href="transport.html">전체계획표 보기</a></div>
     `;
+    setupFerrySearchPanel(document);
     setupNaverMapLinks(target);
   };
 
@@ -1920,8 +2488,11 @@ function setupMasterPlanPage() {
       ${segments.map((segment) => renderScheduleCard(segment, true)).join("")}
     </div>
     <section class="plan-food-section">
-      <h3>맛집 후보</h3>
-      <p class="route-source-note">지도 코스 화면의 맛집 마커와 함께 확인하세요. 평판 점수는 공개 검색 노출과 여행자 리뷰 경향을 요약한 내부 참고값입니다.</p>
+      <div class="section-mini-head">
+        <h3>맛집 후보 TOP 6</h3>
+        <a class="btn light small" href="restaurants.html">50선 전체 보기</a>
+      </div>
+      <p class="route-source-note">지도 코스 화면의 맛집 마커와 함께 확인하세요. 50선은 라이딩 동선에서 쓰기 좋은 식사 후보 순서로 정리했습니다.</p>
       <div class="restaurant-list">${renderRestaurantList(6)}</div>
     </section>
     <div class="master-columns">
@@ -2025,6 +2596,7 @@ setupVWorldRouteEditor();
 setupLinkedSchedulePage();
 setupTransportPage();
 setupMasterPlanPage();
+setupRestaurantPage();
 setupShare();
 setupTripDate();
 setupNaverMapLinks();
