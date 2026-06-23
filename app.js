@@ -14,6 +14,13 @@ const dayLabels = {
   day4: "4일차"
 };
 
+const dayRouteColors = {
+  day1: "#ff745f",
+  day2: "#4b8fe8",
+  day3: "#159d84",
+  day4: "#8b5cf6"
+};
+
 const tripDefaults = {
   title: "탄감자 제주도 원정대",
   dateRange: "2026년 10월 8일(목) – 10월 11일(일)",
@@ -32,6 +39,62 @@ const tripDefaults = {
     "2일차와 3일차는 장거리 구간이므로 08:00 출발과 점심 시간 준수가 핵심입니다.",
     "8명 단체 라이딩은 선두·중간·후미 담당자를 정하고 시내·관광지 구간은 한 줄 주행을 원칙으로 합니다."
   ]
+};
+
+const defaultItineraryMapRoutes = {
+  day1: {
+    title: "제주항 → 협재·금능",
+    distance: "35~38km",
+    points: [
+      { name: "제주항", lat: 33.5162, lng: 126.5280, detail: "제주항 도착, 자전거 수령과 장비 점검" },
+      { name: "용두암", lat: 33.5161, lng: 126.5117, detail: "제주환상자전거길 출발 인증 후보" },
+      { name: "이호테우해변", lat: 33.4971, lng: 126.4522, detail: "초반 대열 정비와 해안도로 진입" },
+      { name: "애월·한담해안도로", lat: 33.4637, lng: 126.3096, detail: "카페·편의점 보급이 쉬운 구간" },
+      { name: "다락쉼터", lat: 33.4523, lng: 126.2871, detail: "인증·사진 휴식 추천 지점" },
+      { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "1박 숙박 권역" }
+    ]
+  },
+  day2: {
+    title: "협재·금능 → 법환·서귀포",
+    distance: "78~83km",
+    points: [
+      { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "2일차 출발 지점" },
+      { name: "신창풍차해안도로", lat: 33.3459, lng: 126.1746, detail: "강풍 가능 구간" },
+      { name: "해거름마을공원", lat: 33.3424, lng: 126.1830, detail: "인증·10분 휴식" },
+      { name: "수월봉·차귀도", lat: 33.2945, lng: 126.1636, detail: "사진 휴식 후 모슬포까지 페이스 유지" },
+      { name: "모슬포", lat: 33.2208, lng: 126.2496, detail: "점심 보급 후보" },
+      { name: "송악산", lat: 33.2066, lng: 126.2902, detail: "오후 업다운 전 휴식" },
+      { name: "산방산", lat: 33.2391, lng: 126.3130, detail: "기복과 관광 차량 주의" },
+      { name: "중문", lat: 33.2497, lng: 126.4124, detail: "서귀포 진입 전 보급 후보" },
+      { name: "법환·서귀포", lat: 33.2376, lng: 126.5159, detail: "2박 숙박 권역" }
+    ]
+  },
+  day3: {
+    title: "법환·서귀포 → 월정리",
+    distance: "82~86km",
+    points: [
+      { name: "법환·서귀포", lat: 33.2376, lng: 126.5159, detail: "3일차 출발 지점" },
+      { name: "정방·보목", lat: 33.2447, lng: 126.5796, detail: "시내 교통량과 짧은 기복 주의" },
+      { name: "쇠소깍", lat: 33.2525, lng: 126.6231, detail: "인증·휴식" },
+      { name: "남원·위미", lat: 33.2791, lng: 126.7209, detail: "편의점·카페 보급" },
+      { name: "표선해변", lat: 33.3244, lng: 126.8324, detail: "점심을 늦추지 않는 핵심 지점" },
+      { name: "성산일출봉·광치기해변", lat: 33.4585, lng: 126.9348, detail: "사진 휴식" },
+      { name: "종달·세화", lat: 33.5260, lng: 126.8567, detail: "월정리 접근 전 바람 방향 확인" },
+      { name: "월정리", lat: 33.5568, lng: 126.7952, detail: "3박 숙박 권역" }
+    ]
+  },
+  day4: {
+    title: "월정리 → 제주항",
+    distance: "42~48km",
+    points: [
+      { name: "월정리", lat: 33.5568, lng: 126.7952, detail: "4일차 조기 출발 지점" },
+      { name: "김녕성세기해변", lat: 33.5576, lng: 126.7593, detail: "인증·사진" },
+      { name: "함덕서우봉해변", lat: 33.5437, lng: 126.6692, detail: "짧은 휴식" },
+      { name: "조천·삼양 해안", lat: 33.5262, lng: 126.5865, detail: "마지막 보급" },
+      { name: "제주항", lat: 33.5162, lng: 126.5280, detail: "12:00 전후 도착 목표, 자전거 선적 준비" },
+      { name: "용두암", lat: 33.5161, lng: 126.5117, detail: "종주 인증 목적이면 선택 경유" }
+    ]
+  }
 };
 
 const vworldApiKey = "5880CF73-00D8-30E9-BCF1-3DC6E80FC58B";
@@ -1432,6 +1495,59 @@ function routePlacePopup(place) {
   `;
 }
 
+function itinerarySearchTerm(place) {
+  return `${place.name} 제주 자전거길`;
+}
+
+function itineraryPlacePopup(place) {
+  const days = place.days.map((dayId) => dayLabels[dayId]).join(" · ");
+  const details = [...new Set(place.details.filter(Boolean))].join(" / ");
+  const term = itinerarySearchTerm(place);
+  return `
+    <div class="place-popup itinerary-popup">
+      <strong>${place.name}</strong>
+      <p>${days} 기본 일정 지점</p>
+      ${details ? `<p>${details}</p>` : ""}
+      <div class="place-popup-links">
+        <a target="_blank" rel="noreferrer" href="${naverSearchUrl(term)}">네이버</a>
+        <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(term)}">다음</a>
+        <a target="_blank" rel="noreferrer" href="${googleSearchUrl(`${term} 설명`)}">구글</a>
+      </div>
+    </div>
+  `;
+}
+
+function itineraryPlaceGroups() {
+  const groups = new Map();
+  Object.entries(defaultItineraryMapRoutes).forEach(([dayId, route]) => {
+    route.points.forEach((point, index) => {
+      const key = `${point.name}|${point.lat.toFixed(4)}|${point.lng.toFixed(4)}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          ...point,
+          firstDayId: dayId,
+          firstOrder: index,
+          days: [],
+          details: []
+        });
+      }
+      const group = groups.get(key);
+      if (!group.days.includes(dayId)) group.days.push(dayId);
+      if (point.detail) group.details.push(point.detail);
+    });
+  });
+  return [...groups.values()].sort((a, b) => {
+    const dayDelta = Number(a.firstDayId.replace("day", "")) - Number(b.firstDayId.replace("day", ""));
+    return dayDelta || a.firstOrder - b.firstOrder;
+  });
+}
+
+function itineraryMarkerHtml(place) {
+  const dayNumbers = place.days.map((dayId) => dayId.replace("day", "")).join("·");
+  const color = dayRouteColors[place.firstDayId] || dayRouteColors.day1;
+  return `<span class="itinerary-marker" style="--marker-color:${color}"><b>${dayNumbers}</b></span>`;
+}
+
 function learnedAreaName(point) {
   if (point.lat > 33.49 && point.lng < 126.63) return "북서부";
   if (point.lat > 33.49 && point.lng >= 126.63) return "북동부";
@@ -1927,7 +2043,10 @@ function setupVWorldRouteEditor() {
   let startMarker = null;
   let endMarker = null;
   let placeLayer = null;
+  let itineraryPlaceLayer = null;
   let restaurantLayer = null;
+  const itineraryRouteLayers = {};
+  const itineraryRouteBounds = {};
   const restaurantMarkers = new Map();
   let overlayScheduleFilter = "all";
   let currentView = "course";
@@ -2026,6 +2145,12 @@ function setupVWorldRouteEditor() {
       if (endMarker) endMarker.remove();
       endMarker = L.marker([markerLat, markerLng], { title: markerTitle }).addTo(map).bindPopup(popup);
     }
+  };
+
+  const fitItineraryDay = (dayId) => {
+    const bounds = itineraryRouteBounds[dayId];
+    if (!map || !bounds) return;
+    map.fitBounds(bounds, { padding: [64, 64] });
   };
 
   const updateResult = () => {
@@ -2331,6 +2456,49 @@ function setupVWorldRouteEditor() {
     });
   });
 
+  Object.entries(defaultItineraryMapRoutes).forEach(([dayId, route]) => {
+    const color = dayRouteColors[dayId] || dayRouteColors.day1;
+    const start = route.points[0];
+    const end = route.points[route.points.length - 1];
+    const dayLayer = L.layerGroup().addTo(map);
+    const dayRoute = buildBikeRoute(
+      { ...start, placeName: start.name },
+      { ...end, placeName: end.name },
+      "forward"
+    );
+    const dayLine = L.polyline(dayRoute.path.map((point) => [point.lat, point.lng]), {
+      color,
+      weight: 7,
+      opacity: 0.86,
+      lineJoin: "round",
+      lineCap: "round"
+    }).addTo(dayLayer);
+    dayLine.bindTooltip(`${dayLabels[dayId]} · ${route.title} · ${route.distance}`, { sticky: true });
+    itineraryRouteLayers[dayId] = dayLayer;
+    itineraryRouteBounds[dayId] = dayLine.getBounds();
+  });
+
+  itineraryPlaceLayer = L.layerGroup().addTo(map);
+  itineraryPlaceGroups().forEach((place) => {
+    const icon = typeof L.divIcon === "function"
+      ? L.divIcon({
+        className: "itinerary-marker-wrap",
+        html: itineraryMarkerHtml(place),
+        iconSize: [34, 42],
+        iconAnchor: [17, 39],
+        popupAnchor: [0, -36]
+      })
+      : undefined;
+    const markerOptions = { title: `${place.name} 일정 지점` };
+    if (icon) markerOptions.icon = icon;
+    const marker = L.marker([place.lat, place.lng], markerOptions).addTo(itineraryPlaceLayer);
+    marker.bindTooltip(`${place.days.map((dayId) => dayLabels[dayId]).join(" · ")} · ${place.name}`, {
+      direction: "top",
+      offset: [0, -32]
+    });
+    marker.bindPopup(itineraryPlacePopup(place));
+  });
+
   restaurantLayer = L.layerGroup().addTo(map);
   jejuRestaurants.forEach((restaurant, index) => {
     const marker = L.circleMarker([restaurant.lat, restaurant.lng], {
@@ -2353,7 +2521,16 @@ function setupVWorldRouteEditor() {
 
   L.control.layers(
     { "일반지도": baseMapLayer, "항공사진": satelliteLayer },
-    { "자전거길": learnedRouteLayer, "장소": placeLayer, "맛집": restaurantLayer },
+    {
+      "1일차 코스": itineraryRouteLayers.day1,
+      "2일차 코스": itineraryRouteLayers.day2,
+      "3일차 코스": itineraryRouteLayers.day3,
+      "4일차 코스": itineraryRouteLayers.day4,
+      "일정 지점": itineraryPlaceLayer,
+      "자전거길": learnedRouteLayer,
+      "장소": placeLayer,
+      "맛집": restaurantLayer
+    },
     { position: "topright", collapsed: true }
   ).addTo(map);
 
@@ -2375,6 +2552,7 @@ function setupVWorldRouteEditor() {
     clearRoute();
     overlayScheduleFilter = currentDay;
     loadSavedRoute();
+    fitItineraryDay(currentDay);
     renderOverlayViews();
   });
 
