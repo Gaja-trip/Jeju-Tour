@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>지도 코스 선택 | 제주 자전거 여행</title>
+  <title>지도 코스 선택 | Jeju-Tour Plan</title>
   <meta name="description" content="V-World 지도 기반 제주 자전거 여행 1~4일차 코스 자동 생성">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,12 +13,9 @@
   <main class="route-map-shell" data-vworld-route-editor>
     <div id="vworldMap" class="vworld-map" aria-label="V-World 지도"></div>
 
-    <button class="route-panel-float-toggle" type="button" data-panel-toggle aria-expanded="true" aria-label="패널 숨기기"></button>
-
     <aside class="route-map-panel" data-route-panel>
-      <button class="sheet-handle" type="button" data-panel-toggle aria-label="패널 열고 닫기"></button>
-      <div class="route-panel-top">
-        <a class="brand compact-brand" href="index.html"><span class="brand-mark">J</span> Jeju</a>
+      <div class="route-panel-top" data-panel-toggle-area>
+        <a class="brand compact-brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> Jeju-Tour Plan</a>
         <div class="panel-nav">
           <button type="button" data-panel-view-tab="course">코스</button>
           <button type="button" data-panel-view-tab="restaurants">맛집</button>

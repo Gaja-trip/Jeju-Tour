@@ -14,6 +14,26 @@ const dayLabels = {
   day4: "4일차"
 };
 
+const tripDefaults = {
+  title: "탄감자 제주도 원정대",
+  dateRange: "2026년 10월 8일(목) – 10월 11일(일)",
+  startDate: "2026-10-08",
+  ferryOutboundDate: "2026-10-08",
+  ferryReturnDate: "2026-10-11",
+  riders: "8명",
+  vehicle: "전주↔목포 차량 이동, 목포↔제주 선박 이동, 제주 내 자전거 일주",
+  ferryPlan: "목포 08:30 출항 / 제주 13:30~13:40 출항 예정",
+  lodgingPlan: "1박 협재·금능, 2박 법환·서귀포, 3박 월정리·구좌",
+  totalDistance: "237~255km",
+  totalRideTime: "15시간 30분~16시간 40분",
+  totalAscent: "+1,220~1,300m",
+  operationNotes: [
+    "1일차와 4일차는 배편 때문에 라이딩 가능 시간이 짧으므로 항구 도착 시간을 우선합니다.",
+    "2일차와 3일차는 장거리 구간이므로 08:00 출발과 점심 시간 준수가 핵심입니다.",
+    "8명 단체 라이딩은 선두·중간·후미 담당자를 정하고 시내·관광지 구간은 한 줄 주행을 원칙으로 합니다."
+  ]
+};
+
 const vworldApiKey = "5880CF73-00D8-30E9-BCF1-3DC6E80FC58B";
 const seaferryBookingUrl = "https://www.seaferry.co.kr/bbs/content.php?co_id=p201";
 
@@ -525,18 +545,23 @@ const routeChoices = {
   day1: [
     {
       optionId: "west-standard",
-      title: "제주항 → 모슬포/대정",
-      theme: "서부 해안 적응",
-      distance: "82km",
-      rideTime: "5h",
-      stops: ["제주항/용두암", "이호테우", "애월", "협재/금능", "신창풍차해안도로", "모슬포/대정"],
-      summary: "제주항에서 자전거를 조립한 뒤 서부 해안도로로 몸을 풀며 모슬포까지 이동하는 기본 코스입니다.",
+      title: "전주·목포항 → 제주항 → 협재·금능",
+      theme: "10/8 목 · 서부 해안 적응",
+      distance: "35~38km",
+      rideTime: "약 2:20",
+      ascent: "+170m 내외",
+      lodging: "협재·금능",
+      stops: ["전주", "목포항", "제주항", "용두암", "이호테우", "애월", "다락쉼터", "협재·금능"],
+      summary: "첨부 일정표 기준 1일차입니다. 오전 전주에서 목포항으로 이동해 08:30 배편을 타고, 제주항 도착 후 용두암에서 출발해 협재·금능 숙소까지 무리 없이 적응합니다.",
       schedule: [
-        { time: "09:30", place: "제주항/용두암", detail: "하선, 자전거 조립, 브레이크와 타이어 점검" },
-        { time: "11:00", place: "이호테우/애월", detail: "첫 보급, 바람 방향과 팀 페이스 확인" },
-        { time: "13:00", place: "협재/금능", detail: "점심과 긴 휴식" },
-        { time: "15:30", place: "신창풍차해안도로", detail: "강풍 주의, 대열 간격 유지" },
-        { time: "17:30", place: "모슬포/대정", detail: "1박, 자전거 실내 보관 확인" }
+        { time: "04:50", place: "전주 집결", distanceKm: 0, cumulativeDistanceKm: 0, detail: "자전거 적재, 신분증·승선권·보급식 확인" },
+        { time: "05:00", place: "전주 출발", detail: "차량 이동, 목포항 국제여객터미널 07:00 전후 도착 목표" },
+        { time: "07:00~08:00", place: "목포항 수속", detail: "주차, 발권, 자전거 선적. 선적 마감 시간 여유 확보" },
+        { time: "08:30", place: "목포 출항", detail: "선내 휴식 및 간단식" },
+        { time: "12:50 전후", place: "제주항 도착", detail: "자전거 수령, 공기압·브레이크 점검" },
+        { time: "13:20~13:50", place: "점심", detail: "제주항·탑동·동문시장 인근 간단식" },
+        { time: "14:00~18:00", place: "용두암 → 애월 → 협재·금능", distanceKm: 35, cumulativeDistanceKm: 35, detail: "이호테우, 애월·한담, 다락쉼터를 지나 숙소 이동" },
+        { time: "19:00", place: "협재·한림권 저녁", detail: "옹포별장가든 우선, 문쏘 협재점·버거307 협재점 대안" }
       ]
     },
     {
@@ -574,18 +599,25 @@ const routeChoices = {
   day2: [
     {
       optionId: "south-standard",
-      title: "모슬포/대정 → 성산",
-      theme: "남부 핵심 구간",
-      distance: "96km",
-      rideTime: "6h",
-      stops: ["모슬포/대정", "송악산", "산방산", "중문", "서귀포", "쇠소깍", "표선", "성산"],
-      summary: "가장 긴 라이딩 날입니다. 보급 지점을 촘촘히 잡고 서귀포 도심 통과는 안전을 우선합니다.",
+      title: "협재·금능 → 법환·서귀포",
+      theme: "10/9 금 · 서남부 장거리",
+      distance: "78~83km",
+      rideTime: "약 5:05",
+      ascent: "+500m 내외",
+      lodging: "법환·서귀포",
+      stops: ["협재·금능", "신창풍차해안도로", "해거름마을공원", "수월봉·차귀도", "모슬포", "송악산", "산방산·중문", "법환·서귀포"],
+      summary: "첨부 일정표 기준 2일차입니다. 서남부 조망 구간과 업다운이 이어지는 핵심 장거리 날이므로 오전 출발, 모슬포 점심, 중문 이후 차량 주의를 우선합니다.",
       schedule: [
-        { time: "08:00", place: "모슬포/대정", detail: "이른 출발, 공기압과 체인 윤활 확인" },
-        { time: "10:00", place: "송악산/산방산", detail: "경관 구간, 사진 정차는 짧게" },
-        { time: "12:30", place: "중문/서귀포", detail: "점심, 긴 보급" },
-        { time: "15:30", place: "쇠소깍/표선", detail: "오후 페이스 관리" },
-        { time: "18:00", place: "성산", detail: "2박, 다음날 복귀 배편 재확인" }
+        { time: "07:00", place: "기상·조식", detail: "물 2통, 보급식, 펑크키트 확인" },
+        { time: "08:00", place: "협재·금능 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "초반은 15km/h 안팎으로 무리하지 않기" },
+        { time: "09:10", place: "신창풍차해안도로", distanceKm: 18, cumulativeDistanceKm: 18, detail: "바람 강할 때 대열 좁히기" },
+        { time: "09:40", place: "해거름마을공원", detail: "인증·10분 휴식" },
+        { time: "11:00", place: "수월봉·차귀도 전망", distanceKm: 25, cumulativeDistanceKm: 43, detail: "사진 휴식 후 모슬포까지 페이스 유지" },
+        { time: "12:00~13:00", place: "모슬포 점심", detail: "탄수화물·수분 보충" },
+        { time: "14:00", place: "송악산 인증센터", distanceKm: 9, cumulativeDistanceKm: 52, detail: "오후 업다운 전 짧은 휴식" },
+        { time: "15:30", place: "산방산·중문 접근", distanceKm: 21, cumulativeDistanceKm: 73, detail: "기복과 관광 차량 주의" },
+        { time: "17:30~18:00", place: "법환·서귀포 도착", distanceKm: 10, cumulativeDistanceKm: 83, detail: "숙소 체크인, 세탁과 다음날 준비" },
+        { time: "19:00", place: "저녁", detail: "법환나들목·서귀포 매일올레시장·숙성도 중문점 등 단체 예약 가능 식당" }
       ]
     },
     {
@@ -623,17 +655,24 @@ const routeChoices = {
   day3: [
     {
       optionId: "east-standard",
-      title: "성산 → 제주항/용두암",
-      theme: "북동부 복귀",
-      distance: "64km",
-      rideTime: "4h",
-      stops: ["성산", "세화", "월정리", "김녕", "함덕", "용두암", "제주항"],
-      summary: "북동부 해안도로로 제주항에 복귀하는 기본 코스입니다. 배편 마감 기준으로 여유를 둡니다.",
+      title: "법환·서귀포 → 월정리",
+      theme: "10/10 토 · 남동부 해안 장거리",
+      distance: "82~86km",
+      rideTime: "약 5:20",
+      ascent: "+380~430m",
+      lodging: "월정리·구좌",
+      stops: ["법환·서귀포", "정방·보목", "쇠소깍", "남원·위미", "표선", "성산일출봉", "종달·세화", "월정리"],
+      summary: "첨부 일정표 기준 3일차입니다. 쇠소깍, 남원, 표선, 성산, 세화·월정리로 이어지는 긴 해안 구간이라 표선 점심을 늦추지 않는 것이 핵심입니다.",
       schedule: [
-        { time: "08:30", place: "성산", detail: "아침 출발, 관광 차량 주의" },
-        { time: "10:30", place: "세화/월정리", detail: "카페와 보급" },
-        { time: "12:30", place: "김녕/함덕", detail: "점심 또는 긴 휴식" },
-        { time: "15:00", place: "용두암/제주항", detail: "자전거 선적 준비" }
+        { time: "07:00", place: "기상·조식", detail: "전날 피로 확인, 스트레칭" },
+        { time: "08:00", place: "법환·서귀포 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "정방폭포·보목 방향, 시내 교통량 주의" },
+        { time: "08:50", place: "쇠소깍 인증센터", distanceKm: 14, cumulativeDistanceKm: 14, detail: "인증·휴식" },
+        { time: "10:20", place: "남원·위미 해안", distanceKm: 17, cumulativeDistanceKm: 31, detail: "편의점·카페 보급" },
+        { time: "11:40~12:40", place: "표선해변 점심", distanceKm: 19, cumulativeDistanceKm: 50, detail: "표선에서 확실히 식사" },
+        { time: "14:20", place: "성산일출봉·광치기해변", distanceKm: 22, cumulativeDistanceKm: 72, detail: "사진 휴식" },
+        { time: "15:20", place: "성산 출발", detail: "종달·세화·월정리 방향, 바람 방향 확인" },
+        { time: "17:00~17:40", place: "월정리 숙소 도착", distanceKm: 14, cumulativeDistanceKm: 86, detail: "체크인·세탁" },
+        { time: "19:00", place: "저녁", detail: "연미정 우선, 허벅식당·월정세화권 식당 대안" }
       ]
     },
     {
@@ -671,16 +710,25 @@ const routeChoices = {
   day4: [
     {
       optionId: "return-standard",
-      title: "제주항 → 목포항 → 전주",
-      theme: "목포 회수",
-      distance: "복귀 운영",
-      rideTime: "배편 기준",
-      stops: ["제주항", "목포항", "트럭 회수", "전주 복귀"],
-      summary: "제주항에서 자전거만 선적해 목포항으로 돌아오고, 목포항 주차장에 둔 트럭을 회수해 전주로 복귀합니다.",
+      title: "월정리 → 제주항 → 목포항 → 전주",
+      theme: "10/11 일 · 동북부 복귀",
+      distance: "42~48km",
+      rideTime: "약 2:50~3:10",
+      ascent: "+170~200m",
+      lodging: "귀환",
+      stops: ["월정리", "김녕성세기해변", "함덕서우봉해변", "조천·삼양", "제주항/용두암", "목포항", "전주"],
+      summary: "첨부 일정표 기준 4일차입니다. 13:30~13:40 제주발 목포행 배편을 고려해 늦어도 12:00 전후 제주항 도착을 목표로 합니다.",
       schedule: [
-        { time: "출항 2h 전", place: "제주항", detail: "승선권, 신분증, 자전거 선적 준비" },
-        { time: "하선 직후", place: "목포항", detail: "자전거 상태 확인, 트럭 주차 위치로 이동" },
-        { time: "복귀", place: "목포 → 전주", detail: "운전자 휴식, 야간 이동 시 교대 운전" }
+        { time: "06:40", place: "기상·정리", detail: "짐 최소화, 승선권·신분증 확인" },
+        { time: "07:10", place: "조식", detail: "숙소 또는 월정리 간단식" },
+        { time: "07:40", place: "월정리 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "김녕 방향으로 가볍게 워밍업" },
+        { time: "08:10", place: "김녕성세기해변", distanceKm: 8, cumulativeDistanceKm: 8, detail: "인증·사진" },
+        { time: "08:50", place: "함덕서우봉해변", distanceKm: 9, cumulativeDistanceKm: 17, detail: "15분 휴식" },
+        { time: "10:10", place: "조천·삼양 해안", distanceKm: 17, cumulativeDistanceKm: 34, detail: "마지막 보급, 바람 방향 확인" },
+        { time: "11:40~12:10", place: "제주항 도착", distanceKm: 12, cumulativeDistanceKm: 46, detail: "자전거 선적 준비. 용두암 인증 선택 시 더 일찍 출발" },
+        { time: "13:30~13:40", place: "제주 출항", detail: "목포행 배편" },
+        { time: "18:00 전후", place: "목포 도착", detail: "자전거 수령·차량 적재" },
+        { time: "21:00 전후", place: "전주 도착", detail: "해산" }
       ]
     },
     {
@@ -718,12 +766,12 @@ const transportOptions = [
   {
     id: "truck-ferry",
     badge: "추천",
-    title: "목포항 주차 + 자전거 선적",
-    summary: "더블캡 트럭은 목포항에 주차하고, 8명은 자전거만 배에 실어 제주를 왕복하는 기본 운영안입니다.",
-    outbound: "전주 집결 → 목포항 이동 → 트럭 장기주차 → 자전거 선적 → 제주항 하선",
-    returnPlan: "제주항 자전거 선적 → 목포항 하선 → 트럭 회수 → 전주 복귀",
-    truck: "트럭은 목포항 주차장에 대기하며 제주도 내 이동에는 사용하지 않음",
-    checks: ["목포항 장기주차", "자전거 선적 규정", "8명 신분증", "자전거 고정 스트랩"],
+    title: "전주 집결 + 목포항 주차 + 자전거 선적",
+    summary: "첨부 일정표의 기본 운영안입니다. 8명은 전주에서 차량으로 목포항까지 이동하고, 목포 08:30 출항·제주 13:30~13:40 복귀 배편을 기준으로 자전거 8대를 선적합니다.",
+    outbound: "04:50 전주 집결 → 05:00 차량 출발 → 07:00 목포항 수속·주차 → 08:30 목포 출항 → 12:50 전후 제주항 하선",
+    returnPlan: "월정리 조기 출발 → 12:00 전후 제주항 도착 → 13:30~13:40 제주 출항 → 18:00 전후 목포 도착 → 21:00 전후 전주 도착",
+    truck: "전주↔목포 구간 자전거 적재와 귀환 회수를 담당하고, 제주도 내 라이딩 중에는 목포항 주차장에 대기",
+    checks: ["8명 승선권·신분증", "자전거 8대 선적권", "목포항 주차 위치", "제주항 선적 부두", "예비 튜브 4개 이상·펌프 2개"],
     links: [
       { label: "전주 → 목포항 지도", href: "https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%EC%97%90%EC%84%9C%20%EB%AA%A9%ED%8F%AC%ED%95%AD" },
       { label: "목포항 주차", href: "https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%ED%95%AD%20%EC%A3%BC%EC%B0%A8%EC%9E%A5" },
@@ -842,8 +890,8 @@ function getSelectedTransportId() {
 
 function getFerryDates() {
   return {
-    outbound: readStorage(storageKeys.ferryOutboundDate) || "",
-    returnDate: readStorage(storageKeys.ferryReturnDate) || ""
+    outbound: readStorage(storageKeys.ferryOutboundDate) || tripDefaults.ferryOutboundDate,
+    returnDate: readStorage(storageKeys.ferryReturnDate) || tripDefaults.ferryReturnDate
   };
 }
 
@@ -1025,16 +1073,18 @@ function resolveSegment(dayId, plan = getRoutePlan()) {
   if (selected.custom && selected.stopsInput) return customSegment(dayId, selected.stopsInput);
 
   const option = getOptionById(dayId, selected.optionId);
+  const metrics = [
+    { value: option.distance, label: "예상 거리" },
+    { value: option.rideTime, label: "순수 주행" },
+    { value: option.ascent || option.theme, label: option.ascent ? "획득고도" : "코스 성격" }
+  ];
+  if (option.lodging) metrics.push({ value: option.lodging, label: "숙박/귀환" });
   return {
     ...option,
     id: dayId,
     day: dayLabels[dayId],
     query: `${option.stops.join(" ")} 자전거길`,
-    metrics: [
-      { value: option.distance, label: "예상 거리" },
-      { value: option.rideTime, label: "순수 주행" },
-      { value: option.theme, label: "코스 성격" }
-    ]
+    metrics
   };
 }
 
@@ -1092,7 +1142,10 @@ function elevationForPlaceName(placeName) {
 function enrichScheduleLegs(segment) {
   const schedule = Array.isArray(segment.schedule) ? segment.schedule : [];
   const knownDistance = distanceValueKm(segment.distance);
-  const fallbackLegDistance = Number.isFinite(knownDistance) && schedule.length > 1
+  const hasExplicitDistance = schedule.some((stop) => (
+    Number.isFinite(stop.distanceKm) || Number.isFinite(stop.cumulativeDistanceKm)
+  ));
+  const fallbackLegDistance = !hasExplicitDistance && Number.isFinite(knownDistance) && schedule.length > 1
     ? knownDistance / (schedule.length - 1)
     : null;
 
@@ -1178,6 +1231,65 @@ function renderCourseDetail(segment) {
     <div class="action-list selected-actions">
       <a class="btn dark small" href="schedule.html?day=${segment.id}">이 코스로 일정표 보기</a>
       <a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(segment.query)}" data-naver-map data-naver-query="${segment.query}" data-web-url="${naverSearchUrl(segment.query)}">네이버지도 열기</a>
+    </div>
+  `;
+}
+
+function selectedTransportOption() {
+  return transportOptions.find((option) => option.id === getSelectedTransportId()) || transportOptions[0];
+}
+
+function renderMasterPlanContent({ printable = false } = {}) {
+  const segments = resolveSegments();
+  const selectedTransport = selectedTransportOption();
+  const foodLimit = printable ? 8 : 6;
+
+  return `
+    <div class="plan-doc-title">
+      <span class="tag">기본값 · 첨부 일정표 반영</span>
+      <h2>${tripDefaults.title}</h2>
+      <p>${tripDefaults.dateRange} | ${tripDefaults.vehicle}</p>
+    </div>
+    <div class="master-summary">
+      <div><strong>${tripDefaults.riders}</strong><span>참가 인원</span></div>
+      <div><strong>${tripDefaults.totalDistance}</strong><span>전체 제주 라이딩</span></div>
+      <div><strong>${tripDefaults.totalRideTime}</strong><span>전체 순수 주행</span></div>
+      <div><strong>${tripDefaults.totalAscent}</strong><span>전체 추정 획득고도</span></div>
+    </div>
+    <div class="plan-brief-grid">
+      <article><span>배편 기준</span><strong>${tripDefaults.ferryPlan}</strong></article>
+      <article><span>숙박 기준</span><strong>${tripDefaults.lodgingPlan}</strong></article>
+      <article><span>확정 교통편</span><strong>${selectedTransport.title}</strong></article>
+    </div>
+    <div class="master-flow">
+      <article><span>출발</span><h3>전주 → 목포항 → 제주항</h3><p>${selectedTransport.outbound}</p></article>
+      <article><span>제주 라이딩</span><h3>1~4일차 자전거 이동</h3><p>${segments.map((segment) => segment.title).join(" / ")}</p></article>
+      <article><span>복귀</span><h3>제주항 → 목포항 → 전주</h3><p>${selectedTransport.returnPlan}</p></article>
+    </div>
+    <section class="plan-note-section">
+      <h3>운영 핵심</h3>
+      <ul class="plain-check-list">${tripDefaults.operationNotes.map((note) => `<li>${note}</li>`).join("")}</ul>
+    </section>
+    <div class="planner-schedule-grid master-day-grid">
+      ${segments.map((segment) => renderScheduleCard(segment, true)).join("")}
+    </div>
+    <section class="plan-food-section">
+      <div class="section-mini-head">
+        <h3>맛집 후보 TOP ${foodLimit}</h3>
+        ${printable ? "" : `<a class="btn light small" href="restaurants.html">50선 전체 보기</a>`}
+      </div>
+      <p class="route-source-note">각 맛집 카드는 지도 화면과 연결됩니다. 후보는 라이딩 동선에서 식사와 보급에 쓰기 좋은 순서로 정리했습니다.</p>
+      <div class="restaurant-list">${renderRestaurantList(foodLimit)}</div>
+    </section>
+    <div class="master-columns">
+      <section>
+        <h3>교통 체크리스트</h3>
+        <ul class="plain-check-list">${selectedTransport.checks.map((check) => `<li>${check}</li>`).join("")}</ul>
+      </section>
+      <section>
+        <h3>실시간 확인 링크</h3>
+        <div class="source-list">${selectedTransport.links.map((link) => `<a class="btn light small" target="_blank" rel="noreferrer" href="${link.href}" data-naver-map>${link.label}</a>`).join("")}</div>
+      </section>
     </div>
   `;
 }
@@ -1796,7 +1908,7 @@ function setupVWorldRouteEditor() {
   const placeApplyButtons = root.querySelectorAll("[data-place-apply]");
   const viewTabs = root.querySelectorAll("[data-panel-view-tab]");
   const panelViews = root.querySelectorAll("[data-panel-view]");
-  const panelToggleButtons = root.querySelectorAll("[data-panel-toggle]");
+  const routePanel = root.querySelector("[data-route-panel]");
   const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
   const overlaySchedule = root.querySelector("[data-overlay-schedule]");
   const overlayRestaurants = root.querySelector("[data-overlay-restaurants]");
@@ -1816,6 +1928,7 @@ function setupVWorldRouteEditor() {
   let endMarker = null;
   let placeLayer = null;
   let restaurantLayer = null;
+  const restaurantMarkers = new Map();
   let overlayScheduleFilter = "all";
   let currentView = "course";
 
@@ -1855,13 +1968,37 @@ function setupVWorldRouteEditor() {
 
   const setPanelCollapsed = (collapsed) => {
     root.classList.toggle("panel-collapsed", collapsed);
-    panelToggleButtons.forEach((button) => {
-      button.setAttribute("aria-expanded", String(!collapsed));
-      if (!button.classList.contains("sheet-handle")) {
-        button.setAttribute("aria-label", collapsed ? "패널 열기" : "패널 숨기기");
-      }
-    });
+    routePanel?.setAttribute("aria-expanded", String(!collapsed));
+    routePanel?.setAttribute("aria-label", collapsed ? "패널 열기" : "패널 숨기기");
     window.setTimeout(() => map?.invalidateSize(), 220);
+  };
+
+  const isPanelControlTarget = (target) => {
+    return !!target.closest("a, button, input, textarea, select, label, [role='button']");
+  };
+
+  const focusRestaurant = (index) => {
+    const restaurant = jejuRestaurants[index];
+    if (!restaurant || !map) return;
+    if (restaurantLayer && !map.hasLayer(restaurantLayer)) restaurantLayer.addTo(map);
+    setPanelView("restaurants");
+    const marker = restaurantMarkers.get(index);
+    map.flyTo([restaurant.lat, restaurant.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
+    window.setTimeout(() => marker?.openPopup(), 450);
+    setStatus(`${restaurant.name} 위치를 지도에 표시했습니다.`);
+    if (window.matchMedia("(max-width: 760px)").matches) setPanelCollapsed(true);
+  };
+
+  const requestedRestaurantIndex = () => {
+    const params = new URLSearchParams(window.location.search);
+    const rawIndex = params.get("restaurant");
+    if (rawIndex && /^\d+$/.test(rawIndex)) {
+      const index = Number(rawIndex);
+      return jejuRestaurants[index] ? index : null;
+    }
+    const requestedName = params.get("restaurantName") || rawIndex;
+    if (!requestedName) return null;
+    return jejuRestaurants.findIndex((restaurant) => restaurant.name === requestedName);
   };
 
   const drawRoute = () => {
@@ -2069,47 +2206,7 @@ function setupVWorldRouteEditor() {
 
   const renderOverlayPlan = () => {
     if (!overlayPlan) return;
-    const segments = resolveSegments();
-    const selectedTransport = transportOptions.find((option) => option.id === getSelectedTransportId()) || transportOptions[0];
-    const rideDistance = segments
-      .map((segment) => distanceValueKm(segment.distance))
-      .filter(Number.isFinite)
-      .reduce((sum, distance) => sum + distance, 0);
-
-    overlayPlan.innerHTML = `
-      <div class="master-summary">
-        <div><strong>${selectedTransport.title}</strong><span>확정 교통편</span></div>
-        <div><strong>${rideDistance ? formatDistanceKm(rideDistance) : "직접"}</strong><span>예상 라이딩</span></div>
-        <div><strong>8명</strong><span>라이더</span></div>
-        <div><strong>트럭 1대</strong><span>승하선/짐 지원</span></div>
-      </div>
-      <div class="master-flow">
-        <article><span>출발</span><h3>전주 → 항구</h3><p>${selectedTransport.outbound}</p></article>
-        <article><span>제주 라이딩</span><h3>1~3일차 자전거 이동</h3><p>${segments.slice(0, 3).map((segment) => segment.title).join(" / ")}</p></article>
-        <article><span>복귀</span><h3>4일차 복귀 운영</h3><p>${selectedTransport.returnPlan}</p></article>
-      </div>
-      <div class="planner-schedule-grid master-day-grid">
-        ${segments.map((segment) => renderScheduleCard(segment)).join("")}
-      </div>
-      <section class="plan-food-section">
-        <div class="section-mini-head">
-          <h3>맛집 후보 TOP 6</h3>
-          <a class="btn light small" href="restaurants.html">50선 전체 보기</a>
-        </div>
-        <p class="route-source-note">지도 마커와 함께 확인하세요. 50선은 라이딩 동선에서 쓰기 좋은 식사 후보 순서로 정리했습니다.</p>
-        <div class="restaurant-list">${renderRestaurantList(6)}</div>
-      </section>
-      <div class="master-columns">
-        <section>
-          <h3>교통 체크리스트</h3>
-          <ul class="plain-check-list">${selectedTransport.checks.map((check) => `<li>${check}</li>`).join("")}</ul>
-        </section>
-        <section>
-          <h3>실시간 확인 링크</h3>
-          <div class="source-list">${selectedTransport.links.map((link) => `<a class="btn light small" target="_blank" rel="noreferrer" href="${link.href}" data-naver-map>${link.label}</a>`).join("")}</div>
-        </section>
-      </div>
-    `;
+    overlayPlan.innerHTML = renderMasterPlanContent();
     setupNaverMapLinks(overlayPlan);
   };
 
@@ -2251,6 +2348,7 @@ function setupVWorldRouteEditor() {
       · <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(restaurantSearchTerm(restaurant))}">다음</a>
       · <a target="_blank" rel="noreferrer" href="${googleSearchUrl(`${restaurantSearchTerm(restaurant)} 리뷰`)}">구글</a>
     `);
+    restaurantMarkers.set(index, marker);
   });
 
   L.control.layers(
@@ -2298,8 +2396,17 @@ function setupVWorldRouteEditor() {
   viewTabs.forEach((button) => {
     button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
   });
-  panelToggleButtons.forEach((button) => {
-    button.addEventListener("click", () => setPanelCollapsed(!root.classList.contains("panel-collapsed")));
+  routePanel?.addEventListener("click", (event) => {
+    const collapsed = root.classList.contains("panel-collapsed");
+    if (collapsed) {
+      event.preventDefault();
+      setPanelCollapsed(false);
+      return;
+    }
+    if (isPanelControlTarget(event.target) && !collapsed) return;
+    if (event.target.closest("[data-panel-toggle-area]")) {
+      setPanelCollapsed(true);
+    }
   });
   overlayScheduleTabs?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-overlay-schedule-filter]");
@@ -2308,6 +2415,18 @@ function setupVWorldRouteEditor() {
     if (overlayScheduleFilter !== "all") setActiveDay(overlayScheduleFilter);
     renderOverlaySchedule();
   });
+  overlayRestaurants?.addEventListener("click", (event) => {
+    const mapLink = event.target.closest("[data-restaurant-map-link]");
+    if (mapLink) {
+      event.preventDefault();
+      focusRestaurant(Number(mapLink.dataset.restaurantIndex));
+      return;
+    }
+    if (event.target.closest("a, button")) return;
+    const card = event.target.closest("[data-restaurant-card]");
+    if (!card) return;
+    focusRestaurant(Number(card.dataset.restaurantCard));
+  });
   overlayTransport?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-transport-select]");
     if (!button) return;
@@ -2315,6 +2434,15 @@ function setupVWorldRouteEditor() {
     showToast("교통편을 전체계획표에 반영했습니다.");
     renderOverlayViews();
   });
+
+  const initialParams = new URLSearchParams(window.location.search);
+  const requestedPanel = initialParams.get("panel");
+  const initialRestaurant = requestedRestaurantIndex();
+  if (initialRestaurant !== null && initialRestaurant >= 0) {
+    window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
+  } else if (["course", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+    setPanelView(requestedPanel);
+  }
 }
 
 function setupCourseBuilderPage() {
@@ -2459,10 +2587,15 @@ function restaurantSearchTerm(restaurant) {
   return `${restaurant.name} 제주 ${restaurant.area}`;
 }
 
-function renderRestaurantActions(restaurant) {
+function restaurantMapHref(restaurant, index) {
+  return `course.html?panel=restaurants&restaurant=${encodeURIComponent(String(index))}&restaurantName=${encodeURIComponent(restaurant.name)}`;
+}
+
+function renderRestaurantActions(restaurant, index) {
   const term = restaurantSearchTerm(restaurant);
   return `
     <div class="restaurant-actions">
+      <a class="btn dark small" href="${restaurantMapHref(restaurant, index)}" data-restaurant-map-link data-restaurant-index="${index}">지도</a>
       <a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(term)}" data-naver-map data-naver-query="${term}" data-web-url="${naverSearchUrl(term)}">네이버</a>
       <a class="btn light small" target="_blank" rel="noreferrer" href="${kakaoSearchUrl(term)}">다음</a>
       <a class="btn light small" target="_blank" rel="noreferrer" href="${googleSearchUrl(`${term} 리뷰`)}">구글</a>
@@ -2472,14 +2605,14 @@ function renderRestaurantActions(restaurant) {
 
 function renderRestaurantCard(restaurant, index) {
   return `
-    <article class="restaurant-card">
+    <article class="restaurant-card" data-restaurant-card="${index}">
       <div>
         <strong>${restaurant.name}</strong>
         <span>${restaurant.area} · ${restaurant.category}</span>
       </div>
       <em>${index + 1}위</em>
       <p>${restaurant.summary}</p>
-      ${renderRestaurantActions(restaurant)}
+      ${renderRestaurantActions(restaurant, index)}
     </article>
   `;
 }
@@ -2495,13 +2628,20 @@ function setupRestaurantPage() {
   target.innerHTML = `
     <div class="restaurant-summary-bar">
       <div><strong>${jejuRestaurants.length}</strong><span>맛집 후보</span></div>
-      <div><strong>3</strong><span>검색 링크</span></div>
+      <div><strong>4</strong><span>지도·검색 링크</span></div>
       <div><strong>지도</strong><span>코스 화면 마커 연동</span></div>
     </div>
     <div class="restaurant-scroll-list">
       ${renderRestaurantList()}
     </div>
   `;
+  target.addEventListener("click", (event) => {
+    if (event.target.closest("a, button")) return;
+    const card = event.target.closest("[data-restaurant-card]");
+    if (!card) return;
+    const restaurant = jejuRestaurants[Number(card.dataset.restaurantCard)];
+    if (restaurant) window.location.href = restaurantMapHref(restaurant, Number(card.dataset.restaurantCard));
+  });
   setupNaverMapLinks(target);
 }
 
@@ -2541,47 +2681,7 @@ function setupMasterPlanPage() {
   const target = document.querySelector("[data-master-plan-page]");
   if (!target) return;
 
-  const segments = resolveSegments();
-  const selectedTransport = transportOptions.find((option) => option.id === getSelectedTransportId()) || transportOptions[0];
-  const rideDistance = segments
-    .map((segment) => distanceValueKm(segment.distance))
-    .filter(Number.isFinite)
-    .reduce((sum, distance) => sum + distance, 0);
-
-  target.innerHTML = `
-    <div class="master-summary">
-      <div><strong>${selectedTransport.title}</strong><span>확정 교통편</span></div>
-      <div><strong>${rideDistance ? formatDistanceKm(rideDistance) : "직접"}</strong><span>예상 라이딩</span></div>
-      <div><strong>8명</strong><span>라이더</span></div>
-      <div><strong>트럭 1대</strong><span>승하선/짐 지원</span></div>
-    </div>
-    <div class="master-flow">
-      <article><span>출발</span><h3>전주 → 항구</h3><p>${selectedTransport.outbound}</p></article>
-      <article><span>제주 라이딩</span><h3>1~3일차 자전거 이동</h3><p>${segments.slice(0, 3).map((segment) => segment.title).join(" / ")}</p></article>
-      <article><span>복귀</span><h3>4일차 복귀 운영</h3><p>${selectedTransport.returnPlan}</p></article>
-    </div>
-    <div class="planner-schedule-grid master-day-grid">
-      ${segments.map((segment) => renderScheduleCard(segment, true)).join("")}
-    </div>
-    <section class="plan-food-section">
-      <div class="section-mini-head">
-        <h3>맛집 후보 TOP 6</h3>
-        <a class="btn light small" href="restaurants.html">50선 전체 보기</a>
-      </div>
-      <p class="route-source-note">지도 코스 화면의 맛집 마커와 함께 확인하세요. 50선은 라이딩 동선에서 쓰기 좋은 식사 후보 순서로 정리했습니다.</p>
-      <div class="restaurant-list">${renderRestaurantList(6)}</div>
-    </section>
-    <div class="master-columns">
-      <section>
-        <h3>교통 체크리스트</h3>
-        <ul class="plain-check-list">${selectedTransport.checks.map((check) => `<li>${check}</li>`).join("")}</ul>
-      </section>
-      <section>
-        <h3>실시간 확인 링크</h3>
-        <div class="source-list">${selectedTransport.links.map((link) => `<a class="btn light small" target="_blank" rel="noreferrer" href="${link.href}" data-naver-map>${link.label}</a>`).join("")}</div>
-      </section>
-    </div>
-  `;
+  target.innerHTML = renderMasterPlanContent();
   setupNaverMapLinks(target);
 }
 
@@ -2613,11 +2713,41 @@ function setupShare() {
   });
 }
 
+function preparePdfExportRoot() {
+  document.querySelector("[data-pdf-export-root]")?.remove();
+  const root = document.createElement("section");
+  root.className = "pdf-export-root";
+  root.dataset.pdfExportRoot = "true";
+  root.innerHTML = `
+    <header class="pdf-export-header">
+      <p>Jeju-Tour Plan</p>
+      <h1>${tripDefaults.title}</h1>
+      <span>${tripDefaults.dateRange}</span>
+    </header>
+    <div class="master-plan pdf-master-plan">
+      ${renderMasterPlanContent({ printable: true })}
+    </div>
+  `;
+  document.body.append(root);
+  return root;
+}
+
 function setupPdfExport() {
   document.querySelectorAll("[data-export-pdf]").forEach((button) => {
     button.addEventListener("click", () => {
-      showToast("PDF 저장 창을 엽니다. 대상에서 PDF 저장을 선택하세요.");
-      window.setTimeout(() => window.print(), 120);
+      const root = preparePdfExportRoot();
+      const cleanup = () => {
+        document.body.classList.remove("is-exporting-pdf");
+        root.remove();
+        window.removeEventListener("afterprint", cleanup);
+      };
+      document.body.classList.add("is-exporting-pdf");
+      window.addEventListener("afterprint", cleanup, { once: true });
+      showToast("전체 계획표 PDF 저장 창을 엽니다. 대상에서 PDF 저장을 선택하세요.");
+      window.setTimeout(() => {
+        window.print();
+        window.setTimeout(cleanup, 1800);
+      }, 120);
     });
   });
 }
@@ -2627,11 +2757,9 @@ function setupTripDate() {
   const dateHint = document.querySelector("#dateHint");
   if (!tripDate || !dateHint) return;
 
-  const savedDate = readStorage(storageKeys.tripDate);
-  if (savedDate) {
-    tripDate.value = savedDate;
-    dateHint.textContent = `${savedDate} 출발 기준으로 확인하세요.`;
-  }
+  const savedDate = readStorage(storageKeys.tripDate) || tripDefaults.startDate;
+  tripDate.value = savedDate;
+  dateHint.textContent = `${savedDate} 출발 기준으로 확인하세요. 기본값은 첨부 일정표 기준입니다.`;
 
   tripDate.addEventListener("change", () => {
     if (!tripDate.value) return;
