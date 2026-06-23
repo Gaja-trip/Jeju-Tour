@@ -2085,12 +2085,17 @@ footer {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   flex-wrap: nowrap;
+  align-items: center;
 }
 
 .route-map-days button {
   min-width: 0;
   width: 100%;
-  padding-inline: 6px;
+  min-height: 32px;
+  padding: 5px 6px;
+  font-size: .78rem;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .route-map-days[data-overlay-schedule-tabs] {
@@ -2105,7 +2110,12 @@ footer {
 
 .map-tool-row .btn {
   width: 100%;
-  padding-inline: 8px;
+  height: 32px;
+  min-height: 32px;
+  padding: 5px 7px;
+  font-size: .78rem;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .map-tool-row .btn.active {
@@ -2121,23 +2131,34 @@ footer {
 
 .map-search-row input {
   width: 100%;
-  min-height: 40px;
+  min-height: 36px;
   padding: 0 12px;
   border: 1px solid rgba(6,24,32,.12);
   border-radius: 12px;
   background: #fff;
   color: var(--ink);
   font: inherit;
-  font-size: .88rem;
+  font-size: .8rem;
   font-weight: 800;
 }
 
+.map-search-row .btn,
+.route-save-row .btn {
+  height: 32px;
+  min-height: 32px;
+  padding: 5px 7px;
+  font-size: .78rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
 .route-status {
-  padding: 12px;
+  padding: 10px;
   border-radius: 14px;
   background: #e8f8f4;
   color: var(--ocean);
-  font-size: .9rem;
+  font-size: .78rem;
+  line-height: 1.42;
   font-weight: 900;
 }
 
@@ -2930,7 +2951,7 @@ footer {
 
   .route-status {
     padding: 9px 10px;
-    font-size: .82rem;
+    font-size: .76rem;
   }
 
   .route-result-card {
@@ -3226,9 +3247,9 @@ footer {
   }
 
   .route-map-page .route-map-days button {
-    min-height: 36px;
-    padding: 7px 4px;
-    font-size: .78rem;
+    min-height: 32px;
+    padding: 5px 4px;
+    font-size: .76rem;
     line-height: 1.05;
     white-space: nowrap;
   }
