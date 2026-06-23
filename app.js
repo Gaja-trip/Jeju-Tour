@@ -1,6 +1,6 @@
 const storageKeys = {
-  routePlan: "jeju-bike-route-plan-v2",
-  activeDay: "jeju-bike-active-day-v2",
+  routePlan: "jeju-bike-route-plan-v3",
+  activeDay: "jeju-bike-active-day-v3",
   transport: "jeju-bike-transport-v2",
   tripDate: "jeju-bike-trip-date",
   ferryOutboundDate: "jeju-bike-ferry-outbound-date",
@@ -944,6 +944,11 @@ function getRoutePlan() {
 
 function saveRoutePlan(plan) {
   writeStorage(storageKeys.routePlan, JSON.stringify(plan));
+}
+
+function resetRoutePlanToDefault() {
+  writeStorage(storageKeys.routePlan, "");
+  writeStorage(storageKeys.activeDay, "");
 }
 
 function getSelectedTransportId() {
@@ -2660,6 +2665,20 @@ function setupVWorldRouteEditor() {
     showToast("교통편을 전체계획표에 반영했습니다.");
     renderOverlayViews();
   });
+  root.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-reset-schedule]");
+    if (!button) return;
+    event.preventDefault();
+    resetRoutePlanToDefault();
+    currentDay = "day1";
+    overlayScheduleFilter = "all";
+    clearRoute();
+    renderDayTabs();
+    renderOverlayViews();
+    setPanelView("schedule");
+    setStatus("일정표를 기본값으로 복구했습니다.");
+    showToast("일정표를 기본값으로 복구했습니다.");
+  });
 
   const initialParams = new URLSearchParams(window.location.search);
   const requestedPanel = initialParams.get("panel");
@@ -2756,17 +2775,8 @@ function setupLinkedSchedulePage() {
   const cards = document.querySelector("[data-linked-schedule-cards]");
   if (!tabs || !summary || !cards) return;
 
-  let filter = activeDay() || "all";
-  const segments = resolveSegments();
-
-  tabs.innerHTML = `<button type="button" data-schedule-filter="all">전체</button>${segments.map((segment) => `<button type="button" data-schedule-filter="${segment.id}">${shortDayLabel(segment.id)}</button>`).join("")}`;
-  summary.innerHTML = segments.map((segment) => `
-    <article class="summary-card" data-summary-day="${segment.id}">
-      <strong>${segment.day} · ${segment.distance}</strong>
-      <span>${segment.title} · ${segment.theme}</span>
-    </article>
-  `).join("");
-  cards.innerHTML = segments.map((segment) => renderScheduleCard(segment)).join("");
+  const resetButton = document.querySelector("[data-reset-schedule]");
+  let filter = getRequestedDay() || readStorage(storageKeys.activeDay) || "all";
 
   const setFilter = (nextFilter) => {
     filter = nextFilter;
@@ -2784,12 +2794,32 @@ function setupLinkedSchedulePage() {
     });
   };
 
+  const render = () => {
+    const segments = resolveSegments();
+    tabs.innerHTML = `<button type="button" data-schedule-filter="all">전체</button>${segments.map((segment) => `<button type="button" data-schedule-filter="${segment.id}">${shortDayLabel(segment.id)}</button>`).join("")}`;
+    summary.innerHTML = segments.map((segment) => `
+      <article class="summary-card" data-summary-day="${segment.id}">
+        <strong>${segment.day} · ${segment.distance}</strong>
+        <span>${segment.title} · ${segment.theme}</span>
+      </article>
+    `).join("");
+    cards.innerHTML = segments.map((segment) => renderScheduleCard(segment)).join("");
+    setFilter(filter);
+    setupNaverMapLinks(cards);
+  };
+
   tabs.addEventListener("click", (event) => {
     const button = event.target.closest("[data-schedule-filter]");
     if (button) setFilter(button.dataset.scheduleFilter);
   });
+  resetButton?.addEventListener("click", () => {
+    resetRoutePlanToDefault();
+    filter = "all";
+    render();
+    showToast("일정표를 기본값으로 복구했습니다.");
+  });
 
-  setFilter(filter);
+  render();
 }
 
 function renderTransportChoice(option, selected) {
