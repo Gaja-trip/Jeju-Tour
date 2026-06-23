@@ -2050,6 +2050,7 @@ function setupVWorldRouteEditor() {
   const viewTabs = root.querySelectorAll("[data-panel-view-tab]");
   const panelViews = root.querySelectorAll("[data-panel-view]");
   const routePanel = root.querySelector("[data-route-panel]");
+  const panelEdgeToggle = root.querySelector("[data-panel-edge-toggle]");
   const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
   const overlaySchedule = root.querySelector("[data-overlay-schedule]");
   const overlayRestaurants = root.querySelector("[data-overlay-restaurants]");
@@ -2114,6 +2115,8 @@ function setupVWorldRouteEditor() {
     root.classList.toggle("panel-collapsed", collapsed);
     routePanel?.setAttribute("aria-expanded", String(!collapsed));
     routePanel?.setAttribute("aria-label", collapsed ? "패널 열기" : "패널 숨기기");
+    panelEdgeToggle?.setAttribute("aria-label", collapsed ? "패널 열기" : "패널 숨기기");
+    panelEdgeToggle?.setAttribute("aria-expanded", String(!collapsed));
     window.setTimeout(() => map?.invalidateSize(), 220);
   };
 
@@ -2609,6 +2612,11 @@ function setupVWorldRouteEditor() {
   viewTabs.forEach((button) => {
     button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
   });
+  panelEdgeToggle?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setPanelCollapsed(!root.classList.contains("panel-collapsed"));
+  });
   routePanel?.addEventListener("click", (event) => {
     const collapsed = root.classList.contains("panel-collapsed");
     if (collapsed) {
@@ -2938,7 +2946,7 @@ function preparePdfExportRoot() {
   root.dataset.pdfExportRoot = "true";
   root.innerHTML = `
     <header class="pdf-export-header">
-      <p>Jeju-Tour Plan</p>
+      <p>제주 자전거 투어</p>
       <h1>${tripDefaults.title}</h1>
       <span>${tripDefaults.dateRange}</span>
     </header>

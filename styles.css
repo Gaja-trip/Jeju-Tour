@@ -32,6 +32,13 @@ html {
   scroll-behavior: smooth;
 }
 
+html.route-map-document {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   color: var(--ink);
@@ -1846,6 +1853,7 @@ footer {
   height: 100vh;
   overflow: hidden;
   background: #071b24;
+  overscroll-behavior: none;
 }
 
 .route-map-shell {
@@ -1860,6 +1868,7 @@ footer {
   inset: 0;
   z-index: 1;
   background: #dfeceb;
+  overflow: hidden;
 }
 
 .map-load-error {
@@ -1889,7 +1898,7 @@ footer {
   background: rgba(255,253,247,.92);
   box-shadow: var(--shadow-dark);
   backdrop-filter: blur(16px);
-  overflow-y: auto;
+  overflow: hidden;
   transition: transform .24s ease, max-height .24s ease;
 }
 
@@ -1914,7 +1923,36 @@ footer {
   display: none;
 }
 
+.route-panel-edge-toggle {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  right: 8px;
+  width: 12px;
+  height: 64px;
+  transform: translateY(-50%);
+  border: 1px solid rgba(8,124,131,.22);
+  border-radius: 999px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 8px 22px rgba(6,24,32,.16);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.route-panel-edge-toggle:hover,
+.route-panel-edge-toggle:focus-visible {
+  background: #dffbf4;
+  outline: none;
+}
+
+.route-map-shell.panel-collapsed .route-panel-edge-toggle {
+  z-index: 20;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 .route-panel-top {
+  flex: 0 0 auto;
   display: flex;
   align-items: stretch;
   flex-direction: column;
@@ -1970,8 +2008,15 @@ footer {
 }
 
 .panel-view {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
 }
 
 .panel-view[hidden] {
@@ -2351,6 +2396,17 @@ footer {
 
 .leaflet-control-attribution {
   font-size: 10px;
+}
+
+.leaflet-container,
+.leaflet-pane,
+.leaflet-map-pane {
+  overflow: hidden;
+}
+
+.leaflet-shadow-pane,
+.leaflet-marker-shadow {
+  display: none !important;
 }
 
 .leaflet-control-layers {
@@ -2747,7 +2803,7 @@ footer {
     margin: 0;
     max-height: min(72vh, 620px);
     gap: 10px;
-    padding: 10px 12px 14px;
+    padding: 20px 12px 14px;
     border-radius: 22px 22px 0 0;
   }
 
@@ -2766,6 +2822,24 @@ footer {
   .route-map-shell.panel-collapsed .route-map-panel::after {
     content: none;
     display: none;
+  }
+
+  .route-panel-edge-toggle {
+    top: 8px;
+    left: 50%;
+    right: auto;
+    width: 56px;
+    height: 5px;
+    transform: translateX(-50%);
+    border: 0;
+    border-radius: 999px;
+    background: #d9e9e5;
+    box-shadow: none;
+  }
+
+  .route-panel-edge-toggle:hover,
+  .route-panel-edge-toggle:focus-visible {
+    background: #bdeee3;
   }
 
   .route-panel-top {
