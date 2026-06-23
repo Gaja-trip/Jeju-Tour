@@ -1396,17 +1396,34 @@ let preparedGpxRoute = null;
 let preparedRoutePlaces = null;
 let learnedCyclingNetwork = null;
 
+function normalizeGpxPoint(point) {
+  const lat = Number(point?.[0]);
+  const lng = Number(point?.[1]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return {
+    lat,
+    lng,
+    gpxElevation: Number(point?.[2] || 0)
+  };
+}
+
 function getPreparedGpxRoute() {
   if (preparedGpxRoute) return preparedGpxRoute;
   const rawPoints = Array.isArray(window.JEJU_FANTASY_GPX?.points) ? window.JEJU_FANTASY_GPX.points : [];
-  const hasGpxElevation = rawPoints.some((point) => Number(point[2]) > 0);
+  const rawSegments = Array.isArray(window.JEJU_FANTASY_GPX?.segments) ? window.JEJU_FANTASY_GPX.segments : [];
+  const normalizedPoints = rawPoints.map(normalizeGpxPoint).filter(Boolean);
+  const normalizedSegments = rawSegments
+    .map((segment) => Array.isArray(segment) ? segment.map(normalizeGpxPoint).filter(Boolean) : [])
+    .filter((segment) => segment.length > 1);
+  let hasGpxElevation = normalizedPoints.some((point) => point.gpxElevation > 0);
+  if (!hasGpxElevation) {
+    hasGpxElevation = normalizedSegments.some((segment) => segment.some((point) => point.gpxElevation > 0));
+  }
   let totalDistanceKm = 0;
   const points = [];
 
-  rawPoints.forEach((point, index) => {
-    const lat = Number(point[0]);
-    const lng = Number(point[1]);
-    const gpxElevation = Number(point[2] || 0);
+  normalizedPoints.forEach((point, index) => {
+    const { lat, lng, gpxElevation } = point;
     if (index > 0) totalDistanceKm += distanceKm(points[index - 1], { lat, lng });
     const current = {
       lat,
@@ -1419,11 +1436,19 @@ function getPreparedGpxRoute() {
     points.push(current);
   });
 
+  const displaySegments = normalizedSegments.map((segment) => segment.map((point) => ({
+    lat: point.lat,
+    lng: point.lng,
+    elevation: hasGpxElevation ? point.gpxElevation : estimateElevation(point),
+    gpxElevation: point.gpxElevation
+  })));
+
   preparedGpxRoute = {
     name: window.JEJU_FANTASY_GPX?.name || "제주환상자전거길.gpx",
     points,
     totalDistanceKm,
-    hasGpxElevation
+    hasGpxElevation,
+    displaySegments
   };
   return preparedGpxRoute;
 }
@@ -2409,13 +2434,23 @@ function setupVWorldRouteEditor() {
 
   const gpxRoute = getPreparedGpxRoute();
   if (gpxRoute.points.length) {
-    baseRouteLine = L.polyline(gpxRoute.points.map((point) => [point.lat, point.lng]), {
-      color: "#087c83",
-      weight: 4,
-      opacity: 0.58,
-      lineJoin: "round"
-    }).addTo(map);
-    map.fitBounds(baseRouteLine.getBounds(), { padding: [28, 28] });
+    const baseRouteSegments = gpxRoute.displaySegments.length ? gpxRoute.displaySegments : [gpxRoute.points];
+    baseRouteLine = L.layerGroup().addTo(map);
+    baseRouteSegments.forEach((segment, index) => {
+      L.polyline(segment.map((point) => [point.lat, point.lng]), {
+        color: index === 0 ? "#087c83" : "#0f9aa3",
+        weight: index === 0 ? 4 : 3,
+        opacity: index === 0 ? 0.58 : 0.42,
+        lineJoin: "round",
+        lineCap: "round"
+      }).addTo(baseRouteLine);
+    });
+    const fitRouteLine = L.polyline(gpxRoute.points.map((point) => [point.lat, point.lng]), {
+      opacity: 0,
+      weight: 0,
+      interactive: false
+    }).addTo(baseRouteLine);
+    map.fitBounds(fitRouteLine.getBounds(), { padding: [28, 28] });
     setStatus("출발지를 선택하세요.");
   } else {
     setStatus("기본 경로 데이터를 불러오지 못했습니다. 경로 파일을 확인하세요.");
