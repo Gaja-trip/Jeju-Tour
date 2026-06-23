@@ -2616,10 +2616,15 @@ function setupVWorldRouteEditor() {
       setPanelCollapsed(false);
       return;
     }
-    if (isPanelControlTarget(event.target) && !collapsed) return;
-    if (event.target.closest("[data-panel-toggle-area]")) {
+    const toggleArea = event.target.closest("[data-panel-toggle-area]");
+    const panelNavTarget = event.target.closest(".panel-nav");
+    if (toggleArea && !panelNavTarget) {
+      event.preventDefault();
       setPanelCollapsed(true);
+      return;
     }
+    if (isPanelControlTarget(event.target)) return;
+    if (event.target === routePanel) setPanelCollapsed(true);
   });
   overlayScheduleTabs?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-overlay-schedule-filter]");
