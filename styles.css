@@ -1066,17 +1066,24 @@ footer {
   left: 50%;
   bottom: 20px;
   z-index: 50;
-  transform: translateX(-50%) translateY(120%);
+  transform: translateX(-50%) translateY(calc(100% + 32px));
   padding: 10px 14px;
   border-radius: 999px;
   background: var(--ink);
   color: #fff;
   box-shadow: var(--shadow-dark);
-  transition: transform .22s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform .22s ease, opacity .22s ease, visibility 0s linear .22s;
 }
 
 .toast.show {
   transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: transform .22s ease, opacity .22s ease;
 }
 
 .planner-body {
