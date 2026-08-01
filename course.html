@@ -12,18 +12,33 @@
 <body class="route-map-page">
   <main class="route-map-shell" data-vworld-route-editor>
     <div id="vworldMap" class="vworld-map" aria-label="V-World 지도"></div>
+    <div class="aerial-label-control" data-aerial-label-control hidden>
+      <button type="button" class="aerial-label-toggle" data-aerial-label-toggle role="switch" aria-checked="true" aria-label="항공사진 지명 표시">
+        <span>항공사진 지명</span>
+        <strong data-aerial-label-state>ON</strong>
+      </button>
+    </div>
 
     <aside class="route-map-panel" data-route-panel>
       <button class="route-panel-edge-toggle" type="button" data-panel-edge-toggle aria-label="패널 숨기기"></button>
       <div class="route-panel-top" data-panel-toggle-area>
         <a class="brand compact-brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> 제주 자전거 투어</a>
-        <div class="panel-nav">
-          <button type="button" data-panel-view-tab="course">코스</button>
-          <button type="button" data-panel-view-tab="restaurants">맛집</button>
-          <button type="button" data-panel-view-tab="schedule">일정표</button>
-          <button type="button" data-panel-view-tab="transport">교통편</button>
-          <button type="button" data-panel-view-tab="plan">계획표</button>
-        </div>
+        <nav class="panel-nav" aria-label="전체 메뉴">
+          <div class="panel-nav-primary">
+            <button type="button" data-panel-menu="plan" data-panel-default-view="plan" aria-controls="planSubmenu" aria-expanded="false">계획표</button>
+            <button type="button" data-panel-menu="stay-food" data-panel-default-view="lodging" aria-controls="stayFoodSubmenu" aria-expanded="false">숙소&amp;맛집</button>
+            <button type="button" data-panel-menu="transport" data-panel-view-tab="transport">교통편</button>
+            <button type="button" data-panel-menu="course" data-panel-view-tab="course">코스</button>
+          </div>
+          <div class="panel-subnav" id="planSubmenu" data-panel-submenu="plan" hidden>
+            <button type="button" data-panel-view-tab="plan">전체 계획표</button>
+            <button type="button" data-panel-view-tab="schedule">일정표</button>
+          </div>
+          <div class="panel-subnav" id="stayFoodSubmenu" data-panel-submenu="stay-food" hidden>
+            <button type="button" data-panel-view-tab="lodging">숙소</button>
+            <button type="button" data-panel-view-tab="restaurants">맛집</button>
+          </div>
+        </nav>
       </div>
 
       <div class="panel-view" data-panel-view="course">
@@ -80,6 +95,15 @@
           <h1>맛집 50선</h1>
         </div>
         <div class="overlay-scroll restaurant-panel-scroll" data-overlay-restaurants></div>
+      </div>
+
+      <div class="panel-view" data-panel-view="lodging" hidden>
+        <div class="route-panel-heading compact">
+          <p class="kicker">Lodging Areas</p>
+          <h1>숙소</h1>
+          <p>일정에 정해진 1~3박 숙박 권역을 지도와 함께 확인합니다.</p>
+        </div>
+        <div class="overlay-scroll lodging-panel-scroll" data-overlay-lodging></div>
       </div>
 
       <div class="panel-view" data-panel-view="schedule" hidden>

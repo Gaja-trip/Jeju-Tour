@@ -4,7 +4,8 @@ const storageKeys = {
   transport: "jeju-bike-transport-v2",
   tripDate: "jeju-bike-trip-date",
   ferryOutboundDate: "jeju-bike-ferry-outbound-date",
-  ferryReturnDate: "jeju-bike-ferry-return-date"
+  ferryReturnDate: "jeju-bike-ferry-return-date",
+  aerialLabels: "jeju-bike-aerial-labels-v1"
 };
 
 const dayLabels = {
@@ -96,6 +97,36 @@ const defaultItineraryMapRoutes = {
     ]
   }
 };
+
+const jejuLodgings = [
+  {
+    id: "night1",
+    night: "1박",
+    area: "협재·금능",
+    dayRange: "1일차 도착 · 2일차 출발",
+    lat: 33.3945,
+    lng: 126.2397,
+    summary: "서부 해안 첫날 도착 권역입니다. 8명과 자전거 8대 수용, 세탁·보관 가능 여부를 예약 전에 확인하세요."
+  },
+  {
+    id: "night2",
+    night: "2박",
+    area: "법환·서귀포",
+    dayRange: "2일차 도착 · 3일차 출발",
+    lat: 33.2376,
+    lng: 126.5159,
+    summary: "서남부 장거리 주행 뒤 머무는 권역입니다. 늦은 체크인과 자전거 보관, 인근 저녁 식사 동선을 함께 확인하세요."
+  },
+  {
+    id: "night3",
+    night: "3박",
+    area: "월정리·구좌",
+    dayRange: "3일차 도착 · 4일차 출발",
+    lat: 33.5568,
+    lng: 126.7952,
+    summary: "마지막 숙박 권역입니다. 다음 날 제주항 배편에 맞춘 조기 출발과 간단한 조식 가능 여부를 확인하세요."
+  }
+];
 
 const vworldApiKey = "5880CF73-00D8-30E9-BCF1-3DC6E80FC58B";
 const seaferryBookingUrl = "https://www.seaferry.co.kr/bbs/content.php?co_id=p201";
@@ -2053,14 +2084,20 @@ function setupVWorldRouteEditor() {
   const placeList = root.querySelector("[data-place-list]");
   const placeApplyButtons = root.querySelectorAll("[data-place-apply]");
   const viewTabs = root.querySelectorAll("[data-panel-view-tab]");
+  const panelMenuButtons = root.querySelectorAll("[data-panel-menu]");
+  const panelSubmenus = root.querySelectorAll("[data-panel-submenu]");
   const panelViews = root.querySelectorAll("[data-panel-view]");
   const routePanel = root.querySelector("[data-route-panel]");
   const panelEdgeToggle = root.querySelector("[data-panel-edge-toggle]");
   const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
   const overlaySchedule = root.querySelector("[data-overlay-schedule]");
+  const overlayLodging = root.querySelector("[data-overlay-lodging]");
   const overlayRestaurants = root.querySelector("[data-overlay-restaurants]");
   const overlayTransport = root.querySelector("[data-overlay-transport]");
   const overlayPlan = root.querySelector("[data-overlay-plan]");
+  const aerialLabelControl = root.querySelector("[data-aerial-label-control]");
+  const aerialLabelToggle = root.querySelector("[data-aerial-label-toggle]");
+  const aerialLabelState = root.querySelector("[data-aerial-label-state]");
 
   let currentDay = activeDay();
   let mode = "start";
@@ -2075,12 +2112,26 @@ function setupVWorldRouteEditor() {
   let endMarker = null;
   let placeLayer = null;
   let itineraryPlaceLayer = null;
+  let lodgingLayer = null;
   let restaurantLayer = null;
+  let hybridLabelLayer = null;
   const itineraryRouteLayers = {};
   const itineraryRouteBounds = {};
+  const lodgingMarkers = new Map();
   const restaurantMarkers = new Map();
   let overlayScheduleFilter = "all";
   let currentView = "course";
+  let aerialMode = false;
+  let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
+
+  const panelMenuForView = {
+    plan: "plan",
+    schedule: "plan",
+    lodging: "stay-food",
+    restaurants: "stay-food",
+    transport: "transport",
+    course: "course"
+  };
 
   const renderDayTabs = () => {
     dayTabs.innerHTML = Object.entries(dayLabels).map(([dayId, label]) => `
@@ -2090,6 +2141,7 @@ function setupVWorldRouteEditor() {
 
   const setPanelView = (view) => {
     currentView = view;
+    const activeMenu = panelMenuForView[view];
     panelViews.forEach((section) => {
       section.hidden = section.dataset.panelView !== view;
     });
@@ -2097,6 +2149,17 @@ function setupVWorldRouteEditor() {
       const active = button.dataset.panelViewTab === view;
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
+    });
+    panelMenuButtons.forEach((button) => {
+      const active = button.dataset.panelMenu === activeMenu;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+      if (button.hasAttribute("aria-controls")) {
+        button.setAttribute("aria-expanded", String(active));
+      }
+    });
+    panelSubmenus.forEach((submenu) => {
+      submenu.hidden = submenu.dataset.panelSubmenu !== activeMenu;
     });
     if (view !== "course") renderOverlayViews();
     window.setTimeout(() => map?.invalidateSize(), 80);
@@ -2125,8 +2188,42 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => map?.invalidateSize(), 220);
   };
 
+  const syncAerialLabelLayer = () => {
+    const showLabels = aerialMode && aerialLabelsEnabled;
+    if (map && hybridLabelLayer) {
+      if (showLabels && !map.hasLayer(hybridLabelLayer)) hybridLabelLayer.addTo(map);
+      if (!showLabels && map.hasLayer(hybridLabelLayer)) map.removeLayer(hybridLabelLayer);
+    }
+    if (aerialLabelControl) aerialLabelControl.hidden = !aerialMode;
+    if (aerialLabelToggle) {
+      aerialLabelToggle.classList.toggle("is-on", showLabels);
+      aerialLabelToggle.setAttribute("aria-checked", String(showLabels));
+    }
+    if (aerialLabelState) aerialLabelState.textContent = showLabels ? "ON" : "OFF";
+  };
+
+  const toggleAerialLabels = () => {
+    if (!aerialMode) return;
+    aerialLabelsEnabled = !aerialLabelsEnabled;
+    writeStorage(storageKeys.aerialLabels, aerialLabelsEnabled ? "on" : "off");
+    syncAerialLabelLayer();
+    showToast(`항공사진 지명 표시를 ${aerialLabelsEnabled ? "켰습니다" : "껐습니다"}.`);
+  };
+
   const isPanelControlTarget = (target) => {
     return !!target.closest("a, button, input, textarea, select, label, [role='button']");
+  };
+
+  const focusLodging = (index) => {
+    const lodging = jejuLodgings[index];
+    if (!lodging || !map) return;
+    if (lodgingLayer && !map.hasLayer(lodgingLayer)) lodgingLayer.addTo(map);
+    setPanelView("lodging");
+    const marker = lodgingMarkers.get(index);
+    map.flyTo([lodging.lat, lodging.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
+    window.setTimeout(() => marker?.openPopup(), 450);
+    showToast(`${lodging.night} ${lodging.area} 숙박 권역을 지도에 표시했습니다.`);
+    if (window.matchMedia("(max-width: 760px)").matches) setPanelCollapsed(true);
   };
 
   const focusRestaurant = (index) => {
@@ -2151,6 +2248,18 @@ function setupVWorldRouteEditor() {
     const requestedName = params.get("restaurantName") || rawIndex;
     if (!requestedName) return null;
     return jejuRestaurants.findIndex((restaurant) => restaurant.name === requestedName);
+  };
+
+  const requestedLodgingIndex = () => {
+    const params = new URLSearchParams(window.location.search);
+    const rawIndex = params.get("lodging");
+    if (rawIndex && /^\d+$/.test(rawIndex)) {
+      const index = Number(rawIndex);
+      return jejuLodgings[index] ? index : null;
+    }
+    const requestedArea = params.get("lodgingArea") || rawIndex;
+    if (!requestedArea) return null;
+    return jejuLodgings.findIndex((lodging) => lodging.area === requestedArea);
   };
 
   const drawRoute = () => {
@@ -2352,6 +2461,20 @@ function setupVWorldRouteEditor() {
     setupNaverMapLinks(overlayTransport);
   };
 
+  const renderOverlayLodging = () => {
+    if (!overlayLodging) return;
+    overlayLodging.innerHTML = `
+      <div class="lodging-summary">
+        <strong>${tripDefaults.lodgingPlan}</strong>
+        <span>숙소 업소는 미확정이며, 아래 카드는 일정에 포함된 숙박 권역입니다.</span>
+      </div>
+      <div class="lodging-panel-list">
+        ${renderLodgingList()}
+      </div>
+    `;
+    setupNaverMapLinks(overlayLodging);
+  };
+
   const renderOverlayRestaurants = () => {
     if (!overlayRestaurants) return;
     overlayRestaurants.innerHTML = `
@@ -2369,6 +2492,7 @@ function setupVWorldRouteEditor() {
   };
 
   function renderOverlayViews() {
+    renderOverlayLodging();
     renderOverlayRestaurants();
     renderOverlaySchedule();
     renderOverlayTransport();
@@ -2439,6 +2563,15 @@ function setupVWorldRouteEditor() {
     maxZoom: 19,
     attribution: 'Imagery &copy; <a href="https://www.vworld.kr/">V-World</a>'
   });
+  map.createPane("aerialLabelsPane");
+  map.getPane("aerialLabelsPane").style.zIndex = "350";
+  map.getPane("aerialLabelsPane").style.pointerEvents = "none";
+  hybridLabelLayer = L.tileLayer(`https://api.vworld.kr/req/wmts/1.0.0/${vworldApiKey}/Hybrid/{z}/{y}/{x}.png`, {
+    maxZoom: 19,
+    pane: "aerialLabelsPane",
+    attribution: 'Labels &copy; <a href="https://www.vworld.kr/">V-World</a>'
+  });
+  syncAerialLabelLayer();
 
   const gpxRoute = getPreparedGpxRoute();
   if (gpxRoute.points.length) {
@@ -2542,6 +2675,30 @@ function setupVWorldRouteEditor() {
     marker.bindPopup(itineraryPlacePopup(place));
   });
 
+  lodgingLayer = L.layerGroup().addTo(map);
+  jejuLodgings.forEach((lodging, index) => {
+    const marker = L.circleMarker([lodging.lat, lodging.lng], {
+      radius: 9,
+      color: "#0b5d67",
+      weight: 3,
+      fillColor: "#dffbf4",
+      fillOpacity: 1
+    }).addTo(lodgingLayer);
+    marker.bindTooltip(`${lodging.night} · ${lodging.area}`, {
+      direction: "top",
+      offset: [0, -7]
+    });
+    marker.bindPopup(`
+      <strong>${lodging.night} · ${lodging.area}</strong><br>
+      ${lodging.dayRange}<br>
+      ${lodging.summary}<br>
+      <a target="_blank" rel="noreferrer" href="${naverSearchUrl(lodgingSearchTerm(lodging))}">네이버</a>
+      · <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(lodgingSearchTerm(lodging))}">다음</a>
+      · <a target="_blank" rel="noreferrer" href="${googleSearchUrl(lodgingSearchTerm(lodging))}">구글</a>
+    `);
+    lodgingMarkers.set(index, marker);
+  });
+
   restaurantLayer = L.layerGroup().addTo(map);
   jejuRestaurants.forEach((restaurant, index) => {
     const marker = L.circleMarker([restaurant.lat, restaurant.lng], {
@@ -2572,10 +2729,27 @@ function setupVWorldRouteEditor() {
       "일정 지점": itineraryPlaceLayer,
       "자전거길": learnedRouteLayer,
       "장소": placeLayer,
+      "숙박 권역": lodgingLayer,
       "맛집": restaurantLayer
     },
     { position: "topright", collapsed: true }
   ).addTo(map);
+
+  if (aerialLabelControl) {
+    const aerialControl = L.control({ position: "topright" });
+    aerialControl.onAdd = () => {
+      L.DomEvent.disableClickPropagation(aerialLabelControl);
+      L.DomEvent.disableScrollPropagation(aerialLabelControl);
+      return aerialLabelControl;
+    };
+    aerialControl.addTo(map);
+  }
+
+  map.on("baselayerchange", (event) => {
+    aerialMode = event.layer === satelliteLayer;
+    syncAerialLabelLayer();
+  });
+  aerialLabelToggle?.addEventListener("click", toggleAerialLabels);
 
   if (placeList) {
     placeList.innerHTML = getPreparedRoutePlaces()
@@ -2616,6 +2790,10 @@ function setupVWorldRouteEditor() {
   });
   viewTabs.forEach((button) => {
     button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
+  });
+  panelMenuButtons.forEach((button) => {
+    const defaultView = button.dataset.panelDefaultView;
+    if (defaultView) button.addEventListener("click", () => setPanelView(defaultView));
   });
   panelEdgeToggle?.addEventListener("click", (event) => {
     event.preventDefault();
@@ -2658,6 +2836,18 @@ function setupVWorldRouteEditor() {
     if (!card) return;
     focusRestaurant(Number(card.dataset.restaurantCard));
   });
+  overlayLodging?.addEventListener("click", (event) => {
+    const mapLink = event.target.closest("[data-lodging-map-link]");
+    if (mapLink) {
+      event.preventDefault();
+      focusLodging(Number(mapLink.dataset.lodgingIndex));
+      return;
+    }
+    if (event.target.closest("a, button")) return;
+    const card = event.target.closest("[data-lodging-card]");
+    if (!card) return;
+    focusLodging(Number(card.dataset.lodgingCard));
+  });
   overlayTransport?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-transport-select]");
     if (!button) return;
@@ -2682,10 +2872,13 @@ function setupVWorldRouteEditor() {
 
   const initialParams = new URLSearchParams(window.location.search);
   const requestedPanel = initialParams.get("panel");
+  const initialLodging = requestedLodgingIndex();
   const initialRestaurant = requestedRestaurantIndex();
-  if (initialRestaurant !== null && initialRestaurant >= 0) {
+  if (initialLodging !== null && initialLodging >= 0) {
+    window.setTimeout(() => focusLodging(initialLodging), 260);
+  } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["course", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+  } else if (["course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }
@@ -2837,6 +3030,51 @@ function renderTransportChoice(option, selected) {
       <button class="btn dark small" type="button" data-transport-select="${option.id}">${selected ? "선택됨" : "이 교통편으로 확정"}</button>
     </article>
   `;
+}
+
+function lodgingSearchTerm(lodging) {
+  return `제주 ${lodging.area} 8인 숙소 자전거 보관`;
+}
+
+function lodgingMapHref(lodging, index) {
+  return `course.html?panel=lodging&lodging=${encodeURIComponent(String(index))}&lodgingArea=${encodeURIComponent(lodging.area)}`;
+}
+
+function renderLodgingActions(lodging, index) {
+  const term = lodgingSearchTerm(lodging);
+  return `
+    <div class="restaurant-actions lodging-actions">
+      <a class="btn dark small" href="${lodgingMapHref(lodging, index)}" data-lodging-map-link data-lodging-index="${index}">지도</a>
+      <a class="btn light small" target="_blank" rel="noreferrer" href="${naverSearchUrl(term)}" data-naver-map data-naver-query="${term}" data-web-url="${naverSearchUrl(term)}">네이버</a>
+      <a class="btn light small" target="_blank" rel="noreferrer" href="${kakaoSearchUrl(term)}">다음</a>
+      <a class="btn light small" target="_blank" rel="noreferrer" href="${googleSearchUrl(term)}">구글</a>
+    </div>
+  `;
+}
+
+function renderLodgingCard(lodging, index) {
+  return `
+    <article class="lodging-card" data-lodging-card="${index}">
+      <div class="lodging-card-head">
+        <span>${lodging.night}</span>
+        <div>
+          <strong>${lodging.area}</strong>
+          <small>${lodging.dayRange}</small>
+        </div>
+      </div>
+      <p>${lodging.summary}</p>
+      <div class="lodging-checks" aria-label="예약 전 확인 사항">
+        <span>8명 수용 확인</span>
+        <span>자전거 보관 확인</span>
+        <span>세탁 확인</span>
+      </div>
+      ${renderLodgingActions(lodging, index)}
+    </article>
+  `;
+}
+
+function renderLodgingList() {
+  return jejuLodgings.map((lodging, index) => renderLodgingCard(lodging, index)).join("");
 }
 
 function restaurantSearchTerm(restaurant) {
