@@ -1,5 +1,5 @@
 const storageKeys = {
-  routePlan: "jeju-bike-route-plan-v3",
+  routePlan: "jeju-bike-route-plan-v4",
   activeDay: "jeju-bike-active-day-v3",
   transport: "jeju-bike-transport-v2",
   tripDate: "jeju-bike-trip-date",
@@ -31,9 +31,9 @@ const tripDefaults = {
   riders: "8명",
   vehicle: "전주↔목포 차량 이동, 목포↔제주 선박 이동, 제주 내 자전거 일주",
   ferryPlan: "목포 08:30 출항 / 제주 13:30~13:40 출항 예정",
-  lodgingPlan: "1박 협재·금능, 2박 법환·서귀포, 3박 월정리·구좌",
-  totalDistance: "237~255km",
-  totalRideTime: "15시간 30분~16시간 40분",
+  lodgingPlan: "1박 일성제주비치콘도&리조트 · 2박 더베이제주리조트 · 3박 아쿠아뷰티크",
+  totalDistance: "약 230.5km",
+  totalRideTime: "약 15시간 22분",
   totalAscent: "+1,220~1,300m",
   operationNotes: [
     "1일차와 4일차는 배편 때문에 라이딩 가능 시간이 짧으므로 항구 도착 시간을 우선합니다.",
@@ -44,22 +44,23 @@ const tripDefaults = {
 
 const defaultItineraryMapRoutes = {
   day1: {
-    title: "제주항 → 협재·금능",
-    distance: "35~38km",
+    title: "제주항 → 일성제주비치콘도&리조트",
+    distance: "약 42km",
     points: [
       { name: "제주항", lat: 33.5162, lng: 126.5280, detail: "제주항 도착, 자전거 수령과 장비 점검" },
       { name: "용두암", lat: 33.5161, lng: 126.5117, detail: "제주환상자전거길 출발 인증 후보" },
       { name: "이호테우해변", lat: 33.4971, lng: 126.4522, detail: "초반 대열 정비와 해안도로 진입" },
       { name: "애월·한담해안도로", lat: 33.4637, lng: 126.3096, detail: "카페·편의점 보급이 쉬운 구간" },
       { name: "다락쉼터", lat: 33.4523, lng: 126.2871, detail: "인증·사진 휴식 추천 지점" },
-      { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "1박 숙박 권역" }
+      { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "숙소 도착 전 마지막 해안 구간" },
+      { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, detail: "1박 숙소 · 한림읍 한림로 127" }
     ]
   },
   day2: {
-    title: "협재·금능 → 법환·서귀포",
-    distance: "78~83km",
+    title: "일성제주비치콘도&리조트 → 더베이제주리조트",
+    distance: "약 74km",
     points: [
-      { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "2일차 출발 지점" },
+      { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, detail: "2일차 출발 · 한림읍 한림로 127" },
       { name: "신창풍차해안도로", lat: 33.3459, lng: 126.1746, detail: "강풍 가능 구간" },
       { name: "해거름마을공원", lat: 33.3424, lng: 126.1830, detail: "인증·10분 휴식" },
       { name: "수월봉·차귀도", lat: 33.2945, lng: 126.1636, detail: "사진 휴식 후 모슬포까지 페이스 유지" },
@@ -67,33 +68,31 @@ const defaultItineraryMapRoutes = {
       { name: "송악산", lat: 33.2066, lng: 126.2902, detail: "오후 업다운 전 휴식" },
       { name: "산방산", lat: 33.2391, lng: 126.3130, detail: "기복과 관광 차량 주의" },
       { name: "중문", lat: 33.2497, lng: 126.4124, detail: "서귀포 진입 전 보급 후보" },
-      { name: "법환·서귀포", lat: 33.2376, lng: 126.5159, detail: "2박 숙박 권역" }
+      { name: "더베이제주리조트", lat: 33.24118, lng: 126.593475, detail: "2박 숙소 · 서귀포시 문필로35번길 46" }
     ]
   },
   day3: {
-    title: "법환·서귀포 → 월정리",
-    distance: "82~86km",
+    title: "더베이제주리조트 → 아쿠아뷰티크",
+    distance: "약 77km",
     points: [
-      { name: "법환·서귀포", lat: 33.2376, lng: 126.5159, detail: "3일차 출발 지점" },
-      { name: "정방·보목", lat: 33.2447, lng: 126.5796, detail: "시내 교통량과 짧은 기복 주의" },
+      { name: "더베이제주리조트", lat: 33.24118, lng: 126.593475, detail: "3일차 출발 · 서귀포시 문필로35번길 46" },
       { name: "쇠소깍", lat: 33.2525, lng: 126.6231, detail: "인증·휴식" },
       { name: "남원·위미", lat: 33.2791, lng: 126.7209, detail: "편의점·카페 보급" },
       { name: "표선해변", lat: 33.3244, lng: 126.8324, detail: "점심을 늦추지 않는 핵심 지점" },
       { name: "성산일출봉·광치기해변", lat: 33.4585, lng: 126.9348, detail: "사진 휴식" },
-      { name: "종달·세화", lat: 33.5260, lng: 126.8567, detail: "월정리 접근 전 바람 방향 확인" },
-      { name: "월정리", lat: 33.5568, lng: 126.7952, detail: "3박 숙박 권역" }
+      { name: "종달·세화", lat: 33.5260, lng: 126.8567, detail: "행원리 접근 전 바람 방향 확인" },
+      { name: "아쿠아뷰티크", lat: 33.5569228, lng: 126.801566, detail: "3박 숙소 · 구좌읍 해맞이해안로 522" }
     ]
   },
   day4: {
-    title: "월정리 → 제주항",
-    distance: "42~48km",
+    title: "아쿠아뷰티크 → 제주항",
+    distance: "약 37km",
     points: [
-      { name: "월정리", lat: 33.5568, lng: 126.7952, detail: "4일차 조기 출발 지점" },
+      { name: "아쿠아뷰티크", lat: 33.5569228, lng: 126.801566, detail: "4일차 조기 출발 · 구좌읍 해맞이해안로 522" },
       { name: "김녕성세기해변", lat: 33.5576, lng: 126.7593, detail: "인증·사진" },
       { name: "함덕서우봉해변", lat: 33.5437, lng: 126.6692, detail: "짧은 휴식" },
       { name: "조천·삼양 해안", lat: 33.5262, lng: 126.5865, detail: "마지막 보급" },
-      { name: "제주항", lat: 33.5162, lng: 126.5280, detail: "12:00 전후 도착 목표, 자전거 선적 준비" },
-      { name: "용두암", lat: 33.5161, lng: 126.5117, detail: "종주 인증 목적이면 선택 경유" }
+      { name: "제주항", lat: 33.5162, lng: 126.5280, detail: "11:30 전후 도착 목표, 자전거 선적 준비" }
     ]
   }
 };
@@ -102,29 +101,35 @@ const jejuLodgings = [
   {
     id: "night1",
     night: "1박",
-    area: "협재·금능",
+    name: "일성제주비치콘도&리조트",
+    area: "금능·한림",
+    address: "제주특별자치도 제주시 한림읍 한림로 127",
     dayRange: "1일차 도착 · 2일차 출발",
-    lat: 33.3945,
-    lng: 126.2397,
-    summary: "서부 해안 첫날 도착 권역입니다. 8명과 자전거 8대 수용, 세탁·보관 가능 여부를 예약 전에 확인하세요."
+    lat: 33.3856640884,
+    lng: 126.2211180134,
+    summary: "제주항에서 서부 해안을 따라 이동한 첫날 숙소입니다. 8명 이용 조건과 자전거 보관·세탁 가능 여부를 예약처에 확인하세요."
   },
   {
     id: "night2",
     night: "2박",
-    area: "법환·서귀포",
+    name: "더베이제주리조트",
+    area: "보목·서귀포",
+    address: "제주특별자치도 서귀포시 문필로35번길 46",
     dayRange: "2일차 도착 · 3일차 출발",
-    lat: 33.2376,
-    lng: 126.5159,
-    summary: "서남부 장거리 주행 뒤 머무는 권역입니다. 늦은 체크인과 자전거 보관, 인근 저녁 식사 동선을 함께 확인하세요."
+    lat: 33.24118,
+    lng: 126.593475,
+    summary: "서남부 해안을 달린 뒤 도착하는 보목동 숙소입니다. 체크인 마감과 자전거 보관, 인근 저녁 식사 동선을 함께 확인하세요."
   },
   {
     id: "night3",
     night: "3박",
-    area: "월정리·구좌",
+    name: "아쿠아뷰티크",
+    area: "행원·구좌",
+    address: "제주특별자치도 제주시 구좌읍 해맞이해안로 522",
     dayRange: "3일차 도착 · 4일차 출발",
-    lat: 33.5568,
-    lng: 126.7952,
-    summary: "마지막 숙박 권역입니다. 다음 날 제주항 배편에 맞춘 조기 출발과 간단한 조식 가능 여부를 확인하세요."
+    lat: 33.5569228,
+    lng: 126.801566,
+    summary: "마지막 밤을 머무는 행원리 숙소입니다. 다음 날 제주항 배편에 맞춘 조기 출발과 간단한 조식 가능 여부를 확인하세요."
   }
 ];
 
@@ -137,16 +142,19 @@ const jejuBikeNodes = [
   { name: "이호테우", lat: 33.4971, lng: 126.4522, elevation: 10 },
   { name: "애월", lat: 33.4637, lng: 126.3096, elevation: 18 },
   { name: "협재", lat: 33.3945, lng: 126.2397, elevation: 12 },
+  { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, elevation: 12 },
   { name: "신창풍차해안도로", lat: 33.3459, lng: 126.1746, elevation: 9 },
   { name: "모슬포/대정", lat: 33.2208, lng: 126.2496, elevation: 20 },
   { name: "송악산", lat: 33.2066, lng: 126.2902, elevation: 48 },
   { name: "산방산", lat: 33.2391, lng: 126.3130, elevation: 74 },
   { name: "중문", lat: 33.2497, lng: 126.4124, elevation: 64 },
   { name: "서귀포", lat: 33.2461, lng: 126.5615, elevation: 42 },
+  { name: "더베이제주리조트", lat: 33.24118, lng: 126.593475, elevation: 20 },
   { name: "쇠소깍", lat: 33.2525, lng: 126.6231, elevation: 16 },
   { name: "표선", lat: 33.3244, lng: 126.8324, elevation: 18 },
   { name: "성산", lat: 33.4585, lng: 126.9348, elevation: 24 },
   { name: "세화", lat: 33.5260, lng: 126.8567, elevation: 14 },
+  { name: "아쿠아뷰티크", lat: 33.5569228, lng: 126.801566, elevation: 12 },
   { name: "월정리", lat: 33.5568, lng: 126.7952, elevation: 12 },
   { name: "김녕", lat: 33.5576, lng: 126.7593, elevation: 10 },
   { name: "함덕", lat: 33.5437, lng: 126.6692, elevation: 11 },
@@ -161,6 +169,7 @@ const jejuRoutePlaces = [
   { name: "곽지", aliases: ["곽지해수욕장"], lat: 33.4501, lng: 126.3046, elevation: 14 },
   { name: "한림", aliases: ["한림항"], lat: 33.4144, lng: 126.2634, elevation: 12 },
   { name: "협재", aliases: ["협재해수욕장", "금능"], lat: 33.3945, lng: 126.2397, elevation: 12 },
+  { name: "일성제주비치콘도&리조트", aliases: ["일성 제주비치 콘도&리조트", "일성리조트 제주비치", "일성콘도 제주비치", "일성비치콘도미니엄"], lat: 33.3856640884, lng: 126.2211180134, elevation: 12 },
   { name: "신창풍차해안도로", aliases: ["신창", "풍차해안도로"], lat: 33.3459, lng: 126.1746, elevation: 9 },
   { name: "차귀도", aliases: ["자구내포구"], lat: 33.3080, lng: 126.1668, elevation: 12 },
   { name: "모슬포", aliases: ["모슬포항", "대정"], lat: 33.2208, lng: 126.2496, elevation: 20 },
@@ -169,12 +178,14 @@ const jejuRoutePlaces = [
   { name: "중문", aliases: ["중문관광단지"], lat: 33.2497, lng: 126.4124, elevation: 64 },
   { name: "법환바당", aliases: ["법환포구"], lat: 33.2376, lng: 126.5159, elevation: 20 },
   { name: "서귀포", aliases: ["서귀포항", "천지연"], lat: 33.2461, lng: 126.5615, elevation: 42 },
+  { name: "더베이제주리조트", aliases: ["더베이 제주 리조트", "THEBAY 제주리조트", "더베이리조트"], lat: 33.24118, lng: 126.593475, elevation: 20 },
   { name: "쇠소깍", aliases: ["하효항"], lat: 33.2525, lng: 126.6231, elevation: 16 },
   { name: "남원", aliases: ["남원포구"], lat: 33.2791, lng: 126.7209, elevation: 19 },
   { name: "표선", aliases: ["표선해수욕장"], lat: 33.3244, lng: 126.8324, elevation: 18 },
   { name: "섭지코지", aliases: ["신양섭지"], lat: 33.4241, lng: 126.9291, elevation: 26 },
   { name: "성산", aliases: ["성산일출봉", "성산항"], lat: 33.4585, lng: 126.9348, elevation: 24 },
   { name: "세화", aliases: ["세화해변"], lat: 33.5260, lng: 126.8567, elevation: 14 },
+  { name: "아쿠아뷰티크", aliases: ["아쿠아 뷰티크", "Aqua BEAutique"], lat: 33.5569228, lng: 126.801566, elevation: 12 },
   { name: "월정리", aliases: ["월정리해변"], lat: 33.5568, lng: 126.7952, elevation: 12 },
   { name: "김녕", aliases: ["김녕해수욕장"], lat: 33.5576, lng: 126.7593, elevation: 10 },
   { name: "함덕", aliases: ["함덕해수욕장"], lat: 33.5437, lng: 126.6692, elevation: 11 },
@@ -271,7 +282,7 @@ const jejuRestaurants = [
     lat: 33.4627,
     lng: 126.9338,
     sentiment: 83,
-    summary: "성산 숙박일 저녁 또는 아침 식사 후보로 넣기 좋은 위치입니다."
+    summary: "3일차 성산 경유 구간에서 점심이나 이른 저녁 후보로 넣기 좋은 위치입니다."
   },
   {
     name: "고집돌우럭 중문점",
@@ -379,7 +390,7 @@ const jejuRestaurants = [
     lat: 33.2176,
     lng: 126.2491,
     sentiment: 71,
-    summary: "모슬포·대정권 숙박일 저녁 후보로 넣기 좋은 고등어회 식당입니다."
+    summary: "2일차 모슬포 점심 구간에서 영업시간과 대기 시간을 확인할 후보입니다."
   },
   {
     name: "덕승식당",
@@ -388,7 +399,7 @@ const jejuRestaurants = [
     lat: 33.2189,
     lng: 126.2504,
     sentiment: 70,
-    summary: "모슬포항 근처 생선요리 후보입니다. 1일차 서부 종료 후 동선이 좋습니다."
+    summary: "모슬포항 근처 생선요리 후보입니다. 2일차 서남부 구간 점심 동선과 맞습니다."
   },
   {
     name: "산방식당",
@@ -541,7 +552,7 @@ const jejuRestaurants = [
     lat: 33.5420,
     lng: 126.6652,
     sentiment: 53,
-    summary: "함덕 숙박 또는 동부 복귀 구간에서 편하게 볼 수 있는 식사 후보입니다."
+    summary: "4일차 함덕 경유 구간에서 가볍게 확인할 수 있는 식사 후보입니다."
   },
   {
     name: "고집돌우럭 함덕점",
@@ -550,7 +561,7 @@ const jejuRestaurants = [
     lat: 33.5425,
     lng: 126.6679,
     sentiment: 52,
-    summary: "함덕권 단체 식사 후보입니다. 계획표의 동부 복귀일과 잘 맞습니다."
+    summary: "함덕권 단체 식사 후보입니다. 4일차 제주항 복귀 구간과 잘 맞습니다."
   },
   {
     name: "대우정",
@@ -638,15 +649,15 @@ const jejuRestaurants = [
 const routeChoices = {
   day1: [
     {
-      optionId: "west-standard",
-      title: "전주·목포항 → 제주항 → 협재·금능",
-      theme: "10/8 목 · 서부 해안 적응",
-      distance: "35~38km",
-      rideTime: "약 2:20",
+      optionId: "hotel-day1-v4",
+      title: "제주항 → 일성제주비치콘도&리조트",
+      theme: "10/8 목 · 서부 해안과 1박 숙소",
+      distance: "약 41.7km",
+      rideTime: "약 2시간 47분",
       ascent: "+170m 내외",
-      lodging: "협재·금능",
-      stops: ["전주", "목포항", "제주항", "용두암", "이호테우", "애월", "다락쉼터", "협재·금능"],
-      summary: "첨부 일정표 기준 1일차입니다. 오전 전주에서 목포항으로 이동해 08:30 배편을 타고, 제주항 도착 후 용두암에서 출발해 협재·금능 숙소까지 무리 없이 적응합니다.",
+      lodging: "일성제주비치콘도&리조트",
+      stops: ["제주항", "용두암", "이호테우", "애월·한담", "다락쉼터", "협재·금능", "일성제주비치콘도&리조트"],
+      summary: "변경 계획의 1일차 코스입니다. 제주항에서 자전거를 정비한 뒤 서부 해안을 따라 일성제주비치콘도&리조트까지 이동합니다.",
       schedule: [
         { time: "04:50", place: "전주 집결", distanceKm: 0, cumulativeDistanceKm: 0, detail: "자전거 적재, 신분증·승선권·보급식 확인" },
         { time: "05:00", place: "전주 출발", detail: "차량 이동, 목포항 국제여객터미널 07:00 전후 도착 목표" },
@@ -654,203 +665,84 @@ const routeChoices = {
         { time: "08:30", place: "목포 출항", detail: "선내 휴식 및 간단식" },
         { time: "12:50 전후", place: "제주항 도착", detail: "자전거 수령, 공기압·브레이크 점검" },
         { time: "13:20~13:50", place: "점심", detail: "제주항·탑동·동문시장 인근 간단식" },
-        { time: "14:00~18:00", place: "용두암 → 애월 → 협재·금능", distanceKm: 35, cumulativeDistanceKm: 35, detail: "이호테우, 애월·한담, 다락쉼터를 지나 숙소 이동" },
-        { time: "19:00", place: "협재·한림권 저녁", detail: "옹포별장가든 우선, 문쏘 협재점·버거307 협재점 대안" }
-      ]
-    },
-    {
-      optionId: "west-short",
-      title: "제주항 → 협재/한림",
-      theme: "짧은 적응",
-      distance: "55km",
-      rideTime: "3.5h",
-      stops: ["제주항/용두암", "이호테우", "애월", "곽지", "한림", "협재"],
-      summary: "배편 도착이 늦거나 첫날 컨디션을 보수적으로 볼 때 쓰는 짧은 서부 적응 코스입니다.",
-      schedule: [
-        { time: "10:30", place: "제주항/용두암", detail: "하선 후 장비 점검" },
-        { time: "12:00", place: "애월", detail: "점심과 보급" },
-        { time: "14:30", place: "곽지/한림", detail: "팀 페이스 조정" },
-        { time: "16:00", place: "협재", detail: "숙소 또는 추가 이동 여부 결정" }
-      ]
-    },
-    {
-      optionId: "west-scenic",
-      title: "제주항 → 산방산 권역",
-      theme: "서부 경관 강화",
-      distance: "92km",
-      rideTime: "6h",
-      stops: ["제주항", "애월", "협재", "신창", "차귀도", "송악산", "산방산"],
-      summary: "서부 해안 풍경을 길게 가져가는 코스입니다. 초반 배편이 빠르고 팀 체력이 좋을 때 적합합니다.",
-      schedule: [
-        { time: "08:40", place: "제주항", detail: "빠른 출발, 장비 점검 최소화" },
-        { time: "11:00", place: "협재", detail: "첫 긴 휴식" },
-        { time: "13:30", place: "신창/차귀도", detail: "점심과 사진 정차" },
-        { time: "16:30", place: "송악산", detail: "오르내림 구간 주의" },
-        { time: "18:00", place: "산방산 권역", detail: "숙소 도착, 다음날 남부 구간 준비" }
+        { time: "14:00", place: "제주항 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "용두암 방향으로 제주환상자전거길 진입" },
+        { time: "15:00", place: "이호테우해변", distanceKm: 11, cumulativeDistanceKm: 11, detail: "초반 대열 정비와 10분 휴식" },
+        { time: "16:30", place: "애월·한담", distanceKm: 16, cumulativeDistanceKm: 27, detail: "보급 후 다락쉼터·협재 방향 이동" },
+        { time: "17:50 전후", place: "일성제주비치콘도&리조트", distanceKm: 15, cumulativeDistanceKm: 42, detail: "체크인, 자전거 보관과 세탁 확인" },
+        { time: "19:00", place: "금능·한림권 저녁", detail: "숙소에서 이동 가능한 단체 식당의 영업·예약 여부 확인" }
       ]
     }
   ],
   day2: [
     {
-      optionId: "south-standard",
-      title: "협재·금능 → 법환·서귀포",
-      theme: "10/9 금 · 서남부 장거리",
-      distance: "78~83km",
-      rideTime: "약 5:05",
+      optionId: "hotel-day2-v4",
+      title: "일성제주비치콘도&리조트 → 더베이제주리조트",
+      theme: "10/9 금 · 서남부 해안과 2박 숙소",
+      distance: "약 74.4km",
+      rideTime: "약 4시간 57분",
       ascent: "+500m 내외",
-      lodging: "법환·서귀포",
-      stops: ["협재·금능", "신창풍차해안도로", "해거름마을공원", "수월봉·차귀도", "모슬포", "송악산", "산방산·중문", "법환·서귀포"],
-      summary: "첨부 일정표 기준 2일차입니다. 서남부 조망 구간과 업다운이 이어지는 핵심 장거리 날이므로 오전 출발, 모슬포 점심, 중문 이후 차량 주의를 우선합니다.",
+      lodging: "더베이제주리조트",
+      stops: ["일성제주비치콘도&리조트", "신창풍차해안도로", "수월봉·차귀도", "모슬포", "송악산", "산방산·중문", "더베이제주리조트"],
+      summary: "변경 계획의 2일차 코스입니다. 일성제주비치콘도&리조트에서 출발해 서남부 조망 구간과 중문을 거쳐 보목동의 더베이제주리조트에 도착합니다.",
       schedule: [
         { time: "07:00", place: "기상·조식", detail: "물 2통, 보급식, 펑크키트 확인" },
-        { time: "08:00", place: "협재·금능 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "초반은 15km/h 안팎으로 무리하지 않기" },
-        { time: "09:10", place: "신창풍차해안도로", distanceKm: 18, cumulativeDistanceKm: 18, detail: "바람 강할 때 대열 좁히기" },
-        { time: "09:40", place: "해거름마을공원", detail: "인증·10분 휴식" },
-        { time: "11:00", place: "수월봉·차귀도 전망", distanceKm: 25, cumulativeDistanceKm: 43, detail: "사진 휴식 후 모슬포까지 페이스 유지" },
-        { time: "12:00~13:00", place: "모슬포 점심", detail: "탄수화물·수분 보충" },
-        { time: "14:00", place: "송악산 인증센터", distanceKm: 9, cumulativeDistanceKm: 52, detail: "오후 업다운 전 짧은 휴식" },
-        { time: "15:30", place: "산방산·중문 접근", distanceKm: 21, cumulativeDistanceKm: 73, detail: "기복과 관광 차량 주의" },
-        { time: "17:30~18:00", place: "법환·서귀포 도착", distanceKm: 10, cumulativeDistanceKm: 83, detail: "숙소 체크인, 세탁과 다음날 준비" },
-        { time: "19:00", place: "저녁", detail: "법환나들목·서귀포 매일올레시장·숙성도 중문점 등 단체 예약 가능 식당" }
-      ]
-    },
-    {
-      optionId: "south-cut",
-      title: "모슬포/대정 → 표선",
-      theme: "중간 절단",
-      distance: "78km",
-      rideTime: "5h",
-      stops: ["모슬포/대정", "송악산", "중문", "서귀포", "쇠소깍", "표선"],
-      summary: "강풍이나 비가 있을 때 성산까지 무리하지 않고 표선에서 끊는 안전 운영 코스입니다.",
-      schedule: [
-        { time: "08:30", place: "모슬포/대정", detail: "컨디션 확인 후 출발" },
-        { time: "11:00", place: "중문", detail: "보급과 우천 장비 점검" },
-        { time: "13:30", place: "서귀포", detail: "점심, 필요 시 회수 판단" },
-        { time: "16:30", place: "표선", detail: "숙소 또는 성산 추가 이동 결정" }
-      ]
-    },
-    {
-      optionId: "south-long",
-      title: "산방산 → 성산",
-      theme: "남부 완주",
-      distance: "104km",
-      rideTime: "6.5h",
-      stops: ["산방산", "중문", "법환바당", "쇠소깍", "남원", "표선", "섭지코지", "성산"],
-      summary: "1일차를 산방산까지 늘렸을 때 이어지는 남부 완주 코스입니다. 충분한 일조 시간이 필요합니다.",
-      schedule: [
-        { time: "07:40", place: "산방산", detail: "일찍 출발, 긴 하루 운영" },
-        { time: "10:30", place: "중문/법환", detail: "보급과 도심 통과" },
-        { time: "13:00", place: "쇠소깍/남원", detail: "점심" },
-        { time: "16:30", place: "표선/섭지코지", detail: "마지막 보급" },
-        { time: "18:30", place: "성산", detail: "숙소 도착, 야간 주행 피하기" }
+        { time: "08:00", place: "일성제주비치콘도&리조트 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "초반은 15km/h 안팎으로 무리하지 않기" },
+        { time: "09:00", place: "신창풍차해안도로", distanceKm: 13, cumulativeDistanceKm: 13, detail: "바람 강할 때 대열 좁히기" },
+        { time: "10:15", place: "수월봉·차귀도", distanceKm: 10, cumulativeDistanceKm: 23, detail: "인증과 사진 휴식" },
+        { time: "11:45~12:45", place: "모슬포 점심", distanceKm: 14, cumulativeDistanceKm: 37, detail: "탄수화물·수분 보충" },
+        { time: "13:35", place: "송악산", distanceKm: 8, cumulativeDistanceKm: 45, detail: "오후 업다운 전 짧은 휴식" },
+        { time: "15:20", place: "산방산·중문", distanceKm: 16, cumulativeDistanceKm: 61, detail: "기복과 관광 차량 주의" },
+        { time: "17:00 전후", place: "더베이제주리조트", distanceKm: 13, cumulativeDistanceKm: 74, detail: "체크인, 세탁과 다음 날 준비" },
+        { time: "19:00", place: "보목·서귀포권 저녁", detail: "늦은 도착에도 이용 가능한 단체 식당 확인" }
       ]
     }
   ],
   day3: [
     {
-      optionId: "east-standard",
-      title: "법환·서귀포 → 월정리",
-      theme: "10/10 토 · 남동부 해안 장거리",
-      distance: "82~86km",
-      rideTime: "약 5:20",
+      optionId: "hotel-day3-v4",
+      title: "더베이제주리조트 → 아쿠아뷰티크",
+      theme: "10/10 토 · 동부 해안과 3박 숙소",
+      distance: "약 77.3km",
+      rideTime: "약 5시간 9분",
       ascent: "+380~430m",
-      lodging: "월정리·구좌",
-      stops: ["법환·서귀포", "정방·보목", "쇠소깍", "남원·위미", "표선", "성산일출봉", "종달·세화", "월정리"],
-      summary: "첨부 일정표 기준 3일차입니다. 쇠소깍, 남원, 표선, 성산, 세화·월정리로 이어지는 긴 해안 구간이라 표선 점심을 늦추지 않는 것이 핵심입니다.",
+      lodging: "아쿠아뷰티크",
+      stops: ["더베이제주리조트", "쇠소깍", "남원·위미", "표선", "성산일출봉", "종달·세화", "아쿠아뷰티크"],
+      summary: "변경 계획의 3일차 코스입니다. 보목동의 더베이제주리조트에서 출발해 쇠소깍·표선·성산·세화를 지나 행원리 아쿠아뷰티크에 도착합니다.",
       schedule: [
         { time: "07:00", place: "기상·조식", detail: "전날 피로 확인, 스트레칭" },
-        { time: "08:00", place: "법환·서귀포 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "정방폭포·보목 방향, 시내 교통량 주의" },
-        { time: "08:50", place: "쇠소깍 인증센터", distanceKm: 14, cumulativeDistanceKm: 14, detail: "인증·휴식" },
-        { time: "10:20", place: "남원·위미 해안", distanceKm: 17, cumulativeDistanceKm: 31, detail: "편의점·카페 보급" },
-        { time: "11:40~12:40", place: "표선해변 점심", distanceKm: 19, cumulativeDistanceKm: 50, detail: "표선에서 확실히 식사" },
-        { time: "14:20", place: "성산일출봉·광치기해변", distanceKm: 22, cumulativeDistanceKm: 72, detail: "사진 휴식" },
-        { time: "15:20", place: "성산 출발", detail: "종달·세화·월정리 방향, 바람 방향 확인" },
-        { time: "17:00~17:40", place: "월정리 숙소 도착", distanceKm: 14, cumulativeDistanceKm: 86, detail: "체크인·세탁" },
-        { time: "19:00", place: "저녁", detail: "연미정 우선, 허벅식당·월정세화권 식당 대안" }
-      ]
-    },
-    {
-      optionId: "east-slow",
-      title: "성산 → 함덕",
-      theme: "여유 복귀",
-      distance: "48km",
-      rideTime: "3h",
-      stops: ["성산", "세화", "월정리", "김녕", "함덕"],
-      summary: "제주항 복귀 전 함덕에서 끊는 여유형 코스입니다. 다음 배편이 늦거나 제주 1박을 추가할 때 적합합니다.",
-      schedule: [
-        { time: "09:30", place: "성산", detail: "늦은 출발 가능" },
-        { time: "11:00", place: "월정리", detail: "카페 휴식" },
-        { time: "13:30", place: "김녕", detail: "점심" },
-        { time: "15:30", place: "함덕", detail: "숙소 또는 제주항 추가 이동 결정" }
-      ]
-    },
-    {
-      optionId: "east-full",
-      title: "성산 → 제주항 + 시내 정리",
-      theme: "복귀 완결",
-      distance: "72km",
-      rideTime: "4.5h",
-      stops: ["성산", "세화", "월정리", "김녕", "함덕", "삼양", "동문시장", "제주항"],
-      summary: "제주항 복귀 전 시내 정리와 식사를 넣는 완결형 코스입니다.",
-      schedule: [
-        { time: "08:00", place: "성산", detail: "빠른 출발" },
-        { time: "10:30", place: "월정리/김녕", detail: "보급" },
-        { time: "13:00", place: "함덕/삼양", detail: "점심" },
-        { time: "15:30", place: "동문시장", detail: "정리 식사 또는 장보기" },
-        { time: "17:00", place: "제주항", detail: "선적 준비" }
+        { time: "08:00", place: "더베이제주리조트 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "쇠소깍 방향으로 출발, 보목 해안 차량 주의" },
+        { time: "08:30", place: "쇠소깍", distanceKm: 6, cumulativeDistanceKm: 6, detail: "인증과 짧은 휴식" },
+        { time: "10:00", place: "남원·위미 해안", distanceKm: 15, cumulativeDistanceKm: 21, detail: "편의점·카페 보급" },
+        { time: "11:30~12:30", place: "표선해변 점심", distanceKm: 17, cumulativeDistanceKm: 38, detail: "표선에서 식사 시간을 늦추지 않기" },
+        { time: "14:00", place: "성산일출봉·광치기해변", distanceKm: 21, cumulativeDistanceKm: 59, detail: "사진 휴식" },
+        { time: "15:15", place: "종달·세화", distanceKm: 10, cumulativeDistanceKm: 69, detail: "행원 방향 바람 확인과 마지막 보급" },
+        { time: "16:10 전후", place: "아쿠아뷰티크", distanceKm: 8, cumulativeDistanceKm: 77, detail: "체크인·세탁, 다음 날 조기 출발 준비" },
+        { time: "19:00", place: "행원·구좌권 저녁", detail: "숙소 주변 영업 식당과 조식 대안을 확인" }
       ]
     }
   ],
   day4: [
     {
-      optionId: "return-standard",
-      title: "월정리 → 제주항 → 목포항 → 전주",
-      theme: "10/11 일 · 동북부 복귀",
-      distance: "42~48km",
-      rideTime: "약 2:50~3:10",
+      optionId: "hotel-day4-v4",
+      title: "아쿠아뷰티크 → 제주항",
+      theme: "10/11 일 · 동북부 해안과 제주항 복귀",
+      distance: "약 37.2km",
+      rideTime: "약 2시간 29분",
       ascent: "+170~200m",
       lodging: "귀환",
-      stops: ["월정리", "김녕성세기해변", "함덕서우봉해변", "조천·삼양", "제주항/용두암", "목포항", "전주"],
-      summary: "첨부 일정표 기준 4일차입니다. 13:30~13:40 제주발 목포행 배편을 고려해 늦어도 12:00 전후 제주항 도착을 목표로 합니다.",
+      stops: ["아쿠아뷰티크", "김녕성세기해변", "함덕서우봉해변", "조천·삼양", "제주항"],
+      summary: "변경 계획의 4일차 코스입니다. 아쿠아뷰티크에서 조기 출발해 동북부 해안을 달리고 제주항으로 돌아옵니다. 배편 수속을 위해 11:30 전후 도착을 목표로 합니다.",
       schedule: [
         { time: "06:40", place: "기상·정리", detail: "짐 최소화, 승선권·신분증 확인" },
-        { time: "07:10", place: "조식", detail: "숙소 또는 월정리 간단식" },
-        { time: "07:40", place: "월정리 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "김녕 방향으로 가볍게 워밍업" },
-        { time: "08:10", place: "김녕성세기해변", distanceKm: 8, cumulativeDistanceKm: 8, detail: "인증·사진" },
-        { time: "08:50", place: "함덕서우봉해변", distanceKm: 9, cumulativeDistanceKm: 17, detail: "15분 휴식" },
-        { time: "10:10", place: "조천·삼양 해안", distanceKm: 17, cumulativeDistanceKm: 34, detail: "마지막 보급, 바람 방향 확인" },
-        { time: "11:40~12:10", place: "제주항 도착", distanceKm: 12, cumulativeDistanceKm: 46, detail: "자전거 선적 준비. 용두암 인증 선택 시 더 일찍 출발" },
+        { time: "07:10", place: "조식", detail: "아쿠아뷰티크 또는 행원·월정리권 간단식" },
+        { time: "07:40", place: "아쿠아뷰티크 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "김녕 방향으로 가볍게 워밍업" },
+        { time: "08:10", place: "김녕성세기해변", distanceKm: 7, cumulativeDistanceKm: 7, detail: "인증·사진" },
+        { time: "08:55", place: "함덕서우봉해변", distanceKm: 10, cumulativeDistanceKm: 17, detail: "15분 휴식" },
+        { time: "10:00", place: "조천·삼양 해안", distanceKm: 12, cumulativeDistanceKm: 29, detail: "마지막 보급, 바람 방향 확인" },
+        { time: "11:00~11:30", place: "제주항 도착", distanceKm: 8, cumulativeDistanceKm: 37, detail: "자전거 선적과 승선 수속 준비" },
         { time: "13:30~13:40", place: "제주 출항", detail: "목포행 배편" },
         { time: "18:00 전후", place: "목포 도착", detail: "자전거 수령·차량 적재" },
         { time: "21:00 전후", place: "전주 도착", detail: "해산" }
-      ]
-    },
-    {
-      optionId: "return-mokpo",
-      title: "제주항 → 목포항 → 전주",
-      theme: "목포 대체",
-      distance: "복귀 운영",
-      rideTime: "배편 기준",
-      stops: ["제주항", "목포항", "목포 시내", "전주 복귀"],
-      summary: "완도 배편 시간이 맞지 않을 때 목포항 도착 배편으로 복귀하는 대체 운영입니다.",
-      schedule: [
-        { time: "출항 2h 전", place: "제주항", detail: "차량 선적 마감 시간 확인" },
-        { time: "하선 직후", place: "목포항", detail: "자전거와 트럭 상태 확인" },
-        { time: "복귀", place: "목포 → 전주", detail: "고속도로 휴게 지점과 운전자 교대 계획" }
-      ]
-    },
-    {
-      optionId: "return-extra",
-      title: "제주 시내 정리 → 익일 복귀",
-      theme: "여유 복귀",
-      distance: "제주 시내",
-      rideTime: "반나절",
-      stops: ["제주항", "용두암", "동문시장", "숙소/렌트 정리", "익일 배편"],
-      summary: "3일차 이후 바로 복귀하지 않고 제주 시내에서 정리한 뒤 다음날 배편으로 나가는 여유 운영입니다.",
-      schedule: [
-        { time: "오전", place: "제주 시내", detail: "자전거 정비, 장비 건조" },
-        { time: "오후", place: "동문시장/용두암", detail: "식사와 정산" },
-        { time: "익일", place: "제주항", detail: "배편 승선, 완도 또는 목포 복귀" }
       ]
     }
   ]
@@ -861,9 +753,9 @@ const transportOptions = [
     id: "truck-ferry",
     badge: "추천",
     title: "전주 집결 + 목포항 주차 + 자전거 선적",
-    summary: "첨부 일정표의 기본 운영안입니다. 8명은 전주에서 차량으로 목포항까지 이동하고, 목포 08:30 출항·제주 13:30~13:40 복귀 배편을 기준으로 자전거 8대를 선적합니다.",
+    summary: "변경 계획의 기본 운영안입니다. 8명은 전주에서 차량으로 목포항까지 이동하고, 목포 08:30 출항·제주 13:30~13:40 복귀 배편을 기준으로 자전거 8대를 선적합니다.",
     outbound: "04:50 전주 집결 → 05:00 차량 출발 → 07:00 목포항 수속·주차 → 08:30 목포 출항 → 12:50 전후 제주항 하선",
-    returnPlan: "월정리 조기 출발 → 12:00 전후 제주항 도착 → 13:30~13:40 제주 출항 → 18:00 전후 목포 도착 → 21:00 전후 전주 도착",
+    returnPlan: "아쿠아뷰티크 조기 출발 → 11:30 전후 제주항 도착 → 13:30~13:40 제주 출항 → 18:00 전후 목포 도착 → 21:00 전후 전주 도착",
     truck: "전주↔목포 구간 자전거 적재와 귀환 회수를 담당하고, 제주도 내 라이딩 중에는 목포항 주차장에 대기",
     checks: ["8명 승선권·신분증", "자전거 8대 선적권", "목포항 주차 위치", "제주항 선적 부두", "예비 튜브 4개 이상·펌프 2개"],
     links: [
@@ -1345,7 +1237,7 @@ function renderMasterPlanContent({ printable = false } = {}) {
 
   return `
     <div class="plan-doc-title">
-      <span class="tag">기본값 · 첨부 일정표 반영</span>
+      <span class="tag">변경 일정 · 확정 숙소 반영</span>
       <h2>${tripDefaults.title}</h2>
       <p>${tripDefaults.dateRange} | ${tripDefaults.vehicle}</p>
     </div>
@@ -1557,6 +1449,8 @@ function routePlacePopup(place) {
 }
 
 function itinerarySearchTerm(place) {
+  const lodging = jejuLodgings.find((item) => item.name === place.name);
+  if (lodging) return lodgingSearchTerm(lodging);
   return `${place.name} 제주 자전거길`;
 }
 
@@ -2120,7 +2014,7 @@ function setupVWorldRouteEditor() {
   const lodgingMarkers = new Map();
   const restaurantMarkers = new Map();
   let overlayScheduleFilter = "all";
-  let currentView = "course";
+  let currentView = "plan";
   let aerialMode = false;
   let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
 
@@ -2222,7 +2116,7 @@ function setupVWorldRouteEditor() {
     const marker = lodgingMarkers.get(index);
     map.flyTo([lodging.lat, lodging.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
     window.setTimeout(() => marker?.openPopup(), 450);
-    showToast(`${lodging.night} ${lodging.area} 숙박 권역을 지도에 표시했습니다.`);
+    showToast(`${lodging.night} ${lodging.name} 위치를 지도에 표시했습니다.`);
     if (window.matchMedia("(max-width: 760px)").matches) setPanelCollapsed(true);
   };
 
@@ -2257,9 +2151,9 @@ function setupVWorldRouteEditor() {
       const index = Number(rawIndex);
       return jejuLodgings[index] ? index : null;
     }
-    const requestedArea = params.get("lodgingArea") || rawIndex;
-    if (!requestedArea) return null;
-    return jejuLodgings.findIndex((lodging) => lodging.area === requestedArea);
+    const requestedLodging = params.get("lodgingArea") || rawIndex;
+    if (!requestedLodging) return null;
+    return jejuLodgings.findIndex((lodging) => lodging.name === requestedLodging || lodging.area === requestedLodging);
   };
 
   const drawRoute = () => {
@@ -2466,7 +2360,7 @@ function setupVWorldRouteEditor() {
     overlayLodging.innerHTML = `
       <div class="lodging-summary">
         <strong>${tripDefaults.lodgingPlan}</strong>
-        <span>숙소 업소는 미확정이며, 아래 카드는 일정에 포함된 숙박 권역입니다.</span>
+        <span>아래 3곳을 1~3박 숙소로 일정에 반영했습니다. 실제 예약 상태와 8명 이용·자전거 보관 조건은 예약처에서 최종 확인하세요.</span>
       </div>
       <div class="lodging-panel-list">
         ${renderLodgingList()}
@@ -2543,7 +2437,7 @@ function setupVWorldRouteEditor() {
   updateResult();
   setMode("start");
   renderOverlayViews();
-  setPanelView("course");
+  setPanelView("plan");
 
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
@@ -2684,13 +2578,14 @@ function setupVWorldRouteEditor() {
       fillColor: "#dffbf4",
       fillOpacity: 1
     }).addTo(lodgingLayer);
-    marker.bindTooltip(`${lodging.night} · ${lodging.area}`, {
+    marker.bindTooltip(`${lodging.night} · ${lodging.name}`, {
       direction: "top",
       offset: [0, -7]
     });
     marker.bindPopup(`
-      <strong>${lodging.night} · ${lodging.area}</strong><br>
-      ${lodging.dayRange}<br>
+      <strong>${lodging.night} · ${lodging.name}</strong><br>
+      ${lodging.area} · ${lodging.dayRange}<br>
+      ${lodging.address}<br>
       ${lodging.summary}<br>
       <a target="_blank" rel="noreferrer" href="${naverSearchUrl(lodgingSearchTerm(lodging))}">네이버</a>
       · <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(lodgingSearchTerm(lodging))}">다음</a>
@@ -2729,7 +2624,7 @@ function setupVWorldRouteEditor() {
       "일정 지점": itineraryPlaceLayer,
       "자전거길": learnedRouteLayer,
       "장소": placeLayer,
-      "숙박 권역": lodgingLayer,
+      "숙소": lodgingLayer,
       "맛집": restaurantLayer
     },
     { position: "topright", collapsed: true }
@@ -3033,11 +2928,11 @@ function renderTransportChoice(option, selected) {
 }
 
 function lodgingSearchTerm(lodging) {
-  return `제주 ${lodging.area} 8인 숙소 자전거 보관`;
+  return `${lodging.name} ${lodging.address}`;
 }
 
 function lodgingMapHref(lodging, index) {
-  return `course.html?panel=lodging&lodging=${encodeURIComponent(String(index))}&lodgingArea=${encodeURIComponent(lodging.area)}`;
+  return `course.html?panel=lodging&lodging=${encodeURIComponent(String(index))}&lodgingArea=${encodeURIComponent(lodging.name)}`;
 }
 
 function renderLodgingActions(lodging, index) {
@@ -3058,10 +2953,11 @@ function renderLodgingCard(lodging, index) {
       <div class="lodging-card-head">
         <span>${lodging.night}</span>
         <div>
-          <strong>${lodging.area}</strong>
-          <small>${lodging.dayRange}</small>
+          <strong>${lodging.name}</strong>
+          <small>${lodging.area} · ${lodging.dayRange}</small>
         </div>
       </div>
+      <p class="lodging-address">${lodging.address}</p>
       <p>${lodging.summary}</p>
       <div class="lodging-checks" aria-label="예약 전 확인 사항">
         <span>8명 수용 확인</span>
@@ -3253,7 +3149,7 @@ function setupTripDate() {
 
   const savedDate = readStorage(storageKeys.tripDate) || tripDefaults.startDate;
   tripDate.value = savedDate;
-  dateHint.textContent = `${savedDate} 출발 기준으로 확인하세요. 기본값은 첨부 일정표 기준입니다.`;
+  dateHint.textContent = `${savedDate} 출발 기준으로 확인하세요. 기본값은 변경된 4일 숙소 일정 기준입니다.`;
 
   tripDate.addEventListener("change", () => {
     if (!tripDate.value) return;
