@@ -2441,14 +2441,28 @@ footer {
 }
 
 .lodging-summary strong {
+  display: grid;
+  gap: 3px;
   color: var(--ink);
   font-size: .88rem;
 }
 
-.lodging-summary span {
+.lodging-summary > span {
   color: var(--muted);
   font-size: .76rem;
   line-height: 1.45;
+}
+
+.lodging-summary strong span {
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.lodging-summary strong b {
+  display: inline-block;
+  min-width: 30px;
+  color: #1767c9;
+  font-weight: 1000;
 }
 
 .lodging-panel-list {
@@ -2473,47 +2487,64 @@ footer {
 
 .lodging-card-head {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: stretch;
+  gap: 12px;
 }
 
-.lodging-card-head > span {
+.lodging-card-image {
   flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 13px;
-  background: #dffbf4;
-  color: var(--ocean);
-  font-size: .78rem;
-  font-weight: 950;
+  width: 96px;
+  height: 74px;
+  border: 1px solid rgba(23,103,201,.16);
+  border-radius: 10px;
+  background: #eaf2ff;
+  object-fit: cover;
 }
 
-.lodging-card-head div {
+.lodging-card-copy {
   min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.lodging-card-head strong,
-.lodging-card-head small {
+.lodging-card-copy strong,
+.lodging-card-copy small {
   display: block;
 }
 
-.lodging-card-head strong {
+.lodging-night {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  margin-bottom: 4px;
+  padding: 3px 8px;
+  border: 1px solid rgba(23,103,201,.2);
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: #1767c9;
+  font-size: .76rem;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.lodging-card-copy strong {
   color: var(--ink);
   font-size: .98rem;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
-.lodging-card-head small,
+.lodging-card-copy small,
 .lodging-card p {
   color: var(--muted);
   font-size: .78rem;
   line-height: 1.5;
 }
 
-.lodging-card-head small {
+.lodging-card-copy small {
   margin-top: 2px;
   font-weight: 850;
 }
@@ -2803,6 +2834,7 @@ footer {
 .itinerary-marker-wrap {
   background: transparent;
   border: 0;
+  overflow: visible !important;
 }
 
 .itinerary-marker {
@@ -2829,9 +2861,51 @@ footer {
 .itinerary-marker b {
   position: relative;
   z-index: 1;
-  font-size: .72rem;
+  font-size: .9rem;
   font-weight: 950;
   line-height: 1;
+}
+
+.itinerary-marker.is-stay b {
+  font-size: .76rem;
+}
+
+.itinerary-marker i {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  left: 29px;
+  min-width: max-content;
+  padding: 4px 6px;
+  border: 1px solid color-mix(in srgb, var(--marker-color) 45%, #fff);
+  border-radius: 999px;
+  background: rgba(255,255,255,.96);
+  color: #17353d;
+  box-shadow: 0 4px 10px rgba(6,24,32,.16);
+  font-size: .66rem;
+  font-style: normal;
+  font-weight: 1000;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.itinerary-distance-list {
+  display: grid;
+  gap: 4px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  background: #edf5ff;
+}
+
+.itinerary-distance-list span {
+  color: #36546c;
+  font-size: .74rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.itinerary-distance-list b {
+  color: #1767c9;
 }
 
 .itinerary-popup strong {

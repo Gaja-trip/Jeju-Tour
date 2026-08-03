@@ -51,7 +51,7 @@ const defaultItineraryMapRoutes = {
       { name: "용두암", lat: 33.5161, lng: 126.5117, detail: "제주환상자전거길 출발 인증 후보" },
       { name: "이호테우해변", lat: 33.4971, lng: 126.4522, detail: "초반 대열 정비와 해안도로 진입" },
       { name: "애월·한담해안도로", lat: 33.4637, lng: 126.3096, detail: "카페·편의점 보급이 쉬운 구간" },
-      { name: "다락쉼터", lat: 33.4523, lng: 126.2871, detail: "인증·사진 휴식 추천 지점" },
+      { name: "다락인증센터(다락쉼터)", lat: 33.4695, lng: 126.340222, detail: "인증·사진 휴식 추천 지점 · 33°28'10.2\"N 126°20'24.8\"E" },
       { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "숙소 도착 전 마지막 해안 구간" },
       { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, detail: "1박 숙소 · 한림읍 한림로 127" }
     ]
@@ -107,6 +107,7 @@ const jejuLodgings = [
     dayRange: "1일차 도착 · 2일차 출발",
     lat: 33.3856640884,
     lng: 126.2211180134,
+    image: "assets/lodging/ilsung-jeju-beach.jpg",
     summary: "제주항에서 서부 해안을 따라 이동한 첫날 숙소입니다. 8명 이용 조건과 자전거 보관·세탁 가능 여부를 예약처에 확인하세요."
   },
   {
@@ -118,6 +119,7 @@ const jejuLodgings = [
     dayRange: "2일차 도착 · 3일차 출발",
     lat: 33.24118,
     lng: 126.593475,
+    image: "assets/lodging/the-bay-jeju.webp",
     summary: "서남부 해안을 달린 뒤 도착하는 보목동 숙소입니다. 체크인 마감과 자전거 보관, 인근 저녁 식사 동선을 함께 확인하세요."
   },
   {
@@ -129,6 +131,7 @@ const jejuLodgings = [
     dayRange: "3일차 도착 · 4일차 출발",
     lat: 33.5569228,
     lng: 126.801566,
+    image: "assets/lodging/aqua-beautique.jpg",
     summary: "마지막 밤을 머무는 행원리 숙소입니다. 다음 날 제주항 배편에 맞춘 조기 출발과 간단한 조식 가능 여부를 확인하세요."
   }
 ];
@@ -1454,14 +1457,32 @@ function itinerarySearchTerm(place) {
   return `${place.name} 제주 자전거길`;
 }
 
+function itineraryDistanceDetails(place) {
+  return place.days.map((dayId) => {
+    const metric = place.distanceByDay?.[dayId];
+    if (!metric) return "";
+    if (metric.order === 0) {
+      return `<span><b>${dayLabels[dayId]}</b> 출발 지점</span>`;
+    }
+    return `
+      <span>
+        <b>${dayLabels[dayId]}</b>
+        ${metric.previousName}에서 ${formatDistanceKm(metric.legDistanceKm)} · 출발 누적 ${formatDistanceKm(metric.cumulativeDistanceKm)}
+      </span>
+    `;
+  }).filter(Boolean).join("");
+}
+
 function itineraryPlacePopup(place) {
   const days = place.days.map((dayId) => dayLabels[dayId]).join(" · ");
   const details = [...new Set(place.details.filter(Boolean))].join(" / ");
   const term = itinerarySearchTerm(place);
+  const distanceDetails = itineraryDistanceDetails(place);
   return `
     <div class="place-popup itinerary-popup">
       <strong>${place.name}</strong>
       <p>${days} 기본 일정 지점</p>
+      ${distanceDetails ? `<div class="itinerary-distance-list">${distanceDetails}</div>` : ""}
       ${details ? `<p>${details}</p>` : ""}
       <div class="place-popup-links">
         <a target="_blank" rel="noreferrer" href="${naverSearchUrl(term)}">네이버</a>
@@ -1472,7 +1493,56 @@ function itineraryPlacePopup(place) {
   `;
 }
 
-function itineraryPlaceGroups() {
+function itineraryPointKey(dayId, point) {
+  return `${dayId}|${point.name}|${point.lat.toFixed(4)}|${point.lng.toFixed(4)}`;
+}
+
+function closestPathIndex(path, point, minimumIndex = 0) {
+  let closestIndex = Math.min(minimumIndex, Math.max(0, path.length - 1));
+  let closestDistance = Number.POSITIVE_INFINITY;
+  for (let index = closestIndex; index < path.length; index += 1) {
+    const candidateDistance = distanceKm(point, path[index]);
+    if (candidateDistance < closestDistance) {
+      closestDistance = candidateDistance;
+      closestIndex = index;
+    }
+  }
+  return closestIndex;
+}
+
+function itineraryRoutePointMetrics(dayId, points, path) {
+  if (!Array.isArray(path) || path.length < 2) return new Map();
+  const cumulative = [0];
+  for (let index = 1; index < path.length; index += 1) {
+    cumulative[index] = cumulative[index - 1] + distanceKm(path[index - 1], path[index]);
+  }
+
+  const metrics = new Map();
+  let previousPathIndex = 0;
+  let previousPathDistance = 0;
+  let displayedCumulativeDistance = 0;
+  points.forEach((point, order) => {
+    let pathIndex = order === 0 ? 0 : closestPathIndex(path, point, previousPathIndex);
+    if (order === points.length - 1) pathIndex = path.length - 1;
+    const pathDistance = cumulative[pathIndex] || 0;
+    const pathLegDistance = Math.max(0, pathDistance - previousPathDistance);
+    const directLegDistance = order > 0 ? distanceKm(points[order - 1], point) : 0;
+    const legDistanceKm = order > 0 ? Math.max(pathLegDistance, directLegDistance) : 0;
+    displayedCumulativeDistance += legDistanceKm;
+    metrics.set(itineraryPointKey(dayId, point), {
+      order,
+      previousName: order > 0 ? points[order - 1].name : "",
+      pathIndex,
+      legDistanceKm,
+      cumulativeDistanceKm: displayedCumulativeDistance
+    });
+    previousPathIndex = pathIndex;
+    previousPathDistance = pathDistance;
+  });
+  return metrics;
+}
+
+function itineraryPlaceGroups(pointMetrics = new Map()) {
   const groups = new Map();
   Object.entries(defaultItineraryMapRoutes).forEach(([dayId, route]) => {
     route.points.forEach((point, index) => {
@@ -1483,12 +1553,18 @@ function itineraryPlaceGroups() {
           firstDayId: dayId,
           firstOrder: index,
           days: [],
-          details: []
+          details: [],
+          roles: [],
+          distanceByDay: {}
         });
       }
       const group = groups.get(key);
       if (!group.days.includes(dayId)) group.days.push(dayId);
       if (point.detail) group.details.push(point.detail);
+      if (index === 0 && !group.roles.includes("start")) group.roles.push("start");
+      if (index === route.points.length - 1 && !group.roles.includes("finish")) group.roles.push("finish");
+      const metric = pointMetrics.get(itineraryPointKey(dayId, point));
+      if (metric) group.distanceByDay[dayId] = metric;
     });
   });
   return [...groups.values()].sort((a, b) => {
@@ -1497,10 +1573,30 @@ function itineraryPlaceGroups() {
   });
 }
 
+function itineraryMarkerKind(place) {
+  if (jejuLodgings.some((lodging) => lodging.name === place.name)) return "stay";
+  if (place.roles.includes("start") && place.roles.includes("finish")) return "terminal";
+  if (place.roles.includes("start")) return "start";
+  if (place.roles.includes("finish")) return "finish";
+  return "sight";
+}
+
 function itineraryMarkerHtml(place) {
-  const dayNumbers = place.days.map((dayId) => dayId.replace("day", "")).join("·");
+  const kind = itineraryMarkerKind(place);
+  const symbols = { start: "▶", sight: "★", stay: "H", finish: "✓", terminal: "◆" };
   const color = dayRouteColors[place.firstDayId] || dayRouteColors.day1;
-  return `<span class="itinerary-marker" style="--marker-color:${color}"><b>${dayNumbers}</b></span>`;
+  const metric = place.distanceByDay?.[place.firstDayId];
+  const distanceLabel = metric?.order === 0
+    ? kind === "terminal" ? "출·도" : "출발"
+    : Number.isFinite(metric?.legDistanceKm)
+      ? formatDistanceKm(metric.legDistanceKm)
+      : "경유";
+  return `
+    <span class="itinerary-marker is-${kind}" style="--marker-color:${color}">
+      <b aria-hidden="true">${symbols[kind]}</b>
+      <i>${distanceLabel}</i>
+    </span>
+  `;
 }
 
 function learnedAreaName(point) {
@@ -2013,8 +2109,9 @@ function setupVWorldRouteEditor() {
   const itineraryRouteBounds = {};
   const lodgingMarkers = new Map();
   const restaurantMarkers = new Map();
+  const itineraryDistanceMetrics = new Map();
   let overlayScheduleFilter = "all";
-  let currentView = "plan";
+  let currentView = "schedule";
   let aerialMode = false;
   let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
 
@@ -2359,7 +2456,7 @@ function setupVWorldRouteEditor() {
     if (!overlayLodging) return;
     overlayLodging.innerHTML = `
       <div class="lodging-summary">
-        <strong>${tripDefaults.lodgingPlan}</strong>
+        <strong>${jejuLodgings.map((lodging) => `<span><b>${lodging.night}</b> ${lodging.name}</span>`).join("")}</strong>
         <span>아래 3곳을 1~3박 숙소로 일정에 반영했습니다. 실제 예약 상태와 8명 이용·자전거 보관 조건은 예약처에서 최종 확인하세요.</span>
       </div>
       <div class="lodging-panel-list">
@@ -2437,7 +2534,7 @@ function setupVWorldRouteEditor() {
   updateResult();
   setMode("start");
   renderOverlayViews();
-  setPanelView("plan");
+  setPanelView("schedule");
 
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
@@ -2544,12 +2641,15 @@ function setupVWorldRouteEditor() {
       lineCap: "round"
     }).addTo(dayLayer);
     dayLine.bindTooltip(`${dayLabels[dayId]} · ${route.title} · ${route.distance}`, { sticky: true });
+    itineraryRoutePointMetrics(dayId, route.points, dayRoute.path).forEach((metric, key) => {
+      itineraryDistanceMetrics.set(key, metric);
+    });
     itineraryRouteLayers[dayId] = dayLayer;
     itineraryRouteBounds[dayId] = dayLine.getBounds();
   });
 
   itineraryPlaceLayer = L.layerGroup().addTo(map);
-  itineraryPlaceGroups().forEach((place) => {
+  itineraryPlaceGroups(itineraryDistanceMetrics).forEach((place) => {
     const icon = typeof L.divIcon === "function"
       ? L.divIcon({
         className: "itinerary-marker-wrap",
@@ -2562,7 +2662,11 @@ function setupVWorldRouteEditor() {
     const markerOptions = { title: `${place.name} 일정 지점` };
     if (icon) markerOptions.icon = icon;
     const marker = L.marker([place.lat, place.lng], markerOptions).addTo(itineraryPlaceLayer);
-    marker.bindTooltip(`${place.days.map((dayId) => dayLabels[dayId]).join(" · ")} · ${place.name}`, {
+    const primaryMetric = place.distanceByDay?.[place.firstDayId];
+    const tooltipDistance = primaryMetric?.order > 0
+      ? ` · 이전 지점에서 ${formatDistanceKm(primaryMetric.legDistanceKm)} · 누적 ${formatDistanceKm(primaryMetric.cumulativeDistanceKm)}`
+      : " · 출발 지점";
+    marker.bindTooltip(`${place.days.map((dayId) => dayLabels[dayId]).join(" · ")} · ${place.name}${tooltipDistance}`, {
       direction: "top",
       offset: [0, -32]
     });
@@ -2951,8 +3055,9 @@ function renderLodgingCard(lodging, index) {
   return `
     <article class="lodging-card" data-lodging-card="${index}">
       <div class="lodging-card-head">
-        <span>${lodging.night}</span>
-        <div>
+        <img class="lodging-card-image" src="${lodging.image}" alt="${lodging.name} 전경" loading="lazy">
+        <div class="lodging-card-copy">
+          <span class="lodging-night">${lodging.night}</span>
           <strong>${lodging.name}</strong>
           <small>${lodging.area} · ${lodging.dayRange}</small>
         </div>
