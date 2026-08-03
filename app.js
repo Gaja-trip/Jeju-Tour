@@ -2545,6 +2545,14 @@ function setupVWorldRouteEditor() {
     zoomControl: false,
     preferCanvas: true
   }).setView([33.38, 126.55], 10);
+  const syncItineraryDistanceVisibility = () => {
+    const minimumZoom = window.matchMedia("(max-width: 760px)").matches ? 13 : 12;
+    const visible = map.getZoom() >= minimumZoom;
+    mapTarget.classList.toggle("show-itinerary-distances", visible);
+    mapTarget.dataset.distanceMinimumZoom = String(minimumZoom);
+  };
+  syncItineraryDistanceVisibility();
+  map.on("zoomend", syncItineraryDistanceVisibility);
   L.control.zoom({ position: "bottomright" }).addTo(map);
   const baseMapLayer = L.tileLayer(`https://api.vworld.kr/req/wmts/1.0.0/${vworldApiKey}/Base/{z}/{y}/{x}.png`, {
     maxZoom: 19,

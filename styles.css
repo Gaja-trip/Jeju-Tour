@@ -2887,6 +2887,18 @@ footer {
   font-weight: 1000;
   line-height: 1;
   white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-4px) scale(.94);
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
+}
+
+.vworld-map.show-itinerary-distances .itinerary-marker i {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0) scale(1);
+  transition: opacity .16s ease, transform .16s ease;
 }
 
 .itinerary-distance-list {
