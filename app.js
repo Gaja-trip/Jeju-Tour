@@ -2121,6 +2121,7 @@ function setupVWorldRouteEditor() {
   const panelEdgeToggle = root.querySelector("[data-panel-edge-toggle]");
   const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
   const overlaySchedule = root.querySelector("[data-overlay-schedule]");
+  const noticeLodgingNightButtons = root.querySelectorAll("[data-notice-lodging-night]");
   const overlayNoticeLodging = root.querySelector("[data-overlay-notice-lodging]");
   const overlayLodging = root.querySelector("[data-overlay-lodging]");
   const overlayRestaurants = root.querySelector("[data-overlay-restaurants]");
@@ -2152,6 +2153,7 @@ function setupVWorldRouteEditor() {
   const restaurantMarkers = new Map();
   const itineraryDistanceMetrics = new Map();
   let overlayScheduleFilter = "all";
+  let noticeLodgingNightIndex = 0;
   let currentView = "notice";
   let aerialMode = false;
   let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
@@ -2511,12 +2513,17 @@ function setupVWorldRouteEditor() {
 
   const renderOverlayNoticeLodging = () => {
     if (!overlayNoticeLodging) return;
+    noticeLodgingNightButtons.forEach((button) => {
+      const active = Number(button.dataset.noticeLodgingNight) === noticeLodgingNightIndex;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
     overlayNoticeLodging.innerHTML = `
       <div class="notice-lodging-summary">
         <strong>날짜별 숙소 예약 자료</strong>
         <span>10월 8일은 대체 숙소 후보, 9일과 10일은 예정 숙소 안내입니다. 표시 요금과 객실은 예약 시점에 따라 달라질 수 있습니다.</span>
       </div>
-      ${renderNoticeLodgingList()}
+      ${renderNoticeLodgingList(noticeLodgingNightIndex)}
     `;
   };
 
@@ -2854,6 +2861,13 @@ function setupVWorldRouteEditor() {
   viewTabs.forEach((button) => {
     button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
   });
+  noticeLodgingNightButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      noticeLodgingNightIndex = Number(button.dataset.noticeLodgingNight);
+      renderOverlayNoticeLodging();
+      button.closest("[data-panel-view]")?.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
   panelMenuButtons.forEach((button) => {
     const defaultView = button.dataset.panelDefaultView;
     if (defaultView) button.addEventListener("click", () => setPanelView(defaultView));
@@ -3166,8 +3180,9 @@ function renderNoticeLodgingCard(lodging, index) {
   `;
 }
 
-function renderNoticeLodgingList() {
-  return jejuLodgings.map((lodging, index) => renderNoticeLodgingCard(lodging, index)).join("");
+function renderNoticeLodgingList(activeIndex = 0) {
+  const lodging = jejuLodgings[activeIndex];
+  return lodging ? renderNoticeLodgingCard(lodging, activeIndex) : "";
 }
 
 function renderLodgingActions(lodging, index) {
