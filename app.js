@@ -2111,17 +2111,18 @@ function setupVWorldRouteEditor() {
   const restaurantMarkers = new Map();
   const itineraryDistanceMetrics = new Map();
   let overlayScheduleFilter = "all";
-  let currentView = "schedule";
+  let currentView = "notice";
   let aerialMode = false;
   let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
 
   const panelMenuForView = {
+    notice: "notice",
     plan: "plan",
     schedule: "plan",
     lodging: "stay-food",
     restaurants: "stay-food",
-    transport: "transport",
-    course: "course"
+    transport: "transport-course",
+    course: "transport-course"
   };
 
   const renderDayTabs = () => {
@@ -2534,7 +2535,7 @@ function setupVWorldRouteEditor() {
   updateResult();
   setMode("start");
   renderOverlayViews();
-  setPanelView("schedule");
+  setPanelView("notice");
 
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
@@ -2885,7 +2886,7 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }

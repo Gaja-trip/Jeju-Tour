@@ -25,10 +25,10 @@
         <a class="brand compact-brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> 제주 자전거 투어</a>
         <nav class="panel-nav" aria-label="전체 메뉴">
           <div class="panel-nav-primary">
+            <button type="button" data-panel-menu="notice" data-panel-view-tab="notice">알림</button>
             <button type="button" data-panel-menu="plan" data-panel-default-view="schedule" aria-controls="planSubmenu" aria-expanded="false">계획표</button>
             <button type="button" data-panel-menu="stay-food" data-panel-default-view="lodging" aria-controls="stayFoodSubmenu" aria-expanded="false">숙소&amp;맛집</button>
-            <button type="button" data-panel-menu="transport" data-panel-view-tab="transport">교통편</button>
-            <button type="button" data-panel-menu="course" data-panel-view-tab="course">코스</button>
+            <button type="button" data-panel-menu="transport-course" data-panel-default-view="transport" aria-controls="transportCourseSubmenu" aria-expanded="false">교통&amp;코스</button>
           </div>
           <div class="panel-subnav" id="planSubmenu" data-panel-submenu="plan" hidden>
             <button type="button" data-panel-view-tab="schedule">일정표</button>
@@ -38,10 +38,25 @@
             <button type="button" data-panel-view-tab="lodging">숙소</button>
             <button type="button" data-panel-view-tab="restaurants">맛집</button>
           </div>
+          <div class="panel-subnav" id="transportCourseSubmenu" data-panel-submenu="transport-course" hidden>
+            <button type="button" data-panel-view-tab="transport">교통</button>
+            <button type="button" data-panel-view-tab="course">코스</button>
+          </div>
         </nav>
       </div>
 
-      <div class="panel-view" data-panel-view="course">
+      <div class="panel-view notice-panel-view" data-panel-view="notice">
+        <div class="route-panel-heading compact">
+          <p class="kicker">Travel Notice</p>
+          <h1>배편 예약 안내</h1>
+        </div>
+        <a class="notice-image-link" href="assets/ferry-booking-guide.png" target="_blank" rel="noreferrer" aria-label="배편 예약 안내 원본 이미지 열기">
+          <img src="assets/ferry-booking-guide.png" alt="2026 제주 자전거 여행 목포 제주 여객선 예약 안내" width="1672" height="941">
+          <span class="notice-expand-icon" aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <div class="panel-view" data-panel-view="course" hidden>
         <div class="route-panel-heading">
           <p class="kicker">Course Editor</p>
           <h1>제주 환상 자전거길</h1>
