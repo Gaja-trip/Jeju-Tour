@@ -25,10 +25,14 @@
         <a class="brand compact-brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> 제주 자전거 투어</a>
         <nav class="panel-nav" aria-label="전체 메뉴">
           <div class="panel-nav-primary">
-            <button type="button" data-panel-menu="notice" data-panel-view-tab="notice">알림</button>
+            <button type="button" data-panel-menu="notice" data-panel-default-view="notice" aria-controls="noticeSubmenu" aria-expanded="false">알림</button>
             <button type="button" data-panel-menu="plan" data-panel-default-view="schedule" aria-controls="planSubmenu" aria-expanded="false">계획표</button>
             <button type="button" data-panel-menu="stay-food" data-panel-default-view="lodging" aria-controls="stayFoodSubmenu" aria-expanded="false">숙소&amp;맛집</button>
             <button type="button" data-panel-menu="transport-course" data-panel-default-view="transport" aria-controls="transportCourseSubmenu" aria-expanded="false">교통&amp;코스</button>
+          </div>
+          <div class="panel-subnav" id="noticeSubmenu" data-panel-submenu="notice" hidden>
+            <button type="button" data-panel-view-tab="notice">배편</button>
+            <button type="button" data-panel-view-tab="notice-lodging">숙소</button>
           </div>
           <div class="panel-subnav" id="planSubmenu" data-panel-submenu="plan" hidden>
             <button type="button" data-panel-view-tab="schedule">일정표</button>
@@ -54,6 +58,15 @@
           <img src="assets/ferry-booking-guide.png" alt="2026 제주 자전거 여행 목포 제주 여객선 예약 안내" width="1672" height="941">
           <span class="notice-expand-icon" aria-hidden="true">↗</span>
         </a>
+      </div>
+
+      <div class="panel-view notice-lodging-panel" data-panel-view="notice-lodging" hidden>
+        <div class="route-panel-heading compact">
+          <p class="kicker">Lodging Notice</p>
+          <h1>숙소 예약 안내</h1>
+          <p>10월 8일부터 10일까지 날짜별 숙소와 예약 경로를 확인합니다.</p>
+        </div>
+        <div class="overlay-scroll notice-lodging-list" data-overlay-notice-lodging></div>
       </div>
 
       <div class="panel-view" data-panel-view="course" hidden>

@@ -105,8 +105,30 @@ const jejuLodgings = [
     area: "금능·한림",
     address: "제주특별자치도 제주시 한림읍 한림로 127",
     dayRange: "1일차 도착 · 2일차 출발",
+    stayDate: "10월 8일(목)",
+    checkoutDate: "10월 9일(금)",
     lat: 33.3856640884,
     lng: 126.2211180134,
+    phone: "064-796-8400",
+    bookingUrl: "https://nol.yanolja.com/stay/domestic/3001809?roomTypeId=60041",
+    bookingLabel: "NOL 예약",
+    noticeImage: "assets/notices/oct-08-alternative-lodging.png",
+    noticeImageAlt: "2026년 10월 8일 제주 자전거 여행 1일차 대체 숙소 후보 안내",
+    noticeImageWidth: 1024,
+    noticeImageHeight: 1536,
+    noticeCandidates: [
+      {
+        name: "애월 스테이 인 제주",
+        bookingUrl: "https://place-site.yanolja.com/places/1000110954/335933",
+        bookingLabel: "NOL 예약"
+      },
+      {
+        name: "라온 호텔 앤 리조트",
+        bookingUrl: "https://nol.yanolja.com/stay/domestic/3006733",
+        bookingLabel: "NOL 예약"
+      },
+      { name: "카이 리조트" }
+    ],
     image: "assets/lodging/ilsung-jeju-beach.jpg",
     summary: "제주항에서 서부 해안을 따라 이동한 첫날 숙소입니다. 8명 이용 조건과 자전거 보관·세탁 가능 여부를 예약처에 확인하세요."
   },
@@ -117,8 +139,17 @@ const jejuLodgings = [
     area: "보목·서귀포",
     address: "제주특별자치도 서귀포시 문필로35번길 46",
     dayRange: "2일차 도착 · 3일차 출발",
+    stayDate: "10월 9일(금)",
+    checkoutDate: "10월 10일(토)",
     lat: 33.24118,
     lng: 126.593475,
+    phone: "064-732-8500",
+    bookingUrl: "https://www.yeogi.com/domestic-accommodations/75833",
+    bookingLabel: "여기어때 예약",
+    noticeImage: "assets/notices/oct-09-lodging.png",
+    noticeImageAlt: "2026년 10월 9일 더베이제주리조트 숙소 예약 안내",
+    noticeImageWidth: 864,
+    noticeImageHeight: 1821,
     image: "assets/lodging/the-bay-jeju.webp",
     summary: "서남부 해안을 달린 뒤 도착하는 보목동 숙소입니다. 체크인 마감과 자전거 보관, 인근 저녁 식사 동선을 함께 확인하세요."
   },
@@ -129,8 +160,17 @@ const jejuLodgings = [
     area: "행원·구좌",
     address: "제주특별자치도 제주시 구좌읍 해맞이해안로 522",
     dayRange: "3일차 도착 · 4일차 출발",
+    stayDate: "10월 10일(토)",
+    checkoutDate: "10월 11일(일)",
     lat: 33.5569228,
     lng: 126.801566,
+    phone: "064-784-1014",
+    bookingUrl: "https://www.yeogi.com/domestic-accommodations/6970",
+    bookingLabel: "여기어때 예약",
+    noticeImage: "assets/notices/oct-10-lodging.png",
+    noticeImageAlt: "2026년 10월 10일 아쿠아뷰티크 숙소 예약 안내",
+    noticeImageWidth: 864,
+    noticeImageHeight: 1821,
     image: "assets/lodging/aqua-beautique.jpg",
     summary: "마지막 밤을 머무는 행원리 숙소입니다. 다음 날 제주항 배편에 맞춘 조기 출발과 간단한 조식 가능 여부를 확인하세요."
   }
@@ -2081,6 +2121,7 @@ function setupVWorldRouteEditor() {
   const panelEdgeToggle = root.querySelector("[data-panel-edge-toggle]");
   const overlayScheduleTabs = root.querySelector("[data-overlay-schedule-tabs]");
   const overlaySchedule = root.querySelector("[data-overlay-schedule]");
+  const overlayNoticeLodging = root.querySelector("[data-overlay-notice-lodging]");
   const overlayLodging = root.querySelector("[data-overlay-lodging]");
   const overlayRestaurants = root.querySelector("[data-overlay-restaurants]");
   const overlayTransport = root.querySelector("[data-overlay-transport]");
@@ -2117,6 +2158,7 @@ function setupVWorldRouteEditor() {
 
   const panelMenuForView = {
     notice: "notice",
+    "notice-lodging": "notice",
     plan: "plan",
     schedule: "plan",
     lodging: "stay-food",
@@ -2467,6 +2509,17 @@ function setupVWorldRouteEditor() {
     setupNaverMapLinks(overlayLodging);
   };
 
+  const renderOverlayNoticeLodging = () => {
+    if (!overlayNoticeLodging) return;
+    overlayNoticeLodging.innerHTML = `
+      <div class="notice-lodging-summary">
+        <strong>날짜별 숙소 예약 자료</strong>
+        <span>10월 8일은 대체 숙소 후보, 9일과 10일은 예정 숙소 안내입니다. 표시 요금과 객실은 예약 시점에 따라 달라질 수 있습니다.</span>
+      </div>
+      ${renderNoticeLodgingList()}
+    `;
+  };
+
   const renderOverlayRestaurants = () => {
     if (!overlayRestaurants) return;
     overlayRestaurants.innerHTML = `
@@ -2484,6 +2537,7 @@ function setupVWorldRouteEditor() {
   };
 
   function renderOverlayViews() {
+    renderOverlayNoticeLodging();
     renderOverlayLodging();
     renderOverlayRestaurants();
     renderOverlaySchedule();
@@ -2699,6 +2753,7 @@ function setupVWorldRouteEditor() {
       <strong>${lodging.night} · ${lodging.name}</strong><br>
       ${lodging.area} · ${lodging.dayRange}<br>
       ${lodging.address}<br>
+      <a href="${lodgingPhoneHref(lodging.phone)}">☎ ${lodging.phone}</a><br>
       ${lodging.summary}<br>
       <a target="_blank" rel="noreferrer" href="${naverSearchUrl(lodgingSearchTerm(lodging))}">네이버</a>
       · <a target="_blank" rel="noreferrer" href="${kakaoSearchUrl(lodgingSearchTerm(lodging))}">다음</a>
@@ -2886,7 +2941,7 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["notice", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "notice-lodging", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }
@@ -3044,8 +3099,75 @@ function lodgingSearchTerm(lodging) {
   return `${lodging.name} ${lodging.address}`;
 }
 
+function lodgingPhoneHref(phone) {
+  return `tel:${String(phone).replace(/[^\d+]/g, "")}`;
+}
+
 function lodgingMapHref(lodging, index) {
   return `course.html?panel=lodging&lodging=${encodeURIComponent(String(index))}&lodgingArea=${encodeURIComponent(lodging.name)}`;
+}
+
+function lodgingNaverBookingHref(lodging) {
+  return `https://search.naver.com/search.naver?query=${encodeURIComponent(`${lodging.name} 제주 예약`)}`;
+}
+
+function renderNoticeLodgingCandidates(candidates) {
+  return `
+    <div class="notice-lodging-candidates" aria-label="10월 8일 대체 숙소 예약 경로">
+      ${candidates.map((candidate) => `
+        <div class="notice-lodging-candidate">
+          <strong>${candidate.name}</strong>
+          <div>
+            ${candidate.bookingUrl ? `<a class="btn dark small" target="_blank" rel="noreferrer" href="${candidate.bookingUrl}">${candidate.bookingLabel}</a>` : ""}
+            <a class="btn light small" target="_blank" rel="noreferrer" href="${lodgingNaverBookingHref(candidate)}">네이버 예약</a>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderNoticeLodgingCard(lodging, index) {
+  const hasCandidates = Array.isArray(lodging.noticeCandidates) && lodging.noticeCandidates.length > 0;
+  return `
+    <article class="notice-lodging-card">
+      <div class="notice-lodging-date">
+        <span>${lodging.night}</span>
+        <strong>${lodging.stayDate}</strong>
+        <small>입실 · ${lodging.checkoutDate} 퇴실</small>
+      </div>
+      <a class="notice-lodging-poster" href="${lodging.noticeImage}" target="_blank" rel="noreferrer" aria-label="${lodging.noticeImageAlt} 원본 이미지 열기">
+        <img src="${lodging.noticeImage}" alt="${lodging.noticeImageAlt}" width="${lodging.noticeImageWidth}" height="${lodging.noticeImageHeight}" loading="lazy" decoding="async">
+        <span aria-hidden="true">↗</span>
+      </a>
+      ${hasCandidates ? `
+        <div class="notice-lodging-details">
+          <strong>1일차 대체 숙소 후보 3곳</strong>
+          <span>회원 의견을 모은 뒤 최종 숙소를 선택합니다.</span>
+        </div>
+        ${renderNoticeLodgingCandidates(lodging.noticeCandidates)}
+      ` : `
+        <div class="notice-lodging-details">
+          <strong>${lodging.name}</strong>
+          <span>${lodging.area}</span>
+          <small>${lodging.address}</small>
+        </div>
+        <a class="lodging-phone-link" href="${lodgingPhoneHref(lodging.phone)}" aria-label="${lodging.name} ${lodging.phone} 전화 걸기">
+          <span class="lodging-phone-icon" aria-hidden="true">☎</span>
+          <strong>${lodging.phone}</strong>
+        </a>
+        <div class="notice-lodging-actions">
+          <a class="btn dark small" target="_blank" rel="noreferrer" href="${lodging.bookingUrl}">${lodging.bookingLabel}</a>
+          <a class="btn light small" target="_blank" rel="noreferrer" href="${lodgingNaverBookingHref(lodging)}">네이버 예약</a>
+          <a class="btn light small" href="${lodgingMapHref(lodging, index)}">지도 보기</a>
+        </div>
+      `}
+    </article>
+  `;
+}
+
+function renderNoticeLodgingList() {
+  return jejuLodgings.map((lodging, index) => renderNoticeLodgingCard(lodging, index)).join("");
 }
 
 function renderLodgingActions(lodging, index) {
@@ -3072,6 +3194,10 @@ function renderLodgingCard(lodging, index) {
         </div>
       </div>
       <p class="lodging-address">${lodging.address}</p>
+      <a class="lodging-phone-link" href="${lodgingPhoneHref(lodging.phone)}" aria-label="${lodging.name} ${lodging.phone} 전화 걸기">
+        <span class="lodging-phone-icon" aria-hidden="true">☎</span>
+        <strong>${lodging.phone}</strong>
+      </a>
       <p>${lodging.summary}</p>
       <div class="lodging-checks" aria-label="예약 전 확인 사항">
         <span>8명 수용 확인</span>
