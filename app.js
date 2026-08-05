@@ -31,7 +31,7 @@ const tripDefaults = {
   riders: "8명",
   vehicle: "전주↔목포 차량 이동, 목포↔제주 선박 이동, 제주 내 자전거 일주",
   ferryPlan: "목포 08:30 출항 / 제주 13:30~13:40 출항 예정",
-  lodgingPlan: "1박 일성제주비치콘도&리조트 · 2박 더베이제주리조트 · 3박 아쿠아뷰티크",
+  lodgingPlan: "1박 카이리조트 제주 · 2박 더베이제주리조트 · 3박 아쿠아뷰티크",
   totalDistance: "약 230.5km",
   totalRideTime: "약 15시간 22분",
   totalAscent: "+1,220~1,300m",
@@ -44,8 +44,8 @@ const tripDefaults = {
 
 const defaultItineraryMapRoutes = {
   day1: {
-    title: "제주항 → 일성제주비치콘도&리조트",
-    distance: "약 42km",
+    title: "제주항 → 카이리조트 제주",
+    distance: "약 40km",
     points: [
       { name: "제주항", lat: 33.5162, lng: 126.5280, detail: "제주항 도착, 자전거 수령과 장비 점검" },
       { name: "용두암", lat: 33.5161, lng: 126.5117, detail: "제주환상자전거길 출발 인증 후보" },
@@ -53,14 +53,14 @@ const defaultItineraryMapRoutes = {
       { name: "애월·한담해안도로", lat: 33.4637, lng: 126.3096, detail: "카페·편의점 보급이 쉬운 구간" },
       { name: "다락인증센터(다락쉼터)", lat: 33.4695, lng: 126.340222, detail: "인증·사진 휴식 추천 지점 · 33°28'10.2\"N 126°20'24.8\"E" },
       { name: "협재·금능", lat: 33.3945, lng: 126.2397, detail: "숙소 도착 전 마지막 해안 구간" },
-      { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, detail: "1박 숙소 · 한림읍 한림로 127" }
+      { name: "카이리조트 제주", lat: 33.3922148, lng: 126.2409676, detail: "1박 숙소 · 한림읍 협재2길 10" }
     ]
   },
   day2: {
-    title: "일성제주비치콘도&리조트 → 더베이제주리조트",
-    distance: "약 74km",
+    title: "카이리조트 제주 → 더베이제주리조트",
+    distance: "약 76km",
     points: [
-      { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, detail: "2일차 출발 · 한림읍 한림로 127" },
+      { name: "카이리조트 제주", lat: 33.3922148, lng: 126.2409676, detail: "2일차 출발 · 한림읍 협재2길 10" },
       { name: "신창풍차해안도로", lat: 33.3459, lng: 126.1746, detail: "강풍 가능 구간" },
       { name: "해거름마을공원", lat: 33.3424, lng: 126.1830, detail: "인증·10분 휴식" },
       { name: "수월봉·차귀도", lat: 33.2945, lng: 126.1636, detail: "사진 휴식 후 모슬포까지 페이스 유지" },
@@ -101,36 +101,40 @@ const jejuLodgings = [
   {
     id: "night1",
     night: "1박",
-    name: "일성제주비치콘도&리조트",
-    area: "금능·한림",
-    address: "제주특별자치도 제주시 한림읍 한림로 127",
+    name: "카이리조트 제주",
+    area: "협재·한림",
+    address: "제주특별자치도 제주시 한림읍 협재2길 10",
     dayRange: "1일차 도착 · 2일차 출발",
     stayDate: "10월 8일(목)",
     checkoutDate: "10월 9일(금)",
-    lat: 33.3856640884,
-    lng: 126.2211180134,
-    phone: "064-796-8400",
-    bookingUrl: "https://nol.yanolja.com/stay/domestic/3001809?roomTypeId=60041",
+    lat: 33.3922148,
+    lng: 126.2409676,
+    phone: "064-796-2428",
+    bookingUrl: "https://nol.yanolja.com/stay/domestic/3000862",
     bookingLabel: "NOL 예약",
-    noticeImage: "assets/notices/oct-08-alternative-lodging.png",
-    noticeImageAlt: "2026년 10월 8일 제주 자전거 여행 1일차 대체 숙소 후보 안내",
-    noticeImageWidth: 1024,
-    noticeImageHeight: 1536,
-    noticeCandidates: [
+    noticeImages: [
       {
-        name: "애월 스테이 인 제주",
-        bookingUrl: "https://place-site.yanolja.com/places/1000110954/335933",
-        bookingLabel: "NOL 예약"
+        src: "assets/notices/night-1-kai-room-1.png",
+        alt: "카이리조트 제주 객실 1 트윈 룸온리 예약 안내",
+        width: 1024,
+        height: 1536
       },
       {
-        name: "라온 호텔 앤 리조트",
-        bookingUrl: "https://nol.yanolja.com/stay/domestic/3006733",
-        bookingLabel: "NOL 예약"
+        src: "assets/notices/night-1-kai-room-2.png",
+        alt: "카이리조트 제주 객실 2 트윈 룸온리 예약 안내",
+        width: 1024,
+        height: 1536
       },
-      { name: "카이 리조트" }
+      {
+        src: "assets/notices/night-1-kai-room-3.png",
+        alt: "카이리조트 제주 객실 3 스위트 트윈 룸온리 예약 안내",
+        width: 941,
+        height: 1672
+      }
     ],
-    image: "assets/lodging/ilsung-jeju-beach.jpg",
-    summary: "제주항에서 서부 해안을 따라 이동한 첫날 숙소입니다. 8명 이용 조건과 자전거 보관·세탁 가능 여부를 예약처에 확인하세요."
+    image: "assets/notices/night-1-kai-room-1.png",
+    imageAlt: "카이리조트 제주 객실 예약 안내",
+    summary: "트윈 2실과 스위트 트윈 1실 예약입니다. 트윈과 스위트 트윈의 건물이 다르므로 객실 배정 동선을 함께 확인하세요."
   },
   {
     id: "night2",
@@ -146,10 +150,26 @@ const jejuLodgings = [
     phone: "064-732-8500",
     bookingUrl: "https://www.yeogi.com/domestic-accommodations/75833",
     bookingLabel: "여기어때 예약",
-    noticeImage: "assets/notices/oct-09-lodging.png",
-    noticeImageAlt: "2026년 10월 9일 더베이제주리조트 숙소 예약 안내",
-    noticeImageWidth: 864,
-    noticeImageHeight: 1821,
+    noticeImages: [
+      {
+        src: "assets/notices/night-2-the-bay-room-1.png",
+        alt: "더베이제주리조트 객실 1 오션디럭스 룸온리 예약 안내",
+        width: 1024,
+        height: 1536
+      },
+      {
+        src: "assets/notices/night-2-the-bay-room-2.png",
+        alt: "더베이제주리조트 객실 2 오션패밀리 룸온리 예약 안내",
+        width: 1024,
+        height: 1536
+      },
+      {
+        src: "assets/notices/night-2-the-bay-room-3.png",
+        alt: "더베이제주리조트 객실 3 오션디럭스 룸온리 예약 안내",
+        width: 1024,
+        height: 1536
+      }
+    ],
     image: "assets/lodging/the-bay-jeju.webp",
     summary: "서남부 해안을 달린 뒤 도착하는 보목동 숙소입니다. 체크인 마감과 자전거 보관, 인근 저녁 식사 동선을 함께 확인하세요."
   },
@@ -167,10 +187,26 @@ const jejuLodgings = [
     phone: "064-784-1014",
     bookingUrl: "https://www.yeogi.com/domestic-accommodations/6970",
     bookingLabel: "여기어때 예약",
-    noticeImage: "assets/notices/oct-10-lodging.png",
-    noticeImageAlt: "2026년 10월 10일 아쿠아뷰티크 숙소 예약 안내",
-    noticeImageWidth: 864,
-    noticeImageHeight: 1821,
+    noticeImages: [
+      {
+        src: "assets/notices/night-3-aqua-room-1.png",
+        alt: "제주 아쿠아뷰티크풀빌라 객실 1 패밀리형 미니풀빌라 조식 포함 예약 안내",
+        width: 1024,
+        height: 1536
+      },
+      {
+        src: "assets/notices/night-3-aqua-room-2.png",
+        alt: "제주 아쿠아뷰티크풀빌라 객실 2 레벤드 미니풀빌라 조식 포함 예약 안내",
+        width: 1024,
+        height: 1536
+      },
+      {
+        src: "assets/notices/night-3-aqua-room-3.png",
+        alt: "제주 아쿠아뷰티크풀빌라 객실 3 레벤드 미니풀빌라 조식 포함 예약 안내",
+        width: 1024,
+        height: 1536
+      }
+    ],
     image: "assets/lodging/aqua-beautique.jpg",
     summary: "마지막 밤을 머무는 행원리 숙소입니다. 다음 날 제주항 배편에 맞춘 조기 출발과 간단한 조식 가능 여부를 확인하세요."
   }
@@ -185,7 +221,7 @@ const jejuBikeNodes = [
   { name: "이호테우", lat: 33.4971, lng: 126.4522, elevation: 10 },
   { name: "애월", lat: 33.4637, lng: 126.3096, elevation: 18 },
   { name: "협재", lat: 33.3945, lng: 126.2397, elevation: 12 },
-  { name: "일성제주비치콘도&리조트", lat: 33.3856640884, lng: 126.2211180134, elevation: 12 },
+  { name: "카이리조트 제주", lat: 33.3922148, lng: 126.2409676, elevation: 12 },
   { name: "신창풍차해안도로", lat: 33.3459, lng: 126.1746, elevation: 9 },
   { name: "모슬포/대정", lat: 33.2208, lng: 126.2496, elevation: 20 },
   { name: "송악산", lat: 33.2066, lng: 126.2902, elevation: 48 },
@@ -212,7 +248,7 @@ const jejuRoutePlaces = [
   { name: "곽지", aliases: ["곽지해수욕장"], lat: 33.4501, lng: 126.3046, elevation: 14 },
   { name: "한림", aliases: ["한림항"], lat: 33.4144, lng: 126.2634, elevation: 12 },
   { name: "협재", aliases: ["협재해수욕장", "금능"], lat: 33.3945, lng: 126.2397, elevation: 12 },
-  { name: "일성제주비치콘도&리조트", aliases: ["일성 제주비치 콘도&리조트", "일성리조트 제주비치", "일성콘도 제주비치", "일성비치콘도미니엄"], lat: 33.3856640884, lng: 126.2211180134, elevation: 12 },
+  { name: "카이리조트 제주", aliases: ["카이 리조트", "카이리조트", "Kai Resort"], lat: 33.3922148, lng: 126.2409676, elevation: 12 },
   { name: "신창풍차해안도로", aliases: ["신창", "풍차해안도로"], lat: 33.3459, lng: 126.1746, elevation: 9 },
   { name: "차귀도", aliases: ["자구내포구"], lat: 33.3080, lng: 126.1668, elevation: 12 },
   { name: "모슬포", aliases: ["모슬포항", "대정"], lat: 33.2208, lng: 126.2496, elevation: 20 },
@@ -693,14 +729,14 @@ const routeChoices = {
   day1: [
     {
       optionId: "hotel-day1-v4",
-      title: "제주항 → 일성제주비치콘도&리조트",
+      title: "제주항 → 카이리조트 제주",
       theme: "10/8 목 · 서부 해안과 1박 숙소",
-      distance: "약 41.7km",
-      rideTime: "약 2시간 47분",
+      distance: "약 39.7km",
+      rideTime: "약 2시간 39분",
       ascent: "+170m 내외",
-      lodging: "일성제주비치콘도&리조트",
-      stops: ["제주항", "용두암", "이호테우", "애월·한담", "다락쉼터", "협재·금능", "일성제주비치콘도&리조트"],
-      summary: "변경 계획의 1일차 코스입니다. 제주항에서 자전거를 정비한 뒤 서부 해안을 따라 일성제주비치콘도&리조트까지 이동합니다.",
+      lodging: "카이리조트 제주",
+      stops: ["제주항", "용두암", "이호테우", "애월·한담", "다락쉼터", "협재·금능", "카이리조트 제주"],
+      summary: "변경 계획의 1일차 코스입니다. 제주항에서 자전거를 정비한 뒤 서부 해안을 따라 협재의 카이리조트 제주까지 이동합니다.",
       schedule: [
         { time: "04:50", place: "전주 집결", distanceKm: 0, cumulativeDistanceKm: 0, detail: "자전거 적재, 신분증·승선권·보급식 확인" },
         { time: "05:00", place: "전주 출발", detail: "차량 이동, 목포항 국제여객터미널 07:00 전후 도착 목표" },
@@ -711,7 +747,7 @@ const routeChoices = {
         { time: "14:00", place: "제주항 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "용두암 방향으로 제주환상자전거길 진입" },
         { time: "15:00", place: "이호테우해변", distanceKm: 11, cumulativeDistanceKm: 11, detail: "초반 대열 정비와 10분 휴식" },
         { time: "16:30", place: "애월·한담", distanceKm: 16, cumulativeDistanceKm: 27, detail: "보급 후 다락쉼터·협재 방향 이동" },
-        { time: "17:50 전후", place: "일성제주비치콘도&리조트", distanceKm: 15, cumulativeDistanceKm: 42, detail: "체크인, 자전거 보관과 세탁 확인" },
+        { time: "17:40 전후", place: "카이리조트 제주", distanceKm: 13, cumulativeDistanceKm: 40, detail: "체크인, 객실 건물 동선과 자전거 보관·세탁 확인" },
         { time: "19:00", place: "금능·한림권 저녁", detail: "숙소에서 이동 가능한 단체 식당의 영업·예약 여부 확인" }
       ]
     }
@@ -719,23 +755,23 @@ const routeChoices = {
   day2: [
     {
       optionId: "hotel-day2-v4",
-      title: "일성제주비치콘도&리조트 → 더베이제주리조트",
+      title: "카이리조트 제주 → 더베이제주리조트",
       theme: "10/9 금 · 서남부 해안과 2박 숙소",
-      distance: "약 74.4km",
-      rideTime: "약 4시간 57분",
+      distance: "약 76.4km",
+      rideTime: "약 5시간 5분",
       ascent: "+500m 내외",
       lodging: "더베이제주리조트",
-      stops: ["일성제주비치콘도&리조트", "신창풍차해안도로", "수월봉·차귀도", "모슬포", "송악산", "산방산·중문", "더베이제주리조트"],
-      summary: "변경 계획의 2일차 코스입니다. 일성제주비치콘도&리조트에서 출발해 서남부 조망 구간과 중문을 거쳐 보목동의 더베이제주리조트에 도착합니다.",
+      stops: ["카이리조트 제주", "신창풍차해안도로", "수월봉·차귀도", "모슬포", "송악산", "산방산·중문", "더베이제주리조트"],
+      summary: "변경 계획의 2일차 코스입니다. 카이리조트 제주에서 출발해 서남부 조망 구간과 중문을 거쳐 보목동의 더베이제주리조트에 도착합니다.",
       schedule: [
         { time: "07:00", place: "기상·조식", detail: "물 2통, 보급식, 펑크키트 확인" },
-        { time: "08:00", place: "일성제주비치콘도&리조트 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "초반은 15km/h 안팎으로 무리하지 않기" },
-        { time: "09:00", place: "신창풍차해안도로", distanceKm: 13, cumulativeDistanceKm: 13, detail: "바람 강할 때 대열 좁히기" },
-        { time: "10:15", place: "수월봉·차귀도", distanceKm: 10, cumulativeDistanceKm: 23, detail: "인증과 사진 휴식" },
-        { time: "11:45~12:45", place: "모슬포 점심", distanceKm: 14, cumulativeDistanceKm: 37, detail: "탄수화물·수분 보충" },
-        { time: "13:35", place: "송악산", distanceKm: 8, cumulativeDistanceKm: 45, detail: "오후 업다운 전 짧은 휴식" },
-        { time: "15:20", place: "산방산·중문", distanceKm: 16, cumulativeDistanceKm: 61, detail: "기복과 관광 차량 주의" },
-        { time: "17:00 전후", place: "더베이제주리조트", distanceKm: 13, cumulativeDistanceKm: 74, detail: "체크인, 세탁과 다음 날 준비" },
+        { time: "08:00", place: "카이리조트 제주 출발", distanceKm: 0, cumulativeDistanceKm: 0, detail: "초반은 15km/h 안팎으로 무리하지 않기" },
+        { time: "09:05", place: "신창풍차해안도로", distanceKm: 15, cumulativeDistanceKm: 15, detail: "바람 강할 때 대열 좁히기" },
+        { time: "10:20", place: "수월봉·차귀도", distanceKm: 10, cumulativeDistanceKm: 25, detail: "인증과 사진 휴식" },
+        { time: "11:50~12:50", place: "모슬포 점심", distanceKm: 14, cumulativeDistanceKm: 39, detail: "탄수화물·수분 보충" },
+        { time: "13:40", place: "송악산", distanceKm: 8, cumulativeDistanceKm: 47, detail: "오후 업다운 전 짧은 휴식" },
+        { time: "15:25", place: "산방산·중문", distanceKm: 16, cumulativeDistanceKm: 63, detail: "기복과 관광 차량 주의" },
+        { time: "17:05 전후", place: "더베이제주리조트", distanceKm: 13, cumulativeDistanceKm: 76, detail: "체크인, 세탁과 다음 날 준비" },
         { time: "19:00", place: "보목·서귀포권 저녁", detail: "늦은 도착에도 이용 가능한 단체 식당 확인" }
       ]
     }
@@ -2521,7 +2557,7 @@ function setupVWorldRouteEditor() {
     overlayNoticeLodging.innerHTML = `
       <div class="notice-lodging-summary">
         <strong>날짜별 숙소 예약 자료</strong>
-        <span>10월 8일은 대체 숙소 후보, 9일과 10일은 예정 숙소 안내입니다. 표시 요금과 객실은 예약 시점에 따라 달라질 수 있습니다.</span>
+        <span>1박 카이리조트 제주, 2박 더베이제주리조트, 3박 아쿠아뷰티크의 객실별 예약 자료를 각각 3장씩 확인할 수 있습니다.</span>
       </div>
       ${renderNoticeLodgingList(noticeLodgingNightIndex)}
     `;
@@ -3125,24 +3161,33 @@ function lodgingNaverBookingHref(lodging) {
   return `https://search.naver.com/search.naver?query=${encodeURIComponent(`${lodging.name} 제주 예약`)}`;
 }
 
-function renderNoticeLodgingCandidates(candidates) {
+function lodgingNoticeImages(lodging) {
+  if (Array.isArray(lodging.noticeImages) && lodging.noticeImages.length) return lodging.noticeImages;
+  if (!lodging.noticeImage) return [];
+  return [{
+    src: lodging.noticeImage,
+    alt: lodging.noticeImageAlt,
+    width: lodging.noticeImageWidth,
+    height: lodging.noticeImageHeight
+  }];
+}
+
+function renderNoticeLodgingGallery(lodging) {
+  const images = lodgingNoticeImages(lodging);
   return `
-    <div class="notice-lodging-candidates" aria-label="10월 8일 대체 숙소 예약 경로">
-      ${candidates.map((candidate) => `
-        <div class="notice-lodging-candidate">
-          <strong>${candidate.name}</strong>
-          <div>
-            ${candidate.bookingUrl ? `<a class="btn dark small" target="_blank" rel="noreferrer" href="${candidate.bookingUrl}">${candidate.bookingLabel}</a>` : ""}
-            <a class="btn light small" target="_blank" rel="noreferrer" href="${lodgingNaverBookingHref(candidate)}">네이버 예약</a>
-          </div>
-        </div>
+    <div class="notice-lodging-gallery" aria-label="${lodging.name} 객실별 예약 자료 ${images.length}장">
+      ${images.map((image, imageIndex) => `
+        <a class="notice-lodging-poster" href="${image.src}" target="_blank" rel="noreferrer" aria-label="${image.alt} 원본 이미지 열기">
+          <img src="${image.src}" alt="${image.alt}" width="${image.width}" height="${image.height}" loading="lazy" decoding="async">
+          <span aria-hidden="true">${imageIndex + 1}/${images.length}</span>
+        </a>
       `).join("")}
     </div>
+    ${images.length > 1 ? '<p class="notice-lodging-gallery-help">좌우로 넘기거나 이미지를 눌러 원본을 확인하세요.</p>' : ""}
   `;
 }
 
 function renderNoticeLodgingCard(lodging, index) {
-  const hasCandidates = Array.isArray(lodging.noticeCandidates) && lodging.noticeCandidates.length > 0;
   return `
     <article class="notice-lodging-card">
       <div class="notice-lodging-date">
@@ -3150,32 +3195,21 @@ function renderNoticeLodgingCard(lodging, index) {
         <strong>${lodging.stayDate}</strong>
         <small>입실 · ${lodging.checkoutDate} 퇴실</small>
       </div>
-      <a class="notice-lodging-poster" href="${lodging.noticeImage}" target="_blank" rel="noreferrer" aria-label="${lodging.noticeImageAlt} 원본 이미지 열기">
-        <img src="${lodging.noticeImage}" alt="${lodging.noticeImageAlt}" width="${lodging.noticeImageWidth}" height="${lodging.noticeImageHeight}" loading="lazy" decoding="async">
-        <span aria-hidden="true">↗</span>
+      ${renderNoticeLodgingGallery(lodging)}
+      <div class="notice-lodging-details">
+        <strong>${lodging.name}</strong>
+        <span>${lodging.area}</span>
+        <small>${lodging.address}</small>
+      </div>
+      <a class="lodging-phone-link" href="${lodgingPhoneHref(lodging.phone)}" aria-label="${lodging.name} ${lodging.phone} 전화 걸기">
+        <span class="lodging-phone-icon" aria-hidden="true">☎</span>
+        <strong>${lodging.phone}</strong>
       </a>
-      ${hasCandidates ? `
-        <div class="notice-lodging-details">
-          <strong>1일차 대체 숙소 후보 3곳</strong>
-          <span>회원 의견을 모은 뒤 최종 숙소를 선택합니다.</span>
-        </div>
-        ${renderNoticeLodgingCandidates(lodging.noticeCandidates)}
-      ` : `
-        <div class="notice-lodging-details">
-          <strong>${lodging.name}</strong>
-          <span>${lodging.area}</span>
-          <small>${lodging.address}</small>
-        </div>
-        <a class="lodging-phone-link" href="${lodgingPhoneHref(lodging.phone)}" aria-label="${lodging.name} ${lodging.phone} 전화 걸기">
-          <span class="lodging-phone-icon" aria-hidden="true">☎</span>
-          <strong>${lodging.phone}</strong>
-        </a>
-        <div class="notice-lodging-actions">
-          <a class="btn dark small" target="_blank" rel="noreferrer" href="${lodging.bookingUrl}">${lodging.bookingLabel}</a>
-          <a class="btn light small" target="_blank" rel="noreferrer" href="${lodgingNaverBookingHref(lodging)}">네이버 예약</a>
-          <a class="btn light small" href="${lodgingMapHref(lodging, index)}">지도 보기</a>
-        </div>
-      `}
+      <div class="notice-lodging-actions">
+        <a class="btn dark small" target="_blank" rel="noreferrer" href="${lodging.bookingUrl}">${lodging.bookingLabel}</a>
+        <a class="btn light small" target="_blank" rel="noreferrer" href="${lodgingNaverBookingHref(lodging)}">네이버 예약</a>
+        <a class="btn light small" href="${lodgingMapHref(lodging, index)}">지도 보기</a>
+      </div>
     </article>
   `;
 }
@@ -3201,7 +3235,7 @@ function renderLodgingCard(lodging, index) {
   return `
     <article class="lodging-card" data-lodging-card="${index}">
       <div class="lodging-card-head">
-        <img class="lodging-card-image" src="${lodging.image}" alt="${lodging.name} 전경" loading="lazy">
+        <img class="lodging-card-image" src="${lodging.image}" alt="${lodging.imageAlt || `${lodging.name} 전경`}" loading="lazy">
         <div class="lodging-card-copy">
           <span class="lodging-night">${lodging.night}</span>
           <strong>${lodging.name}</strong>
