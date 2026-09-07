@@ -2145,6 +2145,10 @@ footer {
   background: #e7efec;
 }
 
+.panel-subnav[data-panel-submenu="notice"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .panel-subnav[hidden] {
   display: none;
 }
