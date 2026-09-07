@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>제주라이딩 30분 체력 훈련 챌린지 | 제주 자전거 투어</title>
+  <meta name="description" content="매일 30분 이상 체력훈련 인증 시 일별·주별·월별 집계가 가능한 제주라이딩 이벤트 페이지">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> 제주 자전거 투어</a>
+      <nav class="nav-links" aria-label="주요 페이지">
+        <a href="course.html">코스</a>
+        <a href="restaurants.html">맛집</a>
+        <a href="schedule.html">일정표</a>
+        <a href="live.html">교통편</a>
+        <a href="transport.html">계획표</a>
+        <a class="active" href="event.html">이벤트</a>
+      </nav>
+    </div>
+  </header>
+
+  <nav class="mobile-section-nav" aria-label="모바일 주요 페이지">
+    <div class="wrap">
+      <a href="course.html">코스</a>
+      <a href="restaurants.html">맛집</a>
+      <a href="schedule.html">일정표</a>
+      <a href="live.html">교통편</a>
+      <a href="transport.html">계획표</a>
+      <a class="active" href="event.html">이벤트</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero compact">
+      <div class="wrap hero-inner">
+        <div>
+          <p class="eyebrow">Challenge</p>
+          <h1>제주라이딩 30분 체력 훈련 챌린지</h1>
+          <p class="hero-copy">오늘부터 10월까지, 매일 30분 이상 운동 인증으로 일별·주별·월별 점수를 누적해보세요.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <p class="kicker">운영 규칙</p>
+            <h2>인증 규칙</h2>
+          </div>
+          <p class="lead">참가자별로 날짜·운동 시간을 기준으로 중복을 제거해 일 단위로만 집계합니다.</p>
+        </div>
+
+        <div class="info-grid challenge-rule-grid">
+          <article class="panel" style="padding: 18px;">
+            <h3>인증 기간</h3>
+            <p>2026-09-07 ~ 2026-10-31</p>
+          </article>
+          <article class="panel" style="padding: 18px;">
+            <h3>일별 집계</h3>
+            <p>한 사람이 하루(YYYY-MM-DD)에 30분 이상 인증하면 <strong>1점</strong>으로 계산됩니다.</p>
+          </article>
+          <article class="panel" style="padding: 18px;">
+            <h3>주별 집계</h3>
+            <p>월~일 기준으로 주간 합계를 계산해 월간 집계 전까지 누적 표시합니다.</p>
+          </article>
+          <article class="panel" style="padding: 18px;">
+            <h3>월별 집계</h3>
+            <p>9월/10월 각각의 일별 집계일 수를 합산한 점수를 보여줍니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <p class="kicker">Record</p>
+            <h2>인증 등록</h2>
+          </div>
+          <p class="lead">같은 날 같은 사람 중복 등록은 1일 1점으로 처리됩니다.</p>
+        </div>
+
+        <article class="panel" style="padding: 18px;">
+          <form id="entryForm" class="challenge-form">
+            <label>
+              <span>이름</span>
+              <input name="name" type="text" required placeholder="예: 박철수" autocomplete="name" />
+            </label>
+            <label>
+              <span>운동 종류</span>
+              <input name="activity" type="text" list="activityList" placeholder="예: 실내 라이딩/야외 라이딩/근력" required />
+            </label>
+            <label>
+              <span>운동 날짜</span>
+              <input id="challengeDate" name="date" type="date" required />
+            </label>
+            <label>
+              <span>운동 시간(분)</span>
+              <input name="minutes" type="number" min="1" step="1" required placeholder="예: 45" />
+            </label>
+
+            <button type="submit" class="btn dark small">인증 등록</button>
+            <button type="button" id="clearAll" class="btn light small">전체 초기화</button>
+            <button type="button" id="exportCsv" class="btn light small">CSV 다운로드</button>
+
+            <datalist id="activityList">
+              <option>실내 라이딩</option>
+              <option>야외 라이딩</option>
+              <option>인터벌</option>
+              <option>근력운동</option>
+              <option>런닝/웨이트</option>
+            </datalist>
+          </form>
+          <div id="entryMessage" class="challenge-message" role="status" aria-live="polite"></div>
+        </article>
+
+        <div class="challenge-summary-title">
+          <h3>참가자 집계</h3>
+          <p class="lead">일별/주별/월별 점수를 실시간으로 집계합니다.</p>
+        </div>
+
+        <div class="table-shell challenge-summary-shell">
+          <div class="table-scroll-x">
+            <table>
+              <thead>
+                <tr>
+                  <th>참가자</th>
+                  <th>일별 점수</th>
+                  <th>주별 점수</th>
+                  <th>월별 점수</th>
+                </tr>
+              </thead>
+              <tbody id="summaryTableBody">
+                <tr>
+                  <td colspan="4">등록된 인증이 아직 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="challenge-summary-title">
+          <h3>인증 내역</h3>
+          <p class="lead">30분 미만은 저장되지만 점수에는 반영되지 않습니다.</p>
+        </div>
+
+        <div class="table-shell challenge-summary-shell">
+          <div class="table-scroll-x">
+            <table>
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>이름</th>
+                  <th>운동 종류</th>
+                  <th>시간(분)</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="recordTableBody">
+                <tr>
+                  <td colspan="5">등록된 인증이 아직 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>제주라이딩 30분 체력 훈련 챌린지</strong>
+      <p>운영 보너스나 추가 규칙이 생기면 공지로 고지합니다.</p>
+    </div>
+  </footer>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+
+  <script>
+    const EVENT_START = '2026-09-07';
+    const EVENT_END = '2026-10-31';
+    const STORAGE_KEY = 'jeju-riding-30min-challenge-v2';
+
+    const challengeDateInput = document.getElementById('challengeDate');
+    const entryForm = document.getElementById('entryForm');
+    const entryMessage = document.getElementById('entryMessage');
+    const summaryTableBody = document.getElementById('summaryTableBody');
+    const recordTableBody = document.getElementById('recordTableBody');
+    const clearAllButton = document.getElementById('clearAll');
+    const exportCsvButton = document.getElementById('exportCsv');
+
+    const weeklyRanges = buildEventWeeks(EVENT_START, EVENT_END);
+    const allMonths = Array.from(
+      new Set(weeklyRanges.map((w) => [w.start.slice(0, 7), w.end.slice(0, 7)]).flat())
+    ).sort();
+
+    challengeDateInput.min = EVENT_START;
+    challengeDateInput.max = EVENT_END;
+    challengeDateInput.value = getTodayInRange(EVENT_START, EVENT_END);
+
+    let records = loadRecords();
+
+    entryForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(entryForm);
+      const name = String(formData.get('name') || '').trim();
+      const activity = String(formData.get('activity') || '').trim();
+      const date = String(formData.get('date') || '').trim();
+      const minutes = Number(formData.get('minutes'));
+
+      if (!name) {
+        setMessage('이름을 입력해주세요.', false);
+        return;
+      }
+
+      if (!activity) {
+        setMessage('운동 종류를 입력해주세요.', false);
+        return;
+      }
+
+      if (!isDateInRange(date, EVENT_START, EVENT_END)) {
+        setMessage('운동 날짜는 2026-09-07부터 2026-10-31 사이여야 합니다.', false);
+        return;
+      }
+
+      if (!Number.isFinite(minutes) || minutes <= 0) {
+        setMessage('운동 시간을 1분 이상 입력해주세요.', false);
+        return;
+      }
+
+      records.push({
+        id: String(Date.now()),
+        name,
+        activity,
+        date,
+        minutes,
+        createdAt: new Date().toISOString(),
+      });
+      saveRecords(records);
+      renderAll();
+      entryForm.reset();
+      challengeDateInput.value = getTodayInRange(EVENT_START, EVENT_END);
+      setMessage('인증을 등록했습니다. 30분 이상일 경우 집계에 반영됩니다.', true);
+    });
+
+    clearAllButton.addEventListener('click', () => {
+      if (window.confirm('현재까지 입력한 모든 인증 기록을 삭제할까요?')) {
+        records = [];
+        localStorage.removeItem(STORAGE_KEY);
+        renderAll();
+        setMessage('모든 인증 기록이 삭제되었습니다.', true);
+      }
+    });
+
+    exportCsvButton.addEventListener('click', () => {
+      if (!records.length) {
+        setMessage('내보낼 데이터가 없습니다.', false);
+        return;
+      }
+      downloadCsv(records);
+      setMessage('CSV 파일을 다운로드했습니다.', true);
+    });
+
+    function loadRecords() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+        return parsed.filter(isRecordShape).map((record) => ({
+          ...record,
+          minutes: Number(record.minutes),
+        }));
+      } catch (error) {
+        console.warn('기록 로딩 실패', error);
+        return [];
+      }
+    }
+
+    function isRecordShape(record) {
+      return Boolean(
+        record &&
+        typeof record.name === 'string' &&
+        typeof record.activity === 'string' &&
+        typeof record.date === 'string' &&
+        isDateInRange(record.date, EVENT_START, EVENT_END) &&
+        Number.isFinite(Number(record.minutes))
+      );
+    }
+
+    function saveRecords(nextRecords) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextRecords));
+    }
+
+    function setMessage(text, ok = false) {
+      entryMessage.textContent = text;
+      entryMessage.classList.toggle('is-ok', ok);
+      entryMessage.classList.toggle('is-error', !ok);
+    }
+
+    function renderAll() {
+      const ordered = [...records].sort((a, b) => {
+        if (a.date === b.date) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return b.date.localeCompare(a.date);
+      });
+
+      renderRecords(ordered);
+      renderSummary(ordered);
+    }
+
+    function renderRecords(rows) {
+      if (!rows.length) {
+        recordTableBody.innerHTML = '<tr><td colspan="5">등록된 인증이 아직 없습니다.</td></tr>';
+        return;
+      }
+      const markup = rows
+        .map((record) => {
+          const qualified = record.minutes >= 30;
+          const status = qualified
+            ? '<span class="chip">30분 이상(카운트)</span>'
+            : '<span class="chip">30분 미만(미카운트)</span>';
+          return `<tr>
+            <td>${escapeHtml(record.date)}</td>
+            <td><strong>${escapeHtml(record.name)}</strong></td>
+            <td>${escapeHtml(record.activity)}</td>
+            <td>${escapeHtml(String(record.minutes))}</td>
+            <td>${status}</td>
+          </tr>`;
+        })
+        .join('');
+      recordTableBody.innerHTML = markup;
+    }
+
+    function renderSummary(rows) {
+      const members = new Map();
+      for (const record of rows) {
+        if (!members.has(record.name)) {
+          members.set(record.name, {
+            name: record.name,
+            dailySet: new Set(),
+            weekCount: {},
+            monthCount: {},
+          });
+        }
+        const member = members.get(record.name);
+        if (record.minutes >= 30) {
+          member.dailySet.add(record.date);
+        }
+      }
+
+      for (const member of members.values()) {
+        for (const date of member.dailySet) {
+          const week = getWeekKey(date);
+          member.weekCount[week] = (member.weekCount[week] || 0) + 1;
+          const month = date.slice(0, 7);
+          member.monthCount[month] = (member.monthCount[month] || 0) + 1;
+        }
+      }
+
+      if (!members.size) {
+        summaryTableBody.innerHTML = '<tr><td colspan="4">등록된 인증이 아직 없습니다.</td></tr>';
+        return;
+      }
+
+      const ordered = [...members.values()].sort((a, b) => {
+        const aTotal = a.dailySet.size;
+        const bTotal = b.dailySet.size;
+        if (aTotal === bTotal) {
+          return a.name.localeCompare(b.name);
+        }
+        return bTotal - aTotal;
+      });
+
+      const rowMarkup = ordered
+        .map((member) => {
+          const daily = member.dailySet.size;
+          const weeklyBadges = weeklyRanges
+            .map((weekRange) => {
+              const count = member.weekCount[weekRange.key] || 0;
+              return `<span class="chip">${weekRange.label}: ${count}</span>`;
+            })
+            .join('');
+          const monthBadges = allMonths
+            .map((month) => {
+              const count = member.monthCount[month] || 0;
+              return `<span class="chip">${formatMonthLabel(month)}: ${count}</span>`;
+            })
+            .join('');
+          return `<tr>
+            <td><strong>${escapeHtml(member.name)}</strong></td>
+            <td>${daily}일</td>
+            <td><div class=\"challenge-chip-row\">${weeklyBadges || '<span>없음</span>'}</div></td>
+            <td><div class=\"challenge-chip-row\">${monthBadges || '<span>없음</span>'}</div></td>
+          </tr>`;
+        })
+        .join('');
+
+      summaryTableBody.innerHTML = rowMarkup;
+    }
+
+    function isDateInRange(date, start, end) {
+      return typeof date === 'string' && date >= start && date <= end;
+    }
+
+    function buildEventWeeks(startDate, endDate) {
+      const start = parseDate(startDate);
+      const end = parseDate(endDate);
+      const weeks = [];
+      const cursor = new Date(start);
+      let index = 1;
+      while (cursor <= end) {
+        const weekStart = new Date(cursor);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        const labelStart = toLocalDateString(weekStart);
+        const labelEnd = toLocalDateString(weekEnd <= end ? weekEnd : end);
+        weeks.push({
+          key: labelStart,
+          label: `W${index}(${labelStart.slice(5)}~${labelEnd.slice(5)})`,
+          start: labelStart,
+          end: labelEnd,
+        });
+        cursor.setDate(weekEnd.getDate() + 1);
+        index += 1;
+      }
+      return weeks;
+    }
+
+    function getWeekKey(date) {
+      const [year, month, day] = date.split('-').map((part) => Number(part));
+      const current = new Date(year, month - 1, day);
+      const dayOfWeek = current.getDay();
+      const shift = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(current);
+      monday.setDate(current.getDate() + shift);
+      return toLocalDateString(monday);
+    }
+
+    function getTodayInRange(start, end) {
+      const today = toLocalDateString(new Date());
+      if (today < start) {
+        return start;
+      }
+      if (today > end) {
+        return end;
+      }
+      return today;
+    }
+
+    function parseDate(value) {
+      const [year, month, day] = value.split('-').map((part) => Number(part));
+      return new Date(year, month - 1, day);
+    }
+
+    function toLocalDateString(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatMonthLabel(month) {
+      const [_, monthNumber] = month.split('-');
+      return `${Number(monthNumber)}월`;
+    }
+
+    function downloadCsv(rows) {
+      const headers = ['날짜', '이름', '운동 종류', '운동 시간(분)', '카운트 가능'];
+      const lines = [headers.join(',')];
+      for (const row of rows) {
+        const rowArray = [
+          row.date,
+          csvEscape(row.name),
+          csvEscape(row.activity),
+          String(row.minutes),
+          row.minutes >= 30 ? 'Y' : 'N',
+        ];
+        lines.push(rowArray.join(','));
+      }
+      const blob = new Blob([`\uFEFF${lines.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'jeju-riding-challenge-records.csv';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(value) {
+      const v = String(value ?? '').replaceAll('"', '""');
+      return `"${v}"`;
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
