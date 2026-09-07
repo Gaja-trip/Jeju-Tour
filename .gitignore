@@ -1,0 +1,9 @@
+server/config.json
+server/data/*
+!server/data/.gitkeep
+server/backups/*
+!server/backups/.gitkeep
+server/exports/
+node_modules/
+.test-output/
+*.log

@@ -1,0 +1,13 @@
+{
+  "name": "jeju-tour",
+  "version": "1.0.0",
+  "private": true,
+  "description": "제주 자전거 투어와 사진 인증 서버",
+  "engines": { "node": ">=24.14.0 <25" },
+  "scripts": {
+    "start": "node server/index.mjs",
+    "test": "node --test server/test/*.test.mjs",
+    "backup": "node server/manage.mjs backup",
+    "export": "node server/manage.mjs export"
+  }
+}
