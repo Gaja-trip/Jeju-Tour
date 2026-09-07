@@ -24,16 +24,17 @@
       <div class="route-panel-top" data-panel-toggle-area>
         <a class="brand compact-brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> 제주 자전거 투어</a>
         <nav class="panel-nav" aria-label="전체 메뉴">
-          <div class="panel-nav-primary">
-            <button type="button" data-panel-menu="notice" data-panel-default-view="notice" aria-controls="noticeSubmenu" aria-expanded="false">알림</button>
-            <button type="button" data-panel-menu="plan" data-panel-default-view="schedule" aria-controls="planSubmenu" aria-expanded="false">계획표</button>
-            <button type="button" data-panel-menu="stay-food" data-panel-default-view="lodging" aria-controls="stayFoodSubmenu" aria-expanded="false">숙소&amp;맛집</button>
-            <button type="button" data-panel-menu="transport-course" data-panel-default-view="transport" aria-controls="transportCourseSubmenu" aria-expanded="false">교통&amp;코스</button>
-          </div>
-          <div class="panel-subnav" id="noticeSubmenu" data-panel-submenu="notice" hidden>
-            <button type="button" data-panel-view-tab="notice">배편</button>
-            <button type="button" data-panel-view-tab="notice-lodging">숙소</button>
-          </div>
+        <div class="panel-nav-primary">
+          <button type="button" data-panel-menu="notice" data-panel-default-view="notice" aria-controls="noticeSubmenu" aria-expanded="false">알림</button>
+          <button type="button" data-panel-menu="plan" data-panel-default-view="schedule" aria-controls="planSubmenu" aria-expanded="false">계획표</button>
+          <button type="button" data-panel-menu="stay-food" data-panel-default-view="lodging" aria-controls="stayFoodSubmenu" aria-expanded="false">숙소&amp;맛집</button>
+          <button type="button" data-panel-menu="transport-course" data-panel-default-view="transport" aria-controls="transportCourseSubmenu" aria-expanded="false">교통&amp;코스</button>
+        </div>
+        <div class="panel-subnav" id="noticeSubmenu" data-panel-submenu="notice" hidden>
+          <button type="button" data-panel-view-tab="notice">배편</button>
+          <button type="button" data-panel-view-tab="notice-lodging">숙소</button>
+          <button type="button" data-panel-view-tab="event">이벤트</button>
+        </div>
           <div class="panel-subnav" id="planSubmenu" data-panel-submenu="plan" hidden>
             <button type="button" data-panel-view-tab="schedule">일정표</button>
             <button type="button" data-panel-view-tab="plan">전체 계획표</button>
@@ -58,6 +59,18 @@
           <img src="assets/ferry-booking-guide.png" alt="2026 제주 자전거 여행 목포 제주 여객선 예약 안내" width="1672" height="941">
           <span class="notice-expand-icon" aria-hidden="true">↗</span>
         </a>
+      </div>
+
+      <div class="panel-view" data-panel-view="event" hidden>
+        <div class="route-panel-heading compact">
+          <p class="kicker">Challenge</p>
+          <h1>제주라이딩 30분 체력 훈련 챌린지</h1>
+          <p>알림 메뉴에서 바로 이벤트를 운영하고 인증을 관리할 수 있습니다.</p>
+        </div>
+        <iframe class="event-iframe" title="제주라이딩 이벤트 운영" src="event.html" loading="lazy"></iframe>
+        <div class="action-list" style="margin-top: 12px;">
+          <a class="btn light small" href="event.html" target="_blank" rel="noreferrer">새 탭에서 전체 이벤트 페이지 보기</a>
+        </div>
       </div>
 
       <div class="panel-view notice-lodging-panel" data-panel-view="notice-lodging" hidden>

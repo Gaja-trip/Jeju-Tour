@@ -2245,6 +2245,14 @@ footer {
   align-content: start;
 }
 
+.event-iframe {
+  width: 100%;
+  min-height: 560px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
 .notice-lodging-list {
   display: grid;
   gap: 10px;
@@ -3808,6 +3816,10 @@ footer {
   .route-panel-heading h1 {
     margin-top: 4px;
     font-size: 1.25rem;
+  }
+
+  .event-iframe {
+    min-height: 460px;
   }
 
   .route-panel-heading .kicker,

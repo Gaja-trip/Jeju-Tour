@@ -2197,6 +2197,7 @@ function setupVWorldRouteEditor() {
   const panelMenuForView = {
     notice: "notice",
     "notice-lodging": "notice",
+    event: "notice",
     plan: "plan",
     schedule: "plan",
     lodging: "stay-food",
@@ -2991,7 +2992,7 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["notice", "notice-lodging", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "notice-lodging", "event", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }
