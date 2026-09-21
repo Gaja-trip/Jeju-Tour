@@ -7,7 +7,7 @@
 1. 서버로 사용할 컴퓨터에 [Node.js 24.x](https://nodejs.org/en/download)를 설치합니다.
 2. **Jeju-Tour 폴더 전체**를 원하는 위치에 복사합니다. 예: `D:\프로그래밍\Jeju-Tour`. 드라이브 문자나 한글·공백 경로를 코드에서 고정하지 않았습니다.
 3. `server\start-server.cmd`를 더블클릭합니다. 또는 프로젝트 폴더에서 `npm start`를 실행합니다.
-4. `http://localhost:3000/course.html?panel=event`에 접속합니다. 기존의 **알림 → 이벤트**에서도 같은 화면을 사용합니다. 이벤트만 열려면 `http://localhost:3000/event.html`입니다.
+4. `http://localhost:3000/course.html?panel=meeting`에 접속하면 **알림 → 회의**의 공개 회의자료가 열립니다. 기존 인증 페이지는 `http://localhost:3000/event.html`에서 계속 사용할 수 있습니다.
 5. 첫 실행 때 `server/config.json`, 데이터베이스와 참가자 폴더가 자동으로 만들어집니다.
 
 일반 실행 창을 닫으면 서버가 종료됩니다. 수동 종료는 Ctrl+C입니다. HTML 파일을 탐색기에서 직접 열거나 기존 정적 호스팅만 사용하면 서버 저장은 작동하지 않습니다. 서버가 연결되지 않으면 화면에서 알려주고 신규 등록을 잠급니다.

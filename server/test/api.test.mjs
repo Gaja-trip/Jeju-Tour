@@ -87,7 +87,7 @@ test('photo registration, participants, persistence, backup and access boundarie
       const folders = readdirSync(join(config.dataDir, 'participants'));
       assert.ok(folders.some((f) => f.startsWith('p-.._CON_test--')));
       for (const folder of folders) assert.ok(resolve(config.dataDir, 'participants', folder).startsWith(resolve(config.dataDir, 'participants') + sep));
-      for (const path of ['/server/config.json', '/server/data/jeju-tour.sqlite', '/.git/config', '/package.json', '/assets/%2e%2e%2fserver/config.json', '/assets/%2e%2e%5cserver/config.json']) {
+      for (const path of ['/server/config.json', '/server/data/jeju-tour.sqlite', '/.git/config', '/package.json', '/assets/%2e%2e%2fserver/config.json', '/assets/%2e%2e%5cserver/config.json', '/assets/%2e%2e%2fpackage.json', '/assets/%2e%2e%2fserver/README.md']) {
         assert.equal((await get(path)).status, 404, path);
       }
       assert.equal((await get('/event.html')).status, 200);

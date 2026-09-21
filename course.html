@@ -33,7 +33,7 @@
         <div class="panel-subnav" id="noticeSubmenu" data-panel-submenu="notice" hidden>
           <button type="button" data-panel-view-tab="notice">배편</button>
           <button type="button" data-panel-view-tab="notice-lodging">숙소</button>
-          <button type="button" data-panel-view-tab="event">이벤트</button>
+          <button type="button" data-panel-view-tab="meeting">회의</button>
         </div>
           <div class="panel-subnav" id="planSubmenu" data-panel-submenu="plan" hidden>
             <button type="button" data-panel-view-tab="schedule">일정표</button>
@@ -61,16 +61,21 @@
         </a>
       </div>
 
-      <div class="panel-view" data-panel-view="event" hidden>
+      <div class="panel-view meeting-panel" data-panel-view="meeting" hidden>
         <div class="route-panel-heading compact">
-          <p class="kicker">Challenge</p>
-          <h1>제주라이딩 30분 체력 훈련 챌린지</h1>
-          <p>알림 메뉴에서 바로 이벤트를 운영하고 인증을 관리할 수 있습니다.</p>
+          <p class="kicker">Meeting</p>
+          <h1>제주 3박 4일 라이딩 운영계획</h1>
+          <p>일정과 짐 이동계획, 상세 라이딩 코스를 확인하세요.</p>
         </div>
-        <iframe class="event-iframe" title="제주라이딩 이벤트 운영" src="event.html?embedded=1" loading="lazy"></iframe>
-        <div class="action-list" style="margin-top: 12px;">
-          <a class="btn light small" href="event.html" target="_blank" rel="noreferrer">새 탭에서 전체 이벤트 페이지 보기</a>
+        <p class="meeting-meta">2026. 9. 21. 회의자료 · PDF 1페이지</p>
+        <div class="meeting-actions">
+          <a class="btn dark small" href="meeting.html" target="_blank" rel="noopener">전체 화면 보기 ↗</a>
+          <a class="btn light small" href="assets/meetings/jeju-riding-operation-plan.pdf" download="[회의자료]제주3박4일 라이딩 운영계획.pdf">PDF 다운로드</a>
         </div>
+        <p class="meeting-hint">자료를 누르면 크게 볼 수 있습니다.</p>
+        <a class="meeting-preview" href="meeting.html" target="_blank" rel="noopener" aria-label="제주 3박 4일 라이딩 운영계획 회의자료 전체 화면으로 보기">
+          <img src="assets/meetings/jeju-riding-operation-plan-page-1.png" alt="2026년 9월 21일 회의자료. 제주 3박 4일 일정과 짐 이동계획, 상세 라이딩 일정표. 전체 내용은 PDF에서 확인할 수 있습니다." width="1488" height="2103" loading="lazy">
+        </a>
       </div>
 
       <div class="panel-view notice-lodging-panel" data-panel-view="notice-lodging" hidden>

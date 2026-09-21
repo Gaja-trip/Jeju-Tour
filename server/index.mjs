@@ -7,8 +7,8 @@ import { timingSafeEqual } from 'node:crypto';
 import { loadConfig, SITE_DIR } from './config.mjs';
 import { openStore, HttpError, LIMITS } from './store.mjs';
 
-const PUBLIC_FILES = new Set(['index.html', 'course.html', 'event.html', 'restaurants.html', 'schedule.html', 'live.html', 'transport.html', 'styles.css', 'app.js', 'gpx-route.js', 'event.js', 'event-config.js', 'logo.svg']);
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gpx': 'application/gpx+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
+const PUBLIC_FILES = new Set(['index.html', 'course.html', 'meeting.html', 'event.html', 'restaurants.html', 'schedule.html', 'live.html', 'transport.html', 'styles.css', 'app.js', 'gpx-route.js', 'event.js', 'event-config.js', 'logo.svg']);
+const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.pdf': 'application/pdf', '.gpx': 'application/gpx+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 
 async function readBody(req, limit) {
   if (Number(req.headers['content-length']) > limit) throw new HttpError(413, '첨부 용량을 초과했습니다. 사진은 최대 3장, 장당 8MB입니다.');
@@ -114,11 +114,13 @@ export function createApp(config) {
       }
       if (!['GET', 'HEAD'].includes(req.method)) throw new HttpError(405, '허용되지 않은 요청입니다.');
       const relative = pathname === '/' ? 'index.html' : pathname.slice(1);
-      if (!PUBLIC_FILES.has(relative) && !/^assets\/(?!.*(?:^|\/)\.)(?!.*\\)[\s\S]+$/.test(relative)) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
+      const isAsset = relative.startsWith('assets/') && relative.split('/').every((part) => part && !part.startsWith('.') && !/[\\:\0]/.test(part));
+      if (!PUBLIC_FILES.has(relative) && !isAsset) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
+      const publicRoot = isAsset ? resolve(SITE_DIR, 'assets') : SITE_DIR;
       const path = resolve(SITE_DIR, relative);
-      if (!path.startsWith(SITE_DIR + sep)) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
+      if (!path.startsWith(publicRoot + sep)) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
       const actualPath = await realpath(path).catch(() => { throw new HttpError(404, '페이지를 찾을 수 없습니다.'); });
-      if (!actualPath.startsWith(await realpath(SITE_DIR) + sep)) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
+      if (!actualPath.startsWith(await realpath(publicRoot) + sep)) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
       return await serveFile(req, res, actualPath, MIME[extname(path).toLowerCase()] || 'application/octet-stream');
     } catch (error) {
       const status = error.status || 500;
@@ -141,7 +143,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const { server } = createApp(config);
   server.on('error', (error) => { console.error(`서버 시작 실패: ${error.message}`); process.exitCode = 1; });
   server.listen(config.port, config.host, () => {
-    console.log(`Jeju-Tour: http://localhost:${config.port}/course.html?panel=event`);
+    console.log(`Jeju-Tour: http://localhost:${config.port}/course.html?panel=meeting`);
     console.log(`저장 폴더: ${config.dataDir}`);
     console.log(`관리자 키와 접속 설정: ${resolve(SITE_DIR, 'server/config.json')}`);
   });
