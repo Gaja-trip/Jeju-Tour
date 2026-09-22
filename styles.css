@@ -2194,6 +2194,89 @@ footer {
   align-content: start;
 }
 
+.notice-essentials {
+  padding: 14px 16px;
+  border-left: 3px solid var(--ocean);
+  background: #eaf5f1;
+}
+
+.notice-essentials h2,
+.notice-departure h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.notice-essentials ol {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding-left: 22px;
+  font-size: .9rem;
+  line-height: 1.6;
+}
+
+.notice-essentials li::marker {
+  color: var(--ocean);
+  font-weight: 700;
+}
+
+.notice-departure {
+  padding-top: 6px;
+  min-width: 0;
+}
+
+.notice-departure-timeline {
+  margin: 8px 0 0;
+  font-size: .86rem;
+  line-height: 1.65;
+}
+
+.notice-departure-timeline > div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.notice-departure-timeline dt {
+  color: var(--ocean);
+  font-weight: 700;
+}
+
+.notice-departure-timeline dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.notice-departure-time {
+  display: block;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.notice-departure-route {
+  padding: 12px 0 4px;
+}
+
+.notice-departure-route p {
+  margin: 0 0 5px;
+  font-size: .86rem;
+  line-height: 1.65;
+}
+
+.notice-departure-route > strong {
+  color: var(--ocean);
+  font-size: 1rem;
+}
+
+.notice-departure-route > strong > span {
+  margin: 0 6px;
+  color: var(--muted);
+}
+
 .notice-image-link {
   position: relative;
   display: block;
