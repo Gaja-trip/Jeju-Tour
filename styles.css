@@ -2235,12 +2235,18 @@ footer {
 }
 
 .notice-essentials ol {
-  display: grid;
-  gap: 5px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
   margin: 8px 0 0;
-  padding-left: 22px;
-  font-size: .9rem;
+  padding: 0;
+  list-style-position: inside;
+  font-size: .85rem;
   line-height: 1.6;
+}
+
+.notice-essentials li {
+  white-space: nowrap;
 }
 
 .notice-essentials li::marker {
