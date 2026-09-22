@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>제주라이딩 30분 체력 훈련 챌린지 | 제주 자전거 투어</title>
+  <meta name="description" content="매일 30분 이상 체력훈련 인증 시 일별·주별·월별 집계가 가능한 제주라이딩 이벤트 페이지">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="challenge-page">
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span> 제주 자전거 투어</a>
+      <nav class="nav-links" aria-label="주요 페이지">
+        <a href="course.html">코스</a>
+        <a href="restaurants.html">맛집</a>
+        <a href="schedule.html">일정표</a>
+        <a href="live.html">교통편</a>
+        <a href="transport.html">계획표</a>
+        <a class="active" href="event.html">이벤트</a>
+      </nav>
+    </div>
+  </header>
+
+  <nav class="mobile-section-nav" aria-label="모바일 주요 페이지">
+    <div class="wrap">
+      <a href="course.html">코스</a>
+      <a href="restaurants.html">맛집</a>
+      <a href="schedule.html">일정표</a>
+      <a href="live.html">교통편</a>
+      <a href="transport.html">계획표</a>
+      <a class="active" href="event.html">이벤트</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <section>
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <p class="kicker">Record</p>
+            <h2>인증 등록</h2>
+          </div>
+          <p class="lead">같은 날 같은 사람 중복 등록은 1일 1점으로 처리됩니다.</p>
+        </div>
+
+        <p id="serverStatus" class="challenge-server-status" role="status">서버 연결을 확인하고 있습니다.</p>
+        <article class="panel" style="padding: 18px;">
+          <form id="entryForm" class="challenge-form">
+            <fieldset id="entryFields" class="challenge-fields" disabled>
+            <label>
+              <span>이름</span>
+              <input name="name" type="text" maxlength="40" required placeholder="예: 박철수" autocomplete="name" />
+            </label>
+            <label>
+              <span>운동 종류</span>
+              <input name="activity" maxlength="80" type="text" list="activityList" placeholder="예: 실내 라이딩/야외 라이딩/근력" required />
+            </label>
+            <label>
+              <span>운동 날짜</span>
+              <input id="challengeDate" name="date" type="date" required />
+            </label>
+            <label>
+              <span>운동 시간(분)</span>
+              <input name="minutes" type="number" min="1" max="1440" step="1" required placeholder="예: 45" />
+            </label>
+
+            <label class="challenge-photo-field">
+              <span>인증 사진 <small>(선택)</small></span>
+              <input id="entryPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="photoHelp" />
+              <small id="photoHelp">JPG · PNG · WebP / 최대 3장 / 장당 8MB. 휴대폰에서 사진을 선택하거나 촬영할 수 있습니다.</small>
+            </label>
+            <div id="photoPreview" class="challenge-photo-preview challenge-full" aria-live="polite"></div>
+            <div class="challenge-actions challenge-full">
+              <button id="submitEntry" type="submit" class="btn dark small">인증 등록</button>
+            </div>
+            </fieldset>
+
+            <datalist id="activityList">
+              <option>실내 라이딩</option>
+              <option>야외 라이딩</option>
+              <option>인터벌</option>
+              <option>근력운동</option>
+              <option>런닝/웨이트</option>
+            </datalist>
+          </form>
+          <div class="challenge-actions challenge-toolbar">
+            <button type="button" id="refreshRecords" class="btn light small">새로고침</button>
+            <button type="button" id="exportCsv" class="btn light small" disabled>CSV 다운로드</button>
+            <button type="button" id="importLegacy" class="btn light small" hidden>이 브라우저의 기존 기록 가져오기</button>
+          </div>
+          <div id="entryMessage" class="challenge-message" role="status" aria-live="polite"></div>
+        </article>
+
+        <div class="challenge-summary-title">
+          <h3>참가자 집계 <span id="participantCount" class="chip">0명</span></h3>
+          <p class="lead">30분 이상 인증한 참가자를 이름별로 집계합니다. 이름을 누르면 사진과 인증 내역을 볼 수 있습니다.</p>
+        </div>
+
+        <div class="table-shell challenge-summary-shell">
+          <div class="table-scroll-x">
+            <table>
+              <thead>
+                <tr>
+                  <th>참가자</th>
+                  <th>인증 일수</th>
+                  <th>주별 점수</th>
+                  <th>월별 점수</th>
+                </tr>
+              </thead>
+              <tbody id="summaryTableBody">
+                <tr>
+                  <td colspan="4">등록된 인증이 아직 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="challenge-summary-title">
+          <h3 id="historyHeading" tabindex="-1">인증 내역</h3>
+          <p class="lead">참가자를 선택하면 해당 참가자의 기록만 표시됩니다. 30분 미만은 점수에 반영되지 않습니다.</p>
+        </div>
+
+        <div class="challenge-history-controls">
+          <label for="participantFilter">참가자</label>
+          <select id="participantFilter"><option value="">전체 참가자</option></select>
+          <button id="showAllRecords" type="button" class="btn light small">전체 보기</button>
+          <span id="historyCount" aria-live="polite"></span>
+        </div>
+
+        <div class="table-shell challenge-summary-shell">
+          <div class="table-scroll-x">
+            <table>
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>이름</th>
+                  <th>운동 종류</th>
+                  <th>시간(분)</th>
+                  <th>상태</th>
+                  <th>사진 / 관리</th>
+                </tr>
+              </thead>
+              <tbody id="recordTableBody">
+                <tr>
+                  <td colspan="6">등록된 인증이 아직 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <details class="challenge-admin">
+          <summary>운영자 관리</summary>
+          <p>관리자 키로 연결하면 잘못 등록된 인증을 삭제할 수 있습니다.</p>
+          <form id="adminForm" class="challenge-actions">
+            <label for="adminToken">관리자 키</label>
+            <input id="adminToken" type="password" autocomplete="off" required placeholder="관리자 키 입력">
+            <button type="submit" class="btn light small">관리자 연결</button>
+            <button id="adminLogout" type="button" class="btn light small" hidden>관리자 연결 해제</button>
+          </form>
+          <p id="adminMessage" role="status"></p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>제주라이딩 30분 체력 훈련 챌린지</strong>
+      <p>운영 보너스나 추가 규칙이 생기면 공지로 고지합니다.</p>
+    </div>
+  </footer>
+
+  <dialog id="photoDialog" class="challenge-photo-dialog" aria-labelledby="photoCaption">
+    <form method="dialog"><button class="btn light small" autofocus>닫기</button></form>
+    <p id="photoCaption"></p>
+    <img id="fullPhoto" alt="선택한 인증 사진">
+  </dialog>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+
+  <script src="event-config.js"></script>
+  <script src="event.js" defer></script>
+</body>
+</html>
