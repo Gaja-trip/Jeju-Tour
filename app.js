@@ -2197,6 +2197,7 @@ function setupVWorldRouteEditor() {
   const panelMenuForView = {
     notice: "notice",
     "notice-lodging": "notice",
+    baggage: "notice",
     meeting: "notice",
     plan: "plan",
     schedule: "plan",
@@ -2214,6 +2215,10 @@ function setupVWorldRouteEditor() {
 
   const setPanelView = (view) => {
     currentView = view;
+    if (view === "baggage") {
+      const frame = root.querySelector("[data-baggage-src]");
+      if (frame && !frame.hasAttribute("src")) frame.src = frame.dataset.baggageSrc;
+    }
     const activeMenu = panelMenuForView[view];
     panelViews.forEach((section) => {
       section.hidden = section.dataset.panelView !== view;
@@ -2993,7 +2998,7 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["notice", "notice-lodging", "meeting", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }
