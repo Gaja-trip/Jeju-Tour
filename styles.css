@@ -2220,6 +2220,23 @@ footer {
   align-content: start;
 }
 
+.notice-infographic {
+  min-width: 0;
+  margin: 0;
+}
+
+.notice-infographic img {
+  max-width: 100%;
+}
+
+.notice-infographic figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .notice-image-link {
   position: relative;
   display: block;
