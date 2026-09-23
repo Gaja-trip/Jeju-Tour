@@ -2218,16 +2218,14 @@ footer {
 
 .notice-panel-view {
   align-content: start;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: max-content;
 }
 
-<<<<<<< HEAD
 .notice-infographic {
+  width: 100%;
   min-width: 0;
   margin: 0;
-}
-
-.notice-infographic img {
-  max-width: 100%;
 }
 
 .notice-infographic figcaption {
@@ -2238,7 +2236,6 @@ footer {
   overflow-wrap: anywhere;
 }
 
-=======
 .notice-essentials {
   padding: 14px 16px;
   border-left: 3px solid var(--ocean);
@@ -2328,7 +2325,6 @@ footer {
   color: var(--muted);
 }
 
->>>>>>> b692595a97ffdd3bc58f2b74104a848948e4f1ca
 .notice-image-link {
   position: relative;
   display: block;
@@ -2343,6 +2339,7 @@ footer {
 .notice-image-link img {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
   aspect-ratio: 1672 / 941;
   object-fit: contain;
