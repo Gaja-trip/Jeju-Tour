@@ -244,7 +244,9 @@
         <form class="live-location-form" data-live-join hidden>
           <label for="participantName">참가 이름</label>
           <input id="participantName" type="text" data-live-name autocomplete="name" required maxlength="30">
-          <label for="participantPassword">접속 암호</label>
+          <label for="participantInvite" data-live-invite-label hidden>개인 초대 링크</label>
+          <input id="participantInvite" type="password" data-live-invite hidden autocomplete="off" maxlength="1024">
+          <label for="participantPassword" data-live-password-label>접속 암호</label>
           <input id="participantPassword" type="password" data-live-password autocomplete="current-password" required maxlength="72">
           <button class="btn dark small" type="submit">참가자 인증</button>
         </form>
@@ -283,6 +285,7 @@
   <script src="gpx-route.js"></script>
   <script src="live-location-config.js"></script>
   <script src="live-location-core.js"></script>
+  <script src="invitation-core.js"></script>
   <script src="live-location.js"></script>
   <script src="my-location.js"></script>
   <script src="app.js"></script>

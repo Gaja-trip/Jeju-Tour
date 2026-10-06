@@ -10,3 +10,4 @@ supabase/.temp/
 .vercel/
 .env.local
 *.log
+.private/

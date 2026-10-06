@@ -3,5 +3,5 @@ window.JEJU_LIVE_CONFIG = Object.freeze({
   // Only a Supabase publishable/anon key belongs here, never a service-role key.
   publishableKey: "sb_publishable_-MWKKQxAGch3ZQzwbOlJlw_MVxh66il",
   tripId: "jeju-gaja",
-  authMode: "email"
+  authMode: "invite"
 });

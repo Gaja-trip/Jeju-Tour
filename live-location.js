@@ -19,7 +19,8 @@
     const root = document.querySelector("[data-live-location]");
     if (!root) return;
     const config = window.JEJU_LIVE_CONFIG || {};
-    const deviceLogin = config.authMode === "device";
+    const inviteLogin = config.authMode === "invite";
+    const deviceLogin = config.authMode === "device" || inviteLogin;
     const { LocationPublisher, freshLocation } = window.JejuLocationCore;
     const field = (name) => root.querySelector(`[data-live-${name}]`);
     const status = field("status");
@@ -30,6 +31,16 @@
     const shareButton = field("share");
     const logoutButton = field("logout");
     const consent = field("consent");
+    let inviteToken = inviteLogin ? window.JejuInvitation.takeFromLocation(window.location, window.history) : "";
+    field("invite-label").hidden = !inviteLogin;
+    field("invite").hidden = !inviteLogin;
+    field("invite").required = inviteLogin;
+    field("password-label").hidden = inviteLogin;
+    field("password").hidden = inviteLogin;
+    field("password").required = !inviteLogin;
+    field("invite").value = inviteToken;
+    joinForm.querySelector("button").textContent = inviteLogin ? "초대 등록" : "참가자 인증";
+    logoutButton.textContent = inviteLogin ? "기기 연결 해제" : "로그아웃";
     const layer = L.layerGroup().addTo(map);
     const markers = new Map();
     let client, session, member, publisher, channel, poll;
@@ -43,6 +54,19 @@
     let connected = false;
     let closing = false;
     let emailCooldown = 0;
+    const reasons = {
+      invalid_invitation: "개인 초대 링크 또는 QR을 확인해 주세요.",
+      invitation_required: "운영자에게 받은 개인 초대 QR을 열거나 링크를 입력해 주세요.",
+      expired: "초대 이용 기간이 만료되었습니다. 운영자에게 재발급을 요청해 주세요.",
+      revoked: "초대 연결이 해제되었습니다. 운영자에게 재발급을 요청해 주세요.",
+      already_used: "다른 브라우저에 등록된 초대입니다. 처음 등록한 브라우저를 사용하거나 재발급을 요청해 주세요.",
+      already_registered: "이 브라우저에는 이미 다른 초대가 등록되어 있습니다.",
+      invalid_password: "참가 암호를 확인해 주세요.", invalid_name: "이름은 1~30자로 입력해 주세요.",
+      name_taken: "이미 등록된 이름입니다. 구분할 수 있는 이름을 입력해 주세요.",
+      rate_limited: "확인 횟수를 초과했습니다. 15분 후 다시 시도해 주세요.", disabled: "참가 권한이 중지되었습니다."
+    };
+    const joinPrompt = () => inviteLogin ? (inviteToken ? "초대를 확인했습니다. 참가 이름을 등록해 주세요." : reasons.invitation_required)
+      : deviceLogin ? "참가 이름과 접속 암호를 입력해 주세요." : "이메일 인증 후 참가 암호를 입력해 주세요.";
 
     function message(text, error = false) {
       status.textContent = text;
@@ -54,7 +78,7 @@
       joinForm.hidden = Boolean(member) || (!deviceLogin && !session);
       joinForm.querySelector("button").disabled = busy || !client;
       controls.hidden = !member;
-      logoutButton.hidden = !session;
+      logoutButton.hidden = !session || (inviteLogin && !member);
       shareButton.textContent = watchId === null ? "위치 공유 시작" : "위치 공유 중지";
       shareButton.disabled = busy || !member || (watchId === null && !consent.checked);
       consent.disabled = watchId !== null || busy;
@@ -144,6 +168,20 @@
       refreshing = true;
       const stamp = version;
       try {
+        if (inviteLogin) {
+          const access = await client.rpc("jeju_invitation_status", { p_trip_id: config.tripId });
+          if (stamp !== version) return;
+          if (access.error) throw access.error;
+          if (!access.data?.ok) {
+            member = null;
+            clearTracking();
+            publisher.cancel();
+            clearMap();
+            message(reasons[access.data?.reason] || reasons.invitation_required, Boolean(access.data?.slot));
+            updateControls();
+            return;
+          }
+        }
         const people = await client.from("jeju_participants").select("user_id,display_name,enabled")
           .eq("trip_id", config.tripId).order("joined_at");
         if (stamp !== version) return;
@@ -201,7 +239,7 @@
       if (channel) { void client.removeChannel(channel); channel = null; }
       updateControls();
       if (!session) {
-        message(deviceLogin ? "참가 이름과 접속 암호를 입력해 주세요." : "이메일 인증 후 참가 암호를 입력해 주세요.");
+        message(joinPrompt());
         return;
       }
       message("참가 정보를 확인하고 있습니다.");
@@ -209,17 +247,23 @@
       await refresh();
       if (!session || stamp !== version) return;
       channel = client.channel(`jeju-location-${config.tripId}`)
+        .on("system", {}, (payload) => {
+          if (stamp !== version || payload.extension !== "postgres_changes") return;
+          connected = payload.status === "ok";
+          updateControls();
+          if (connected) void refresh();
+        })
         .on("postgres_changes", { event: "*", schema: "public", table: "jeju_live_locations", filter: `trip_id=eq.${config.tripId}` }, () => void refresh())
         .on("postgres_changes", { event: "*", schema: "public", table: "jeju_participants", filter: `trip_id=eq.${config.tripId}` }, () => void refresh())
         .subscribe((state) => {
           if (stamp !== version) return;
-          connected = state === "SUBSCRIBED";
+          if (state !== "SUBSCRIBED") connected = false;
           updateControls();
           if (connected) void refresh();
         });
       poll = setInterval(() => { renderParticipants(); void refresh(); }, 15000);
       if (member) message("참가자 인증이 완료되었습니다.");
-      else message("참가 이름과 접속 암호를 입력해 주세요.");
+      else if (!inviteLogin) message(joinPrompt());
     }
 
     loginForm.addEventListener("submit", async (event) => {
@@ -247,25 +291,28 @@
       const button = joinForm.querySelector("button");
       button.disabled = true;
       try {
+        if (inviteLogin) {
+          inviteToken = window.JejuInvitation.tokenFrom(field("invite").value, window.location.origin);
+          if (!inviteToken) { message(reasons.invalid_invitation, true); return; }
+        }
         if (!session) {
           const result = await client.auth.signInAnonymously();
           if (result.error || !result.data?.session) throw result.error || new Error("device_login");
           await syncSession(result.data.session);
         }
-        const { data, error } = await client.rpc("jeju_join_trip", {
-          p_trip_id: config.tripId, p_name: field("name").value.trim(), p_password: field("password").value
+        const { data, error } = await client.rpc(inviteLogin ? "jeju_claim_invitation" : "jeju_join_trip", {
+          p_trip_id: config.tripId, p_name: field("name").value.trim(),
+          ...(inviteLogin ? { p_token: inviteToken } : { p_password: field("password").value })
         });
         field("password").value = "";
         if (error) throw error;
         if (!data?.ok) {
-          const reasons = { invalid_password: "참가 암호를 확인해 주세요.", invalid_name: "이름은 1~30자로 입력해 주세요.",
-            name_taken: "이미 등록된 이름입니다. 구분할 수 있는 이름을 입력해 주세요.",
-            rate_limited: "암호 확인 횟수를 초과했습니다. 15분 후 다시 시도해 주세요.", disabled: "참가 권한이 중지되었습니다." };
           message(reasons[data?.reason] || "참가자 등록을 완료하지 못했습니다.", true);
           return;
         }
+        if (inviteLogin) { inviteToken = ""; field("invite").value = ""; }
         await refresh();
-        message("참가자 인증이 완료되었습니다.");
+        if (member) message("참가자 인증이 완료되었습니다.");
       } catch { message("참가자 인증을 완료하지 못했습니다. 연결을 확인해 주세요.", true); }
       finally { busy = false; button.disabled = false; updateControls(); }
     });
@@ -301,11 +348,12 @@
 
     logoutButton.addEventListener("click", async () => {
       if (busy || !client) return;
+      if (inviteLogin && !window.confirm("기기 연결을 해제하면 이 초대는 다시 사용할 수 없습니다. 재참가하려면 운영자의 재발급이 필요합니다. 연결을 해제할까요?")) return;
       busy = true;
       updateControls();
       try {
         await stopSharing();
-        if (session?.user.is_anonymous) {
+        if (inviteLogin || session?.user.is_anonymous) {
           const leave = await client.rpc("jeju_leave_trip", { p_trip_id: config.tripId });
           if (leave.error) throw leave.error;
         }

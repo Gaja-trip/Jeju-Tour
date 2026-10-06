@@ -11,7 +11,7 @@ const site = join(output, "static");
 await mkdir(site, { recursive: true });
 const files = ["index.html", "course.html", "meeting.html", "event.html", "restaurants.html",
   "schedule.html", "live.html", "transport.html", "styles.css", "app.js", "gpx-route.js",
-  "event.js", "event-config.js", "logo.svg", "live-location-config.js", "live-location-core.js", "live-location.js", "my-location.js"];
+  "event.js", "event-config.js", "logo.svg", "live-location-config.js", "live-location-core.js", "live-location.js", "my-location.js", "invitation-core.js"];
 const types = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg", ".pdf", ".gpx", ".woff2"]);
 async function assets(directory) {
   for (const entry of await readdir(join(root, directory), { withFileTypes: true })) {
@@ -28,7 +28,7 @@ for (const file of files) {
 }
 await writeFile(join(output, "config.json"), JSON.stringify({ version: 3, routes: [
   { src: "/(.*)", headers: { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", "Permissions-Policy": "geolocation=(self)" }, continue: true },
-  { src: "/(?:index|course)\\.html|/(?:live-location(?:-config|-core)?|my-location)\\.js", headers: { "Cache-Control": "no-cache" }, continue: true },
+  { src: "/(?:index|course)\\.html|/(?:live-location(?:-config|-core)?|my-location|invitation-core)\\.js", headers: { "Cache-Control": "no-cache" }, continue: true },
   { handle: "filesystem" }
 ] }, null, 2) + "\n");
 console.log(JSON.stringify({ release, staticDirectory: site, fileCount: files.length }));

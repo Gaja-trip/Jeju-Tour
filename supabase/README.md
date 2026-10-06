@@ -10,7 +10,7 @@ the filename matches server history. Do not reapply it.
 Participant tables, latest-location storage, RLS, RPCs and Realtime are live.
 No client secret or service-role key is included in public assets.
 
-Frontend deployed on 2026-10-06 to existing Vercel project `jeju-tour`, scope
+Previous frontend release on 2026-10-06 used existing Vercel project `jeju-tour`, scope
 `rokafap2-3990s-projects`, deployment `dpl_5pUYMxLSUWsnkwfMP1Yft1acyeg5`.
 Production domain is unchanged. The latest V5.6 notice image was preserved.
 Desktop, 390px and 320px mobile checks confirmed map tiles, the location panel and
@@ -43,31 +43,88 @@ and `.test-output/stashed-changes-20261006.bundle` (verified complete history).
 Inspect this backup before recovering specific files; do not blindly apply it
 over current changes. No source changes were committed or pushed by this task.
 
-## Remaining Authentication Setup
+## Personal Invitation Release (Active)
 
-The deployed frontend uses **email** authentication, matching the applied rules.
+The user requested personal invitation-link / QR authentication on 2026-10-07.
+Migration `20261006204913_participant_invitations.sql` is applied and matches
+remote history. Transactional invitation tests passed locally and remotely.
+Public RPCs remain SECURITY INVOKER; invite hashes are private and have no client
+table grants. `invitation_only` is enabled for `jeju-gaja`; the common passcode
+cannot grant location access. The old `proposals/` device/passcode alternative was
+not applied and must not be used for this release.
+
+The local and production frontend use `authMode: "invite"`. Final deployment
+`dpl_jeZ2dhXHHuHfhtXKiktighzEAbrh` at
+https://jeju-tour-nl6lxaq1k-rokafap2-3990s-projects.vercel.app
+was promoted to https://jeju-gaja.vercel.app on 2026-10-07. Desktop, 390px and
+320px mobile checks passed, including scrolling and panel collapse/reopen.
+The public-only release is `.test-output/site-release-STyu85`; 40 static files,
+no private invitation data. Unit tests: 25 passed. Mocked email, device and
+invitation DOM flows passed; no automatic account creation or GPS on QR open.
+
+Eight private QR PNGs were generated and decoded successfully in
+`.private/jeju-invites-2026-10-06T20-49-41-139Z/`. The folder's `index.html` is
+the operator-only distribution sheet. Raw tokens stay in ignored private files;
+only SHA256 hashes appear in its `register.sql`. All eight invitations are
+registered and unclaimed at release. Expiry: 2026-10-21 05:49:19 KST.
+
+The user approved enabling Supabase Anonymous Sign-ins, first-browser binding,
+and 14-day access. Anonymous Sign-ins is enabled; existing email settings were
+preserved. The eight hashes were registered once. Production public-file and
+private-source exclusion checks passed. Two isolated anonymous test clients
+passed concurrent single-use claims, actual Realtime delivery, own-only writes,
+stop clearing GPS and old-JWT denial after connection removal. All tagged test
+users/trips were removed; no real participant QR was consumed. A confirmed
+Realtime readiness timing gap was fixed by waiting for the Postgres `system`
+ready event rather than treating the WebSocket SUBSCRIBED signal as ready.
+The frontend refreshes on ready and every 15 seconds to recover missed events.
+
+Invitations are one-time claims bound to an authenticated browser identity, not
+hardware IDs or verified legal identities. First recipient to register wins;
+send one link privately to each participant, never the complete sheet. Other
+devices or cleared browser data require an operator reissue. Expiry/revocation
+is checked in database RLS for both the viewer and the location owner. Device
+disconnect revokes membership and wipes GPS even if an old JWT remains valid.
+Sharing still requires consent and a user click. The private my-location icon
+remains separate. Anonymous signup abuse is rate-limited by Supabase; CAPTCHA
+is recommended for future public-scale use but was not configured in this task.
+
+Install test-only pinned packages via
+`npm install --prefix .test-output/invite-tools --save-exact qrcode@1.5.4 jsqr@1.4.0 pngjs@7.0.0 @supabase/supabase-js@2.117.2`.
+`scripts/create-invitations.mjs <expiry-ISO>` generates a new private pack.
+`tests/invitation-live-check.mjs --prepare` creates two tagged test-only anonymous
+users and prints registration SQL for a separate synthetic trip. Register that
+SQL, then run `--check`; `--cleanup-sql` prints narrowly scoped cleanup SQL for
+only those tagged test users and that trip. Never consume real participant QR
+codes for tests. Live two-client integration passed; actual phone GPS reception
+was not tested. Mocked GPS/consent/watch lifecycle tests passed.
+
+## Current Production Authentication
+
+The deployed frontend uses **personal invitation QR / links**, without email.
 Site URL is `https://jeju-gaja.vercel.app`; the allowed callback is
 `https://jeju-gaja.vercel.app/course.html?panel=participants`.
-Custom SMTP is NOT configured. Supabase's default email service cannot deliver
-login links to ordinary participants outside the organization.
-General participant login therefore still needs SMTP or an approved alternative.
-Real-phone authenticated GPS sharing has not been verified.
+Custom SMTP is NOT configured and is not needed for personal invitations.
+Existing email authentication remains available at the Supabase project level
+but is not the site's participant login flow. Real-phone authenticated GPS
+reception has not been verified.
 
 The name + trip passcode device-auth alternative passed isolated tests, but its
 remote application was rejected by automatic review pending explicit approval.
-Anonymous Sign-ins is NOT enabled and frontend device mode is NOT active.
+The old common-password frontend device mode is NOT active; personal-invite
+mode is active and Anonymous Sign-ins was approved for that distinct workflow.
 The unapproved SQL and separate tests are in `proposals/`, outside migration history.
 Do not apply the proposal or enable Anonymous Sign-ins without approval.
 
 ## Access Rules
 
-- A verified email and the private bcrypt-hashed trip passcode grant membership.
+- A valid, unused personal invitation grants membership to the first authenticated browser.
 - Only enabled same-trip participants can read positions. No direct client writes.
 - RPCs derive the owner from `auth.uid()`; clients cannot write another user's GPS.
 - Sharing requires consent and a user click. Only the latest position is stored.
 - Stop clears coordinates and invalidates the sharing session, rejecting late writes.
 - Positions older than two minutes disappear; background tracking is not guaranteed.
-- Five failed passcode attempts cause a 15-minute cooldown per verified account.
+- Five failed invitation attempts cause a 15-minute cooldown per authenticated browser account.
 - Static trip pages remain public; this feature does not password-protect all pages.
 
 ## Validation And Deployment

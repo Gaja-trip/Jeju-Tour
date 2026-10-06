@@ -19,8 +19,13 @@ async function request(path, options = {}) {
 
 const settings = await request("/auth/v1/settings");
 assert.equal(settings.response.status, 200, "Project and public key must be reachable");
-assert.equal(settings.data.external?.email, true, "Email authentication must be enabled");
-console.log("PASS: project/public key reachable, email provider enabled (delivery not tested).");
+if (config.authMode === "invite") {
+  assert.equal(settings.data.external?.anonymous_users, true, "Invitation device login must be enabled");
+  console.log("PASS: project/public key reachable, invitation device login enabled.");
+} else {
+  assert.equal(settings.data.external?.email, true, "Email authentication must be enabled");
+  console.log("PASS: project/public key reachable, email provider enabled (delivery not tested).");
+}
 
 for (const table of ["jeju_participants", "jeju_live_locations"]) {
   const { response, data } = await request(`/rest/v1/${table}?select=*&limit=1`);
