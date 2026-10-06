@@ -2204,6 +2204,7 @@ function setupVWorldRouteEditor() {
     lodging: "stay-food",
     restaurants: "stay-food",
     transport: "transport-course",
+    participants: "transport-course",
     course: "transport-course"
   };
 
@@ -2649,6 +2650,7 @@ function setupVWorldRouteEditor() {
     zoomControl: false,
     preferCanvas: true
   }).setView([33.38, 126.55], 10);
+  window.JejuLiveLocation?.attach({ map, L });
   const syncItineraryDistanceVisibility = () => {
     const minimumZoom = window.matchMedia("(max-width: 760px)").matches ? 13 : 12;
     const visible = map.getZoom() >= minimumZoom;
@@ -2658,6 +2660,7 @@ function setupVWorldRouteEditor() {
   syncItineraryDistanceVisibility();
   map.on("zoomend", syncItineraryDistanceVisibility);
   L.control.zoom({ position: "bottomright" }).addTo(map);
+  window.JejuMyLocation?.attach({ map, L, onMessage: showToast });
   const baseMapLayer = L.tileLayer(`https://api.vworld.kr/req/wmts/1.0.0/${vworldApiKey}/Base/{z}/{y}/{x}.png`, {
     maxZoom: 19,
     attribution: 'Map data &copy; <a href="https://www.vworld.kr/">V-World</a>'
@@ -2998,7 +3001,7 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "lodging", "restaurants", "schedule", "transport", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "lodging", "restaurants", "schedule", "transport", "participants", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }

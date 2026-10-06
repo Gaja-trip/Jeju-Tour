@@ -47,6 +47,7 @@
           <div class="panel-subnav" id="transportCourseSubmenu" data-panel-submenu="transport-course" hidden>
             <button type="button" data-panel-view-tab="transport">교통</button>
             <button type="button" data-panel-view-tab="course">코스</button>
+            <button type="button" data-panel-view-tab="participants">참가자 위치</button>
           </div>
         </nav>
       </div>
@@ -226,6 +227,44 @@
         <div class="overlay-scroll" data-overlay-transport></div>
       </div>
 
+      <div class="panel-view live-location-panel" data-panel-view="participants" data-live-location hidden>
+        <div class="route-panel-heading compact">
+          <h1>참가자 위치</h1>
+          <div class="live-location-heading">
+            <strong data-live-identity>참가자 인증</strong>
+            <span data-live-connection>미연결</span>
+          </div>
+        </div>
+        <p class="live-location-status" data-live-status role="status" aria-live="polite">참가자 인증 연결을 확인하고 있습니다.</p>
+        <form class="live-location-form" data-live-login hidden>
+          <label for="participantEmail">이메일</label>
+          <input id="participantEmail" type="email" data-live-email autocomplete="email" required maxlength="254">
+          <button class="btn dark small" type="submit" disabled>로그인 링크 받기</button>
+        </form>
+        <form class="live-location-form" data-live-join hidden>
+          <label for="participantName">참가 이름</label>
+          <input id="participantName" type="text" data-live-name autocomplete="name" required maxlength="30">
+          <label for="participantPassword">접속 암호</label>
+          <input id="participantPassword" type="password" data-live-password autocomplete="current-password" required maxlength="72">
+          <button class="btn dark small" type="submit">참가자 인증</button>
+        </form>
+        <div class="live-location-controls" data-live-controls hidden>
+          <label class="live-location-consent">
+            <input type="checkbox" data-live-consent>
+            <span>내 위치를 이 여행의 인증된 참가자에게 공유합니다.</span>
+          </label>
+          <button class="btn dark" type="button" data-live-share disabled>위치 공유 시작</button>
+          <p class="live-location-note">현재 위치만 저장합니다. 공유 중지 시 위치를 지우며, 2분 이상 갱신되지 않은 위치는 지도에서 숨깁니다. 화면이 꺼지면 위치 갱신이 멈출 수 있습니다.</p>
+          <div class="live-location-actions">
+            <button class="btn light small" type="button" data-live-fit disabled>전체 위치 보기</button>
+            <button class="btn light small" type="button" data-live-refresh>새로고침</button>
+          </div>
+          <h2 class="live-location-count" data-live-count>0명 공유 중</h2>
+          <ul class="live-participants" data-live-participants></ul>
+        </div>
+        <button class="btn light small" type="button" data-live-logout hidden>로그아웃</button>
+      </div>
+
       <div class="panel-view" data-panel-view="plan" hidden>
         <div class="route-panel-heading compact">
           <p class="kicker">Master Plan</p>
@@ -242,6 +281,10 @@
   <div class="toast" data-toast role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="gpx-route.js"></script>
+  <script src="live-location-config.js"></script>
+  <script src="live-location-core.js"></script>
+  <script src="live-location.js"></script>
+  <script src="my-location.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

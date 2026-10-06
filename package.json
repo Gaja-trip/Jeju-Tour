@@ -6,7 +6,8 @@
   "engines": { "node": ">=24.14.0 <25" },
   "scripts": {
     "start": "node server/index.mjs",
-    "test": "node --test server/test/*.test.mjs",
+    "prepare:site": "node scripts/prepare-site.mjs",
+    "test": "node --test server/test/*.test.mjs tests/*.test.mjs",
     "backup": "node server/manage.mjs backup",
     "export": "node server/manage.mjs export"
   }

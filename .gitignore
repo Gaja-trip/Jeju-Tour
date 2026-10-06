@@ -6,4 +6,7 @@ server/backups/*
 server/exports/
 node_modules/
 .test-output/
+supabase/.temp/
+.vercel/
+.env.local
 *.log

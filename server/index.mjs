@@ -7,7 +7,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { loadConfig, SITE_DIR } from './config.mjs';
 import { openStore, HttpError, LIMITS } from './store.mjs';
 
-const PUBLIC_FILES = new Set(['index.html', 'course.html', 'meeting.html', 'event.html', 'restaurants.html', 'schedule.html', 'live.html', 'transport.html', 'styles.css', 'app.js', 'gpx-route.js', 'event.js', 'event-config.js', 'logo.svg']);
+const PUBLIC_FILES = new Set(['index.html', 'course.html', 'meeting.html', 'event.html', 'restaurants.html', 'schedule.html', 'live.html', 'transport.html', 'styles.css', 'app.js', 'gpx-route.js', 'event.js', 'event-config.js', 'logo.svg', 'live-location-config.js', 'live-location-core.js', 'live-location.js', 'my-location.js']);
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.pdf': 'application/pdf', '.gpx': 'application/gpx+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 
 async function readBody(req, limit) {
