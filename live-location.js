@@ -21,7 +21,7 @@
     const config = window.JEJU_LIVE_CONFIG || {};
     const inviteLogin = config.authMode === "invite";
     const deviceLogin = config.authMode === "device" || inviteLogin;
-    const { LocationPublisher, freshLocation } = window.JejuLocationCore;
+    const { LocationPublisher, freshLocation, participantStyle } = window.JejuLocationCore;
     const field = (name) => root.querySelector(`[data-live-${name}]`);
     const status = field("status");
     const loginForm = field("login");
@@ -42,6 +42,10 @@
     joinForm.querySelector("button").textContent = inviteLogin ? "초대 등록" : "참가자 인증";
     logoutButton.textContent = inviteLogin ? "기기 연결 해제" : "로그아웃";
     const layer = L.layerGroup().addTo(map);
+    const participantPane = "jeju-participant-locations";
+    // Shared rider colors stay visible above the separate private GPS dot.
+    const pane = map.getPane(participantPane) || map.createPane(participantPane);
+    pane.style.zIndex = "620";
     const markers = new Map();
     let client, session, member, publisher, channel, poll;
     let watchId = null;
@@ -50,6 +54,7 @@
     let refreshing = false;
     let version = 0;
     let participants = [];
+    let participantSlots = new Map();
     let locations = [];
     let connected = false;
     let closing = false;
@@ -95,6 +100,7 @@
 
     function clearMap() {
       participants = [];
+      participantSlots.clear();
       locations = [];
       markers.clear();
       layer.clearLayers();
@@ -110,7 +116,8 @@
       const nameKey = (person) => person.display_name.trim().toLowerCase();
       for (const person of enabled) nameCounts.set(nameKey(person), (nameCounts.get(nameKey(person)) || 0) + 1);
       const visible = new Set();
-      const items = enabled.map((person) => {
+      const items = enabled.map((person, index) => {
+        const style = participantStyle(inviteLogin ? participantSlots.get(person.user_id) : index + 1);
         const row = active.get(person.user_id);
         const item = document.createElement("li");
         const button = document.createElement("button");
@@ -126,20 +133,37 @@
         detail.textContent = row
           ? `${new Date(row.updated_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · 정확도 ${Math.round(row.accuracy)}m`
           : "공유 안 함 / 위치 갱신 대기";
-        button.append(name, detail);
+        const heading = document.createElement("span");
+        heading.className = "live-participant-heading";
+        const swatch = document.createElement("span");
+        swatch.className = "live-participant-swatch";
+        swatch.style.backgroundColor = style.fillColor;
+        swatch.setAttribute("aria-hidden", "true");
+        heading.append(swatch, name);
+        button.setAttribute("aria-label", `${name.textContent} · ${style.name} · ${detail.textContent}`);
+        button.append(heading, detail);
         item.append(button);
         if (row) {
           visible.add(person.user_id);
           let marker = markers.get(person.user_id);
           if (!marker) {
             marker = L.circleMarker([row.latitude, row.longitude], {
-              radius: 9, color: "#ffffff", weight: 3, fillOpacity: 1,
-              fillColor: person.user_id === session?.user.id ? "#159d84" : "#2768d0",
+              radius: 9, pane: participantPane, ...style,
               bubblingMouseEvents: false
             }).addTo(layer);
             markers.set(person.user_id, marker);
           }
           marker.setLatLng([row.latitude, row.longitude]);
+          marker.setStyle(style);
+          const label = document.createElement("span");
+          label.className = "live-location-name";
+          label.style.setProperty("--participant-color", style.fillColor);
+          label.textContent = name.textContent;
+          if (marker.getTooltip()) marker.setTooltipContent(label);
+          else marker.bindTooltip(label, {
+            permanent: true, direction: "top", offset: [0, -12],
+            className: "live-participant-label", opacity: 1, interactive: false
+          });
           const popup = document.createElement("div");
           const title = document.createElement("strong");
           title.textContent = name.textContent;
@@ -195,6 +219,15 @@
           if (own) message("참가 권한이 중지되었습니다. 운영자에게 확인해 주세요.", true);
           updateControls();
           return;
+        }
+        if (inviteLogin) {
+          const slots = await client.rpc("jeju_participant_slots", { p_trip_id: config.tripId });
+          if (stamp !== version) return;
+          if (slots.error) throw slots.error;
+          const nextSlots = new Map((slots.data || []).filter((row) => Number.isInteger(row.slot)
+            && row.slot >= 1 && row.slot <= 8).map((row) => [row.user_id, row.slot]));
+          if (people.data.some((person) => person.enabled && !nextSlots.has(person.user_id))) throw new Error("participant_slots");
+          participantSlots = nextSlots;
         }
         member = own;
         participants = people.data;

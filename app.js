@@ -2659,8 +2659,15 @@ function setupVWorldRouteEditor() {
   };
   syncItineraryDistanceVisibility();
   map.on("zoomend", syncItineraryDistanceVisibility);
-  L.control.zoom({ position: "bottomright" }).addTo(map);
-  window.JejuMyLocation?.attach({ map, L, onMessage: showToast });
+  const zoomControl = L.control.zoom({ position: "bottomright" }).addTo(map);
+  window.JejuMyLocation?.attach({ map, L, onMessage: showToast,
+    getArrivalTargets: () => {
+      const plan = getRoutePlan();
+      return Object.keys(dayLabels).flatMap((dayId) => window.JejuArrivalAlarm.targetsForDay({
+        routes: defaultItineraryMapRoutes, plan, dayId
+      }));
+    }
+  });
   const baseMapLayer = L.tileLayer(`https://api.vworld.kr/req/wmts/1.0.0/${vworldApiKey}/Base/{z}/{y}/{x}.png`, {
     maxZoom: 19,
     attribution: 'Map data &copy; <a href="https://www.vworld.kr/">V-World</a>'
@@ -2859,6 +2866,15 @@ function setupVWorldRouteEditor() {
     };
     aerialControl.addTo(map);
   }
+
+  const controlMedia = window.matchMedia("(max-width: 760px)");
+  const syncZoomPosition = () => {
+    const position = controlMedia.matches ? "topright" : "bottomright";
+    if (zoomControl.getPosition() !== position) zoomControl.setPosition(position);
+  };
+  syncZoomPosition();
+  controlMedia.addEventListener("change", syncZoomPosition);
+  map.on("unload", () => controlMedia.removeEventListener("change", syncZoomPosition));
 
   map.on("baselayerchange", (event) => {
     aerialMode = event.layer === satelliteLayer;

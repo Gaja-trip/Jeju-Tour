@@ -6,6 +6,25 @@ const now = Date.now();
 const gps = (latitude = 33.5, timestamp = now) => ({ timestamp, coords: { latitude, longitude: 126.5, accuracy: 10 } });
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
+test("participant slots have eight fixed colors in invitation order", () => {
+  const colors = Array.from({ length: 8 }, (_, i) => core.participantStyle(i + 1));
+  assert.deepEqual(colors.map((color) => color.name), ["빨강", "주황", "노랑", "초록", "파랑", "남색", "보라", "흰색"]);
+  assert.equal(new Set(colors.map((color) => color.fillColor)).size, 8);
+  assert.equal(colors[7].fillColor, "#ffffff");
+  assert(colors.every((color) => color.color === "#263238" && color.weight === 3 && color.fillOpacity === 1));
+  assert(Object.isFrozen(core.PARTICIPANT_COLORS));
+  assert(core.PARTICIPANT_COLORS.every(Object.isFrozen));
+});
+
+test("invalid slots cannot borrow another participant's color", () => {
+  for (const slot of [undefined, null, 0, -1, 9, 1.2, "1", NaN]) {
+    assert.equal(core.participantStyle(slot).name, "미지정");
+  }
+  const style = core.participantStyle(1);
+  style.fillColor = "changed";
+  assert.equal(core.participantStyle(1).fillColor, "#e53935");
+});
+
 test("only valid and recent coordinates are accepted", () => {
   assert.equal(positionPayload(gps(), now).p_latitude, 33.5);
   assert.equal(positionPayload(gps(91), now), null);

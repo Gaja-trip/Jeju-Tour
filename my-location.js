@@ -1,7 +1,7 @@
 (function (root) {
   "use strict";
 
-  function createTracker({ map, L, geolocation, secure, validate, document: doc = root.document, onState = () => {}, onMessage = () => {}, focus }) {
+  function createTracker({ map, L, geolocation, secure, validate, document: doc = root.document, onState = () => {}, onMessage = () => {}, onPosition = () => {}, focus }) {
     const layer = L.layerGroup().addTo(map);
     let active = false, waiting = false, watch = null, marker, accuracy, expiry;
     let generation = 0, firstFix = true;
@@ -62,6 +62,7 @@
             state();
             onMessage("위치가 갱신되지 않아 표시를 숨겼습니다. 새 위치 신호를 기다립니다.");
           }, Math.max(0, 120000 - (Date.now() - position.timestamp)));
+          onPosition(position);
         }, (error) => {
           if (!active || run !== generation) return;
           if (error.code === 1) {
@@ -79,7 +80,7 @@
     return { start, stop, toggle() { if (active) { stop(); onMessage("내 위치 보기를 껐습니다."); } else start(); } };
   }
 
-  function attach({ map, L, onMessage }) {
+  function attach({ map, L, onMessage, getArrivalTargets = () => [] }) {
     const panel = document.querySelector("[data-route-panel]");
     const shell = document.querySelector("[data-vworld-route-editor]");
     const mobile = () => root.matchMedia("(max-width: 760px)").matches;
@@ -101,6 +102,28 @@
     status.className = "my-location-status";
     status.setAttribute("role", "status");
     container.append(button, status);
+    const alarmButton = document.createElement("button");
+    alarmButton.type = "button";
+    alarmButton.className = "my-location-toggle arrival-alarm-toggle";
+    alarmButton.dataset.arrivalAlarm = "";
+    alarmButton.innerHTML = '<span class="arrival-alarm-icon" aria-hidden="true"></span>';
+    const announce = (text) => { status.textContent = text; onMessage?.(text); };
+    const alarm = root.JejuArrivalAlarm?.createController({
+      getTargets: getArrivalTargets,
+      onEnable: () => tracker.start(),
+      onMessage: announce,
+      onState: ({ enabled, pending, playing }) => {
+        const name = enabled || pending ? "10m 도착 알림 끄기" : "10m 도착 알림 켜기 (3회)";
+        alarmButton.setAttribute("aria-label", name);
+        alarmButton.setAttribute("aria-pressed", String(enabled || pending));
+        alarmButton.setAttribute("aria-busy", String(pending));
+        alarmButton.title = name;
+        alarmButton.classList.toggle("is-active", enabled);
+        alarmButton.classList.toggle("is-locating", pending);
+        alarmButton.classList.toggle("is-ringing", playing);
+      }
+    });
+    if (alarm) container.append(alarmButton);
     const tracker = createTracker({ map, L, geolocation: root.navigator.geolocation, secure: root.isSecureContext,
       validate: root.JejuLocationCore.positionPayload,
       onState: ({ active, waiting }) => {
@@ -111,8 +134,10 @@
         button.title = name;
         button.classList.toggle("is-active", active);
         button.classList.toggle("is-locating", waiting);
+        if (!active) alarm?.stop();
       },
-      onMessage: (text) => { status.textContent = text; onMessage?.(text); },
+      onMessage: announce,
+      onPosition: (position) => alarm?.update(position),
       focus: (latlng) => {
         map.setView(latlng, Math.max(map.getZoom(), 15));
         const side = panel?.getBoundingClientRect();
@@ -122,6 +147,9 @@
       }
     });
     button.addEventListener("click", () => tracker.toggle());
+    alarmButton.addEventListener("click", () => alarm?.toggle());
+    const pauseAlarm = () => { if (document.hidden) alarm?.pause(); };
+    document.addEventListener("visibilitychange", pauseAlarm);
     L.DomEvent.disableClickPropagation(container);
     L.DomEvent.disableScrollPropagation(container);
     const control = L.control({ position: "bottomright" });
@@ -137,6 +165,7 @@
       tracker.stop(); resize?.disconnect(); mutation?.disconnect();
       root.removeEventListener("resize", updateOffset);
       root.removeEventListener("pagehide", tracker.stop);
+      document.removeEventListener("visibilitychange", pauseAlarm);
       panel?.removeEventListener("transitionend", updateOffset);
     };
     tracker.stop();

@@ -1,6 +1,23 @@
 (function (root) {
   "use strict";
   const MAX_AGE_MS = 120000;
+  const PARTICIPANT_COLORS = Object.freeze([
+    { name: "빨강", fillColor: "#e53935" },
+    { name: "주황", fillColor: "#f58220" },
+    { name: "노랑", fillColor: "#f6d32d" },
+    { name: "초록", fillColor: "#159447" },
+    { name: "파랑", fillColor: "#2475e8" },
+    { name: "남색", fillColor: "#283593" },
+    { name: "보라", fillColor: "#8e44ad" },
+    { name: "흰색", fillColor: "#ffffff" }
+  ].map(Object.freeze));
+  const UNKNOWN_COLOR = Object.freeze({ name: "미지정", fillColor: "#69757c" });
+
+  function participantStyle(slot) {
+    const color = Number.isInteger(slot) && slot >= 1 && slot <= 8
+      ? PARTICIPANT_COLORS[slot - 1] : UNKNOWN_COLOR;
+    return { ...color, color: "#263238", weight: 3, fillOpacity: 1 };
+  }
 
   function positionPayload(position, now = Date.now()) {
     const { latitude, longitude, accuracy } = position.coords || {};
@@ -83,7 +100,7 @@
     }
   }
 
-  const api = { MAX_AGE_MS, positionPayload, freshLocation, LocationPublisher };
+  const api = { MAX_AGE_MS, PARTICIPANT_COLORS, participantStyle, positionPayload, freshLocation, LocationPublisher };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.JejuLocationCore = api;
 })(globalThis);

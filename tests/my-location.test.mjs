@@ -88,3 +88,14 @@ test("invalid and stale fixes are not shown", () => {
     assert.equal(f.calls.view.length, 0);
   } finally { f.tracker.stop(); }
 });
+
+test("only validated, active local GPS fixes are forwarded to arrival alerts", () => {
+  const positions = [];
+  const f = fixture({ onPosition: (position) => positions.push(position) });
+  try {
+    f.tracker.start(); f.position(100); f.position(33.5, Date.now() - 120001);
+    assert.equal(positions.length, 0);
+    f.position(); assert.equal(positions.length, 1);
+    f.tracker.stop(); f.position(); assert.equal(positions.length, 1);
+  } finally { f.tracker.stop(); }
+});
