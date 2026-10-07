@@ -3,6 +3,43 @@ import assert from "node:assert/strict";
 import core from "../live-location-core.js";
 import personal from "../my-location.js";
 
+test("expanded bottom sheets dock controls above the panel in compact rows", () => {
+  assert.deepEqual(personal.controlLayout({ mapBounds: { top: 0, bottom: 700 },
+    panelBounds: { top: 154 }, bottomSheet: true }), {
+    coveredHeight: 546, visibleHeight: 154, bottomOffset: 558, compact: true
+  });
+});
+
+test("collapsed sheets restore vertical controls with a 12px panel gap", () => {
+  assert.deepEqual(personal.controlLayout({ mapBounds: { top: 0, bottom: 700 },
+    panelBounds: { top: 646 }, bottomSheet: true }), {
+    coveredHeight: 54, visibleHeight: 646, bottomOffset: 66, compact: false
+  });
+});
+
+test("sliding panel geometry, not its collapsed class, selects the control layout", () => {
+  const at = top => personal.controlLayout({ mapBounds: { top: 0, bottom: 844 }, panelBounds: { top }, bottomSheet: true });
+  assert.equal(at(185).compact, true);
+  assert.equal(at(329).compact, true);
+  assert.equal(at(330).compact, false);
+  assert.equal(at(500).bottomOffset, 356);
+});
+
+test("desktop and narrow tablet sidebars do not push controls above the screen", () => {
+  assert.deepEqual(personal.controlLayout({ mapBounds: { top: 0, bottom: 700 },
+    panelBounds: { top: 18 }, bottomSheet: false }), {
+    coveredHeight: 0, visibleHeight: 700, bottomOffset: 0, compact: false
+  });
+});
+
+test("missing and offscreen panels keep control offsets inside valid map bounds", () => {
+  const at = panelBounds => personal.controlLayout({ mapBounds: { top: 50, bottom: 750 }, panelBounds, bottomSheet: true });
+  assert.equal(at(null).bottomOffset, 12);
+  assert.equal(at({ top: 800 }).coveredHeight, 0);
+  assert.equal(at({ top: -100 }).coveredHeight, 700);
+  assert.equal(at({ top: 104 }).visibleHeight, 54);
+});
+
 function fixture(options = {}) {
   const calls = { watch: [], clear: [], view: [], state: [], message: [] };
   const nodes = new Set();

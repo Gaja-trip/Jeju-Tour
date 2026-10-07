@@ -1,6 +1,15 @@
 (function (root) {
   "use strict";
 
+  function controlLayout({ mapBounds, panelBounds, bottomSheet }) {
+    const height = Math.max(0, mapBounds.bottom - mapBounds.top);
+    const coveredHeight = bottomSheet && panelBounds
+      ? Math.min(height, Math.max(0, mapBounds.bottom - Math.max(mapBounds.top, panelBounds.top))) : 0;
+    const visibleHeight = height - coveredHeight;
+    return { coveredHeight, visibleHeight, bottomOffset: bottomSheet ? coveredHeight + 12 : 0,
+      compact: bottomSheet && coveredHeight > 54 && visibleHeight < 330 };
+  }
+
   function createTracker({ map, L, geolocation, secure, validate, document: doc = root.document, onState = () => {}, onMessage = () => {}, onPosition = () => {}, focus }) {
     const layer = L.layerGroup().addTo(map);
     let active = false, waiting = false, watch = null, marker, accuracy, expiry;
@@ -83,14 +92,36 @@
   function attach({ map, L, onMessage, getArrivalTargets = () => [] }) {
     const panel = document.querySelector("[data-route-panel]");
     const shell = document.querySelector("[data-vworld-route-editor]");
-    const mobile = () => root.matchMedia("(max-width: 760px)").matches;
-    function coveredHeight() {
-      const bounds = map.getContainer().getBoundingClientRect();
-      const top = panel?.getBoundingClientRect().top ?? bounds.bottom;
-      return Math.max(0, bounds.bottom - Math.max(bounds.top, top));
-    }
+    const sheetMedia = root.matchMedia("(max-width: 680px)");
+    const mobile = () => sheetMedia.matches;
+    const layout = () => controlLayout({ mapBounds: map.getContainer().getBoundingClientRect(),
+      panelBounds: panel?.getBoundingClientRect(), bottomSheet: mobile() });
+    const coveredHeight = () => layout().coveredHeight;
     function updateOffset() {
-      map.getContainer().style.setProperty("--map-controls-bottom", `${mobile() ? coveredHeight() + 12 : 0}px`);
+      const bounds = layout();
+      const target = map.getContainer();
+      target.style.setProperty("--map-controls-bottom", `${bounds.bottomOffset}px`);
+      target.style.setProperty("--map-visible-height", `${bounds.visibleHeight}px`);
+      target.classList.toggle("map-controls-compact", bounds.compact);
+    }
+    let frame = null;
+    const transitions = new Set();
+    function followPanel() {
+      frame = null;
+      updateOffset();
+      if (transitions.size) frame = root.requestAnimationFrame(followPanel);
+    }
+    function startTransition(event) {
+      if (event.target !== panel) return;
+      // ResizeObserver does not report the panel's sliding transform.
+      transitions.add(event.propertyName);
+      if (frame === null) frame = root.requestAnimationFrame(followPanel);
+    }
+    function endTransition(event) {
+      if (event.target !== panel) return;
+      transitions.delete(event.propertyName);
+      if (!transitions.size && frame !== null) { root.cancelAnimationFrame(frame); frame = null; }
+      updateOffset();
     }
     const container = L.DomUtil.create("div", "leaflet-control my-location-control");
     const button = document.createElement("button");
@@ -160,13 +191,21 @@
     if (shell) mutation?.observe(shell, { attributes: true, attributeFilter: ["class"] });
     root.addEventListener("resize", updateOffset);
     root.addEventListener("pagehide", tracker.stop);
-    panel?.addEventListener("transitionend", updateOffset);
+    sheetMedia.addEventListener?.("change", updateOffset);
+    panel?.addEventListener("transitionrun", startTransition);
+    panel?.addEventListener("transitionend", endTransition);
+    panel?.addEventListener("transitioncancel", endTransition);
     control.onRemove = () => {
       tracker.stop(); resize?.disconnect(); mutation?.disconnect();
+      if (frame !== null) root.cancelAnimationFrame(frame);
+      transitions.clear();
       root.removeEventListener("resize", updateOffset);
       root.removeEventListener("pagehide", tracker.stop);
       document.removeEventListener("visibilitychange", pauseAlarm);
-      panel?.removeEventListener("transitionend", updateOffset);
+      sheetMedia.removeEventListener?.("change", updateOffset);
+      panel?.removeEventListener("transitionrun", startTransition);
+      panel?.removeEventListener("transitionend", endTransition);
+      panel?.removeEventListener("transitioncancel", endTransition);
     };
     tracker.stop();
     control.addTo(map);
@@ -174,7 +213,7 @@
     return tracker;
   }
 
-  const api = { attach, createTracker };
+  const api = { attach, createTracker, controlLayout };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.JejuMyLocation = api;
 })(globalThis);

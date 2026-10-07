@@ -3578,7 +3578,7 @@ footer {
 
 @media (max-width: 760px) {
   .vworld-map .leaflet-bottom.leaflet-right {
-    bottom: calc(var(--map-controls-bottom, 66px) + env(safe-area-inset-bottom));
+    bottom: max(var(--map-controls-bottom, 66px), calc(12px + env(safe-area-inset-bottom)));
     right: 10px;
     display: flex;
     flex-direction: column;
@@ -3622,11 +3622,35 @@ footer {
     background: #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,.18);
   }
-}
 
-@media (max-width: 680px) and (min-height: 560px) {
-  .route-map-shell .route-map-panel {
-    max-height: min(72vh, 620px, calc(100dvh - 330px));
+  .vworld-map.map-controls-compact .leaflet-top.leaflet-right {
+    top: 10px;
+    right: 10px;
+    max-width: calc(100% - 20px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vworld-map.map-controls-compact .leaflet-top.leaflet-right > .leaflet-control {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    float: none;
+    clear: none;
+  }
+  .vworld-map.map-controls-compact .leaflet-control-zoom { display: flex; }
+  .vworld-map.map-controls-compact .leaflet-control-zoom a { border-bottom: 0; }
+  .vworld-map.map-controls-compact .leaflet-control-zoom a:first-child { border-right: 1px solid #ccc; border-radius: 2px 0 0 2px; }
+  .vworld-map.map-controls-compact .leaflet-control-zoom a:last-child { border-radius: 0 2px 2px 0; }
+  .vworld-map.map-controls-compact .my-location-control { flex-direction: row-reverse; }
+  .vworld-map.map-controls-compact .aerial-label-toggle { min-height: 44px; }
+  .vworld-map.map-controls-compact .leaflet-control-layers-expanded { position: static; }
+  .vworld-map.map-controls-compact .leaflet-control-layers-list {
+    top: calc(100% + 8px);
+    right: 0;
+    max-height: min(320px, calc(var(--map-visible-height) - 72px));
+  }
+  .vworld-map.map-controls-compact:has(.leaflet-control-layers-expanded) .my-location-control {
+    visibility: hidden;
   }
 }
 
@@ -4087,7 +4111,9 @@ footer {
     bottom: 0;
     width: auto;
     margin: 0;
-    max-height: min(72vh, 620px);
+    max-height: min(78vh, 720px, calc(100vh - 128px));
+    max-height: min(78dvh, 720px, calc(100dvh - 128px));
+    transition: transform .24s ease;
     gap: 10px;
     padding: 20px 12px 14px;
     border-radius: 22px 22px 0 0;
