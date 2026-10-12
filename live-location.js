@@ -431,12 +431,7 @@
         const key = config.publishableKey;
         const isAnon = key.startsWith("eyJ") && JSON.parse(atob(key.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).role === "anon";
         if (!key.startsWith("sb_publishable_") && !isAnon) throw new Error("invalid_key");
-        const createClient = await loadClient();
-        client = createClient(config.supabaseUrl, key, {
-          auth: { storageKey: "jeju-gaja-auth-v1", flowType: "pkce", detectSessionInUrl: true },
-          global: { fetch: (url, options = {}) => fetch(url, { ...options,
-            signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) }) }
-        });
+        client = await window.JejuSupabase.getClient();
         publisher = new LocationPublisher({ rpc: (name, args) => client.rpc(name, args), tripId: config.tripId,
           onResult: ({ data, error }) => {
             if (error?.code === "42501" || (!error && data === false)) {

@@ -13,6 +13,8 @@
   function create({element,map,L,getDay,getSelectedPoint,getPadding,onPickMode=()=>{},onMessage=()=>{},showMap=()=>{},onChange=()=>{}}) {
     if (!element) return null;
     const base = String(root.JEJU_EVENT_API_BASE || "").replace(/\/$/,"");
+    const cloud = root.JejuCourseStorage?.isCloud() ? root.JejuCourseStorage : null;
+    const storageLabel = cloud ? "Supabase" : "서버";
     const form=element.querySelector("[data-journal-form]"), status=element.querySelector("[data-journal-status]"), message=element.querySelector("[data-journal-message]");
     const list=element.querySelector("[data-journal-list]"), input=element.querySelector("[data-journal-photos]"), previews=element.querySelector("[data-journal-previews]");
     const submit=element.querySelector("[data-journal-submit]"), pick=element.querySelector("[data-journal-pick]"), coordinate=element.querySelector("[data-journal-coordinate]");
@@ -26,6 +28,7 @@
     dialog.querySelector("[data-journal-dialog-close]").addEventListener("click",()=>dialog.close());
     dialog.addEventListener("click",(event)=>{if(event.target===dialog) dialog.close();});
     function photoUrl(photo) {
+      if (cloud) return cloud.photoUrl(photo);
       return typeof photo?.url==="string" && /^\/api\/route-photos\/[a-f0-9-]{36}$/.test(photo.url) ? base+photo.url : "";
     }
     function announce(text,error=false) { message.textContent=text; message.classList.toggle("is-error",error); }
@@ -34,13 +37,14 @@
       busy=value;
       for(const control of form.querySelectorAll("input,textarea,button")) control.disabled=value;
       submit.disabled=value||!online||!point;
-      submit.textContent=value?"서버에 저장 중…":"서버에 저장";
+      submit.textContent=value?storageLabel+"에 저장 중…":storageLabel+"에 저장";
       pick.disabled=value||!map; element.querySelector("[data-journal-gpx-point]").disabled=value;
       refreshButton.disabled=value||refreshing;
     }
     async function api(path,options={}) {
       const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),60000);
       try {
+        if (cloud) return await cloud.request(path,{...options,signal:controller.signal});
         const response=await fetch(base+path,{...options,signal:controller.signal,cache:"no-store"});
         const result=await response.json().catch(()=>null);
         if(!response.ok||!result) throw new Error(result?.error||"저장 서버에 연결할 수 없습니다. 서버 주소로 접속해 주세요.");
@@ -137,7 +141,7 @@
         if(!Array.isArray(result.records)) throw new Error("저장 서버 응답을 확인해주세요.");
         records=result.records.filter((record)=>typeof record.title==="string"&&/^day[1-4]$/.test(record.day)&&Number.isFinite(record.latitude)&&Number.isFinite(record.longitude)&&Array.isArray(record.photos));
         online=true; render();
-        status.textContent="서버 연결됨 · 사고지점·사진 "+records.length+"개 저장";
+        status.textContent=storageLabel+" 연결됨 · 사고지점·사진 "+records.length+"개 저장";
         status.classList.remove("is-error");
       } catch(error) {online=false; status.textContent=error.message; status.classList.add("is-error");}
       finally {refreshing=false;setBusy(busy);onChange();}
@@ -171,7 +175,7 @@
       const payload=new FormData();
       for(const [key,value] of Object.entries({kind,day,title:values.get("title"),note:values.get("note")||"",author,latitude:String(point.lat),longitude:String(point.lng),requestId})) payload.append(key,value);
       for(const photo of photos) payload.append("photos",photo,photo.name);
-      setBusy(true); announce("위치와 사진을 서버에 저장하고 있습니다.");
+      setBusy(true); announce("위치와 사진을 "+storageLabel+"에 저장하고 있습니다.");
       try {
         const result=await api("/api/route-posts",{method:"POST",body:payload});
         if(!result.record?.id) throw new Error("저장 결과를 확인해주세요.");
@@ -180,8 +184,8 @@
         if(pendingMarker){layer?.removeLayer(pendingMarker);pendingMarker=null;}
         coordinate.textContent="등록할 위치를 지도에서 선택하세요.";coordinate.classList.remove("is-selected");
         picking=false;onPickMode(false);pick.textContent="지도에서 위치 선택";pick.setAttribute("aria-pressed","false");changed();
-        render();status.textContent="서버 연결됨 · 사고지점·사진 "+records.length+"개 저장";onChange();
-        announce(dayLabel(day)+" 기록과 사진을 서버에 저장했습니다.");onMessage("사고지점·사진을 서버에 저장했습니다.");
+        render();status.textContent=storageLabel+" 연결됨 · 사고지점·사진 "+records.length+"개 저장";onChange();
+        announce(dayLabel(day)+" 기록과 사진을 "+storageLabel+"에 저장했습니다.");onMessage("사고지점·사진을 "+storageLabel+"에 저장했습니다.");
         element.querySelector(".journal-compose").open=false;
         focusRecord(result.record);
       } catch(error) {announce(error.message,true);}
@@ -196,6 +200,11 @@
     allDays.addEventListener("change",render);
     refreshButton.addEventListener("click",refresh);
     root.addEventListener("pagehide",clearPreviews);
+    if (cloud) {
+      const hint=element.querySelector('.journal-save-hint');
+      hint.replaceChildren(document.createTextNode('사진과 장소를 Supabase에 저장합니다. PC를 꺼도 조회할 수 있으며 사진은 여행 사이트에 공개됩니다. '));
+      const link=document.createElement('a');link.href='course.html?panel=participants';link.textContent='사진 등록: 함께가기에서 참가자 인증';hint.append(link);
+    }
     setBusy(false);refresh();
     return {
       cancelPick(){picking=false;onPickMode(false);pick.textContent="지도에서 위치 선택";pick.setAttribute("aria-pressed","false");},
