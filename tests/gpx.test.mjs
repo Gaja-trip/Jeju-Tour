@@ -87,3 +87,30 @@ test("large supported recordings analyze without argument or stack overflow", ()
   assert.equal(data.stats.maxElevationM, 199);
   assert.ok(data.stats.distanceM > 0);
 });
+test("elapsed timeline preserves stops and excludes gaps between separate segments", () => {
+  const data = gpx.analyzeSegments([[point(0, { time: 0 }), point(.01, { time: 60000 }), point(.01, { time: 90000 })],
+    [point(10, { time: 3600000 }), point(10.01, { time: 3660000 })]]);
+  assert.deepEqual(data.points.map((p) => p.elapsedS), [0,60,90,90,150]);
+  assert.equal(data.stats.durationS,150);
+});
+
+test("5km laps split crossing intervals proportionally and assign stop time correctly", () => {
+  const meters = (distanceM, time, elevation) => point(distanceM / 6371000 * 180 / Math.PI, {time,elevation});
+  const data = gpx.analyzeSegments([[meters(0,0,0),meters(2500,150000,25),meters(2500,165000,25),
+    meters(7500,465000,75),meters(10000,615000,100)]]);
+  const laps = gpx.buildLaps(data);
+  assert.equal(laps.length,2);
+  close(laps[0].distanceM,5000); close(laps[1].distanceM,5000);
+  close(laps[0].durationS,315); close(laps[1].durationS,300);
+  close(laps[0].ascentM,50); close(laps[1].ascentM,50);
+  close(laps.reduce((sum,lap)=>sum+lap.durationS,0),data.stats.durationS);
+});
+
+test("partial lap timestamps do not invent elapsed time or average speed", () => {
+  const data=gpx.analyzeSegments([[point(0,{time:0}),point(.01),point(.02,{time:60000})]]);
+  const [lap]=gpx.buildLaps(data);
+  assert.equal(lap.durationS,null);
+  assert.equal(lap.avgSpeedKmh,null);
+  assert.equal(lap.ascentM,null);
+  assert.throws(()=>gpx.buildLaps(data,0));
+});

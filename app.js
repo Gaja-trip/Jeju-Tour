@@ -2194,7 +2194,7 @@ function setupVWorldRouteEditor() {
   let aerialMode = false;
   let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
 
-  const gpxViewer = window.JejuGpxViewer?.create({ element: root.querySelector("[data-gpx-viewer]"), onMessage: showToast });
+  const gpxViewer = window.JejuGpxViewer?.create({ element: root.querySelector("[data-gpx-viewer]"), initialDay: currentDay, onMessage: showToast });
 
   const panelMenuForView = {
     notice: "notice",
@@ -2207,19 +2207,18 @@ function setupVWorldRouteEditor() {
     restaurants: "stay-food",
     transport: "transport-course",
     participants: "transport-course",
-    course: "transport-course",
-    gpx: "transport-course"
+    course: "transport-course"
   };
 
   const renderDayTabs = () => {
     dayTabs.innerHTML = Object.entries(dayLabels).map(([dayId, label]) => `
-      <button type="button" class="${dayId === currentDay ? "active" : ""}" data-map-day="${dayId}">${shortDayLabel(dayId)}</button>
+      <button type="button" class="${dayId === currentDay ? "active" : ""}" data-map-day="${dayId}">${label}</button>
     `).join("");
   };
 
   const setPanelView = (view) => {
     currentView = view;
-    gpxViewer?.setActive(view === "gpx");
+    gpxViewer?.setActive(view === "course");
     if (view === "baggage") {
       const frame = root.querySelector("[data-baggage-src]");
       if (frame && !frame.hasAttribute("src")) frame.src = frame.dataset.baggageSrc;
@@ -2350,8 +2349,8 @@ function setupVWorldRouteEditor() {
     const latLngs = calculatedRoute.path.map((point) => [point.lat, point.lng]);
     if (routeLine) routeLine.remove();
     routeLine = L.polyline(latLngs, {
-      color: "#ff745f",
-      weight: 7,
+      color: "#9ca3af",
+      weight: 4,
       opacity: 0.95,
       lineJoin: "round"
     }).addTo(map);
@@ -2654,7 +2653,9 @@ function setupVWorldRouteEditor() {
   });
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
-    const fallbackPanel = new URLSearchParams(window.location.search).get("panel");
+    gpxViewer?.showMapError("지도를 불러오지 못했습니다. 네트워크 연결을 확인하세요.");
+    const fallbackRequested = new URLSearchParams(window.location.search).get("panel");
+    const fallbackPanel = fallbackRequested === "gpx" ? "course" : fallbackRequested;
     if (panelMenuForView[fallbackPanel]) setPanelView(fallbackPanel);
     return;
   }
@@ -2706,7 +2707,7 @@ function setupVWorldRouteEditor() {
     baseRouteLine = L.layerGroup().addTo(map);
     baseRouteSegments.forEach((segment, index) => {
       L.polyline(segment.map((point) => [point.lat, point.lng]), {
-        color: index === 0 ? "#087c83" : "#0f9aa3",
+        color: "#a1a1aa",
         weight: index === 0 ? 4 : 3,
         opacity: index === 0 ? 0.58 : 0.42,
         lineJoin: "round",
@@ -2729,9 +2730,8 @@ function setupVWorldRouteEditor() {
     const points = gpxRoute.points
       .slice(segment.startIndex, segment.endIndex + 1)
       .map((point) => [point.lat, point.lng]);
-    const hue = 185 + (index % 6) * 18;
     const line = L.polyline(points, {
-      color: `hsl(${hue}, 72%, 38%)`,
+      color: "#a1a1aa",
       weight: 6,
       opacity: 0.78,
       lineJoin: "round"
@@ -2760,7 +2760,6 @@ function setupVWorldRouteEditor() {
   });
 
   Object.entries(defaultItineraryMapRoutes).forEach(([dayId, route]) => {
-    const color = dayRouteColors[dayId] || dayRouteColors.day1;
     const start = route.points[0];
     const end = route.points[route.points.length - 1];
     const dayLayer = L.layerGroup().addTo(map);
@@ -2770,9 +2769,9 @@ function setupVWorldRouteEditor() {
       "forward"
     );
     const dayLine = L.polyline(dayRoute.path.map((point) => [point.lat, point.lng]), {
-      color,
-      weight: 7,
-      opacity: 0.86,
+      color: "#a1a1aa",
+      weight: 4,
+      opacity: 0.6,
       lineJoin: "round",
       lineCap: "round"
     }).addTo(dayLayer);
@@ -2855,14 +2854,15 @@ function setupVWorldRouteEditor() {
     restaurantMarkers.set(index, marker);
   });
 
+  gpxViewer?.setContextLayers([placeLayer, itineraryPlaceLayer, lodgingLayer, restaurantLayer, learnedRouteLayer]);
   L.control.layers(
     { "일반지도": baseMapLayer, "항공사진": satelliteLayer },
     {
-      ...(uploadedGpxLayer ? { "업로드한 GPX": uploadedGpxLayer } : {}),
-      "1일차 코스": itineraryRouteLayers.day1,
-      "2일차 코스": itineraryRouteLayers.day2,
-      "3일차 코스": itineraryRouteLayers.day3,
-      "4일차 코스": itineraryRouteLayers.day4,
+      ...(uploadedGpxLayer ? { "실제 1~4일차 GPX": uploadedGpxLayer } : {}),
+      "기존 1일차 코스": itineraryRouteLayers.day1,
+      "기존 2일차 코스": itineraryRouteLayers.day2,
+      "기존 3일차 코스": itineraryRouteLayers.day3,
+      "기존 4일차 코스": itineraryRouteLayers.day4,
       "일정 지점": itineraryPlaceLayer,
       "자전거길": learnedRouteLayer,
       "장소": placeLayer,
@@ -2915,7 +2915,8 @@ function setupVWorldRouteEditor() {
     clearRoute();
     overlayScheduleFilter = currentDay;
     loadSavedRoute();
-    fitItineraryDay(currentDay);
+    if (gpxViewer?.hasDay(currentDay)) gpxViewer.setDay(currentDay);
+    else { gpxViewer?.setDay(currentDay); fitItineraryDay(currentDay); }
     renderOverlayViews();
   });
 
@@ -2924,7 +2925,7 @@ function setupVWorldRouteEditor() {
   });
   clearButton.addEventListener("click", clearRoute);
   saveButton.addEventListener("click", saveRoute);
-  map.on("click", (event) => { if (currentView === "course") setRoutePointFromMapClick(event.latlng); });
+  map.on("click", (event) => { if (currentView === "course" && gpxViewer?.isEditing()) setRoutePointFromMapClick(event.latlng); });
   placeApplyButtons.forEach((button) => {
     button.addEventListener("click", () => applySearchLocation(button.dataset.placeApply));
   });
@@ -2955,6 +2956,7 @@ function setupVWorldRouteEditor() {
       setPanelCollapsed(false);
       return;
     }
+    if (currentView === "course") return;
     const toggleArea = event.target.closest("[data-panel-toggle-area]");
     const panelNavTarget = event.target.closest(".panel-nav");
     if (toggleArea && !panelNavTarget) {
@@ -3020,14 +3022,14 @@ function setupVWorldRouteEditor() {
 
   const initialParams = new URLSearchParams(window.location.search);
   // Keep previously shared event links working after the menu rename.
-  const requestedPanel = initialParams.get("panel") === "event" ? "meeting" : initialParams.get("panel");
+  const requestedPanel = initialParams.get("panel") === "event" ? "meeting" : initialParams.get("panel") === "gpx" ? "course" : initialParams.get("panel");
   const initialLodging = requestedLodgingIndex();
   const initialRestaurant = requestedRestaurantIndex();
   if (initialLodging !== null && initialLodging >= 0) {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "gpx", "lodging", "restaurants", "schedule", "transport", "participants", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "lodging", "restaurants", "schedule", "transport", "participants", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }

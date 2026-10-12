@@ -23,20 +23,22 @@
     let ascentM = 0, descentM = 0, elevationPairs = 0, timedPairs = 0, invalidTimes = 0;
     let minElevationM = null, maxElevationM = null, maxSpeedKmh = null;
     let heartRateTotal = 0, heartRateCount = 0, cadenceTotal = 0, cadenceCount = 0;
-    let elevationCount = 0, timeCount = 0;
+    let elevationCount = 0, timeCount = 0, elevationTotal = 0, powerTotal = 0, powerCount = 0;
     for (const segment of segments) {
       const result = [];
       let previous = null;
       for (const raw of segment) {
-        const point = { ...raw, index: points.length, segmentIndex: analyzed.length, distanceM, speedKmh: null, gradePercent: null };
+        const point = { ...raw, index: points.length, segmentIndex: analyzed.length, distanceM, elapsedS: finite(raw.time) ? durationS : null, speedKmh: null, gradePercent: null };
         if (finite(point.elevation)) {
           elevationCount += 1;
+          elevationTotal += point.elevation;
           minElevationM = minElevationM === null ? point.elevation : Math.min(minElevationM, point.elevation);
           maxElevationM = maxElevationM === null ? point.elevation : Math.max(maxElevationM, point.elevation);
         }
         if (finite(point.time)) timeCount += 1;
         if (finite(point.heartRate)) { heartRateTotal += point.heartRate; heartRateCount += 1; }
         if (finite(point.cadence)) { cadenceTotal += point.cadence; cadenceCount += 1; }
+        if (finite(point.power)) { powerTotal += point.power; powerCount += 1; }
         if (finite(point.recordedSpeedKmh) && point.recordedSpeedKmh >= 0) point.speedKmh = point.recordedSpeedKmh;
         if (previous) {
           const legM = distance(previous, point);
@@ -55,6 +57,7 @@
               const calculatedSpeed = legM / seconds * 3.6;
               if (point.speedKmh === null) point.speedKmh = calculatedSpeed;
               durationS += seconds;
+              point.elapsedS = durationS;
               timedDistanceM += legM;
               timedPairs += 1;
               // Moving intervals require displacement and at least 1 km/h.
@@ -76,6 +79,8 @@
       movingSpeedKmh: movingS > 0 ? movingDistanceM / movingS * 3.6 : null,
       maxSpeedKmh, ascentM: elevationPairs ? ascentM : null, descentM: elevationPairs ? descentM : null,
       minElevationM, maxElevationM, elevationCount, timeCount, timedPairs, invalidTimes,
+      avgElevationM: elevationCount ? elevationTotal / elevationCount : null,
+      avgPower: powerCount ? powerTotal / powerCount : null,
       avgHeartRate: heartRateCount ? heartRateTotal / heartRateCount : null,
       avgCadence: cadenceCount ? cadenceTotal / cadenceCount : null,
       pointCount: points.length, segmentCount: analyzed.length
@@ -104,7 +109,7 @@
     };
     return { lat, lng, elevation: number(childText(element, "ele")), time: Number.isFinite(timestamp) ? timestamp : null,
       recordedSpeedKmh: speed !== null && speed >= 0 ? speed : null,
-      heartRate: sensor(["hr", "heartrate"]), cadence: sensor(["cad", "cadence"]), name: childText(element, "name").slice(0, 200) };
+      heartRate: sensor(["hr", "heartrate"]), cadence: sensor(["cad", "cadence"]), power: sensor(["power", "watts"]), name: childText(element, "name").slice(0, 200) };
   }
 
   function parse(text, fileName = "route.gpx", Parser = root.DOMParser) {
@@ -160,6 +165,52 @@
       description: childText(metadata || gpx, "desc").slice(0, 2000), source: hasTrack ? "트랙" : "경로" };
   }
 
+  function buildLaps(data, sizeM = 5000) {
+    if (!finite(sizeM) || sizeM <= 0) throw new Error("구간 거리는 0보다 커야 합니다.");
+    const total = data.stats.distanceM;
+    const count = Math.max(1, Math.ceil((total - 0.000001) / sizeM));
+    const laps = Array.from({ length: count }, (_, index) => ({ number: index + 1,
+      startM: index * sizeM, endM: Math.min(total, (index + 1) * sizeM), durationS: 0,
+      ascentM: 0, descentM: 0, maxSpeedKmh: null, timed: true, elevated: true, intervals: 0, endIndex: 0,
+      heartRateTotal: 0, heartRateWeight: 0, cadenceTotal: 0, cadenceWeight: 0, powerTotal: 0, powerWeight: 0 }));
+    for (const segment of data.segments) {
+      for (let index = 1; index < segment.length; index += 1) {
+        const previous = segment[index - 1], point = segment[index];
+        const leg = point.distanceM - previous.distanceM;
+        const seconds = finite(previous.time) && finite(point.time) && point.time > previous.time ? (point.time - previous.time) / 1000 : null;
+        let position = previous.distanceM;
+        do {
+          const lap = laps[Math.min(count - 1, Math.floor((position + 0.000001) / sizeM))];
+          const end = leg > 0 ? Math.min(point.distanceM, lap.endM) : position;
+          const fraction = leg > 0 ? (end - position) / leg : 1;
+          if (fraction <= 0) break;
+          lap.intervals += 1;
+          lap.endIndex = point.index;
+          if (seconds !== null) lap.durationS += seconds * fraction;
+          else lap.timed = false;
+          if (finite(previous.elevation) && finite(point.elevation)) {
+            const delta = (point.elevation - previous.elevation) * fraction;
+            lap.ascentM += Math.max(0, delta);
+            lap.descentM += Math.max(0, -delta);
+          } else lap.elevated = false;
+          if (finite(point.speedKmh)) lap.maxSpeedKmh = lap.maxSpeedKmh === null ? point.speedKmh : Math.max(lap.maxSpeedKmh, point.speedKmh);
+          for (const key of ["heartRate", "cadence", "power"]) if (finite(point[key])) {
+            const weight = seconds !== null ? seconds * fraction : fraction;
+            lap[key + "Total"] += point[key] * weight;
+            lap[key + "Weight"] += weight;
+          }
+          position = end;
+        } while (leg > 0 && position < point.distanceM - 0.000001);
+      }
+    }
+    return laps.map((lap) => ({ number: lap.number, startM: lap.startM, endM: lap.endM, distanceM: lap.endM - lap.startM,
+      endIndex: lap.endIndex, durationS: lap.timed && lap.intervals ? lap.durationS : null,
+      avgSpeedKmh: lap.timed && lap.durationS > 0 ? (lap.endM - lap.startM) / lap.durationS * 3.6 : null,
+      maxSpeedKmh: lap.maxSpeedKmh, ascentM: lap.elevated && lap.intervals ? lap.ascentM : null, descentM: lap.elevated && lap.intervals ? lap.descentM : null,
+      avgHeartRate: lap.heartRateWeight ? lap.heartRateTotal / lap.heartRateWeight : null,
+      avgCadence: lap.cadenceWeight ? lap.cadenceTotal / lap.cadenceWeight : null,
+      avgPower: lap.powerWeight ? lap.powerTotal / lap.powerWeight : null }));
+  }
   function toCsv(data) {
     const quote = (value) => '"' + String(value ?? "").replaceAll('"', '""') + '"';
     const rows = [["구간", "지점", "위도", "경도", "누적 거리(km)", "고도(m)", "속도(km/h)", "경사(%)", "시간(UTC)", "심박(bpm)", "케이던스(rpm)"]];
@@ -168,7 +219,7 @@
     return "\uFEFF" + rows.map((row) => row.map(quote).join(",")).join("\r\n");
   }
 
-  const api = { parse, analyzeSegments, distance, toCsv, MAX_FILE_BYTES, MAX_POINTS };
+  const api = { parse, analyzeSegments, buildLaps, distance, toCsv, MAX_FILE_BYTES, MAX_POINTS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.JejuGpxCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

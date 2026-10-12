@@ -47,7 +47,6 @@
           <div class="panel-subnav" id="transportCourseSubmenu" data-panel-submenu="transport-course" hidden>
             <button type="button" data-panel-view-tab="transport">교통</button>
             <button type="button" data-panel-view-tab="course">코스</button>
-            <button type="button" data-panel-view-tab="gpx">GPX</button>
             <button type="button" data-panel-view-tab="participants">참가자 위치</button>
           </div>
         </nav>
@@ -143,15 +142,21 @@
         <div class="overlay-scroll notice-lodging-list" id="noticeLodgingContent" data-overlay-notice-lodging></div>
       </div>
 
-      <div class="panel-view" data-panel-view="course" hidden>
-        <div class="route-panel-heading">
-          <p class="kicker">Course Editor</p>
-          <h1>제주 환상 자전거길</h1>
-          <p>출발지와 도착지를 선택하거나 장소·주소를 입력하면 해당 구간이 자동 생성됩니다.</p>
+      <div class="panel-view course-analysis-view" data-panel-view="course" data-gpx-viewer hidden>
+        <div class="ride-header">
+          <div class="ride-header-title"><span class="ride-bike-icon" aria-hidden="true">🚴</span><div><h1 data-gpx-heading>제주항 → 카이리조트</h1><p data-gpx-meta>실제 GPX 주행 기록</p></div></div>
+          <details class="ride-upload" data-gpx-drop><summary>GPX 파일 교체</summary>
+            <label for="gpxFile">선택한 일차의 GPX 파일</label>
+            <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml" data-gpx-file aria-describedby="gpxUploadHint">
+            <small id="gpxUploadHint">첨부한 4개 코스는 기본으로 표시합니다. 새 파일을 선택하거나 여기에 끌어 놓으면 선택한 일차를 교체합니다. 최대 20MB.</small>
+          </details>
         </div>
-
-        <div class="segmented-control route-map-days" data-map-day-tabs></div>
-
+        <div class="segmented-control route-map-days ride-day-tabs" data-map-day-tabs></div>
+        <p class="gpx-status" data-gpx-status role="status" aria-live="polite">1~4일차 GPX 기록을 불러오는 중입니다.</p>
+        <div class="gpx-layout">
+          <div class="gpx-main">
+            <div data-gpx-results></div>
+            <details class="ride-legacy-editor" data-legacy-course-editor><summary>기존 계획 코스 편집</summary>
         <div class="map-tool-row">
           <button class="btn dark small" type="button" data-map-mode="start">출발 선택</button>
           <button class="btn light small" type="button" data-map-mode="end">도착 선택</button>
@@ -189,27 +194,18 @@
           <span class="riding-star-pill" aria-hidden="true">바로가기</span>
         </a>
 
-      </div>
 
-      <div class="panel-view gpx-panel-view" data-panel-view="gpx" data-gpx-viewer hidden>
-        <div class="route-panel-heading compact">
-          <p class="kicker">GPX Ride</p>
-          <h1>GPX 경로와 주행 기록</h1>
-          <p>GPX 파일을 불러오면 거리·속도·고도를 분석하고 지도에 경로를 표시합니다.</p>
+            </details>
+          </div>
+          <div class="gpx-sidebar">
+            <div data-gpx-summary></div>
+            <section class="analysis-map-card" aria-label="실제 주행 경로 지도">
+              <div class="analysis-map-toolbar"><strong>주행 경로</strong><button type="button" data-gpx-fit>선택 일차</button><button type="button" data-gpx-fit-all>4일 전체</button></div>
+              <div class="analysis-map-slot" data-course-map-slot></div>
+              <div class="ride-route-legend" data-gpx-legend></div>
+            </section>
+          </div>
         </div>
-        <div class="gpx-upload" data-gpx-drop>
-          <label for="gpxFile"><strong>GPX 파일 추가</strong></label>
-          <p id="gpxUploadHint">파일을 선택하거나 여기로 끌어 놓으세요. 최대 20MB · 150,000개 지점</p>
-          <input id="gpxFile" class="gpx-file-input" type="file" accept=".gpx,application/gpx+xml" data-gpx-file aria-describedby="gpxUploadHint">
-          <small>최근 파일은 이 기기에 저장됩니다. 새 파일을 불러오면 교체됩니다.</small>
-        </div>
-        <p class="gpx-status" data-gpx-status role="status" aria-live="polite">파일의 좌표와 실제 기록을 분석합니다.</p>
-        <div class="gpx-empty" data-gpx-empty>
-          <strong>나의 라이딩을 지도에서 확인하세요</strong>
-          <p>출발·도착 지점, 고도와 속도 그래프, 지점별 경사도까지 한눈에 확인할 수 있습니다.</p>
-          <p>시간·고도 기록이 없는 항목은 ‘기록 없음’으로 표시됩니다.</p>
-        </div>
-        <div class="gpx-results" data-gpx-results hidden></div>
       </div>
       <div class="panel-view" data-panel-view="restaurants" hidden>
         <div class="route-panel-heading compact">
