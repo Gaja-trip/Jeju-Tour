@@ -5148,3 +5148,43 @@ footer {
 
 .gpx-stop-icon > span { position: relative; }
 .gpx-stop-icon b { position: absolute; top: -7px; right: -6px; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 2px; box-sizing: border-box; border: 1px solid #fff; border-radius: 8px; background: var(--stop-color); color: #fff; font-size: 10px; line-height: 1; }
+
+/* Name, exact location and saved photos for a GPX stop. */
+.gpx-stop-card { color: #294b60; overflow-wrap: anywhere; }
+.gpx-stop-card h2 { margin: 3px 0 7px; color: #153c50; font-size: 1rem; line-height: 1.35; }
+.gpx-stop-card p { margin: 5px 0; line-height: 1.55; }
+.stop-card-eyebrow { color: #648391; font-size: .67rem; font-weight: 700; }
+.stop-card-address { color: #315971; font-size: .75rem; }
+.stop-card-summary, .stop-card-time { color: #708494; font-size: .66rem; }
+.stop-card-place-details { margin: 7px 0; color: #738493; font-size: .65rem; }
+.stop-card-place-details summary { cursor: pointer; color: #356888; }
+.stop-card-photos { margin-top: 10px; padding: 0; }
+.stop-card-photos h3 { margin: 0 0 7px; color: #365971; font-size: .77rem; }
+.stop-card-photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.stop-card-photo { padding: 0; border: 1px solid #dce7ed; border-radius: 8px; background: #f2f7fa; color: #557185; overflow: hidden; cursor: pointer; text-align: left; }
+.stop-card-photo img { display: block; width: 100%; height: 85px; object-fit: cover; }
+.stop-card-photo span { display: block; padding: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .64rem; }
+.stop-card-photo.is-unavailable span { min-height: 60px; white-space: normal; }
+.stop-card-photo-grid.has-one-photo { grid-template-columns: minmax(0, 1fr); }
+.stop-card-photo-grid.has-one-photo img { height: 145px; }
+.stop-card-photo-hint { color: #7b8e9a; font-size: .62rem; }
+.stop-card-photo-empty { padding: 12px 10px; border-radius: 8px; background: #f2f7fa; color: #738b9c; font-size: .72rem; }
+.stop-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.stop-card-actions button, .stop-card-actions a, .stop-card-retry { border: 1px solid #cfdee7; border-radius: 7px; background: #f8fbfd; color: #365d75; font: inherit; font-size: .68rem; padding: 7px 8px; cursor: pointer; text-decoration: none; }
+.stop-card-actions .stop-card-add { border-color: #16697f; background: #16697f; color: #fff; }
+.stop-card-actions a { border-color: transparent; padding: 7px 2px; }
+.gpx-stop-card button:focus-visible, .gpx-stop-card a:focus-visible, .gpx-stop-card summary:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.gpx-stop-dialog { width: min(620px, calc(100vw - 20px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid #d5e3ec; border-radius: 16px; color: #294b60; box-shadow: 0 20px 80px #132b4050; overflow-y: auto; }
+.gpx-stop-dialog::backdrop { background: #08273599; }
+.stop-dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; position: sticky; top: 0; z-index: 1; background: #fff; border-bottom: 1px solid #e3ebf0; }
+.stop-dialog-heading strong { font-size: .85rem; }
+.stop-dialog-heading button { flex: 0 0 auto; border: 0; padding: 7px 9px; border-radius: 7px; color: #4a677b; background: #eff5f8; cursor: pointer; font: inherit; font-size: .78rem; }
+.gpx-stop-dialog .gpx-stop-card { padding: 14px; }
+@media (max-width: 760px) {
+  .gpx-stop-dialog h2 { font-size: 1.15rem; }
+  .gpx-stop-dialog .stop-card-address { font-size: .87rem; }
+  .gpx-stop-dialog .stop-card-summary, .gpx-stop-dialog .stop-card-time { font-size: .74rem; }
+  .gpx-stop-dialog .stop-card-photo-grid img { height: 104px; }
+  .gpx-stop-dialog .has-one-photo img { height: 210px; }
+  .gpx-stop-dialog .stop-card-actions button, .gpx-stop-dialog .stop-card-actions a { min-height: 42px; font-size: .8rem; }
+}

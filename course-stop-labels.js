@@ -9,49 +9,103 @@
         "lat": 33.51666,
         "lng": 126.529035,
         "direction": "top",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 건입동 1429",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EB%AC%BC%ED%95%AD%EC%8B%9D%EB%8B%B9,33.5168066,126.5289283",
+        "sourceDistanceM": null,
+        "description": "사용자가 지정한 장소 이름을 유지하고 GPX 좌표의 주소를 대조했습니다."
       },
       "2": {
         "name": "물항식당",
         "lat": 33.516725,
         "lng": 126.5288966,
         "direction": "bottom",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 건입동 1429",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EB%AC%BC%ED%95%AD%EC%8B%9D%EB%8B%B9,33.51671,126.5288816",
+        "sourceDistanceM": null,
+        "description": "사용자가 지정한 장소 이름을 유지하고 GPX 좌표의 주소를 대조했습니다."
       },
       "3": {
         "name": "첫번째 사고지점",
         "lat": 33.4967433,
         "lng": 126.452125,
         "direction": "bottom",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 이호일동 1699-1",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EC%B2%AB%EB%B2%88%EC%A7%B8%20%EC%82%AC%EA%B3%A0%EC%A7%80%EC%A0%90,33.4969383,126.4520216",
+        "sourceDistanceM": null,
+        "description": "CU 앞 GPX 정지 지점의 실제 좌표 주소입니다. 사용자 지정 사고 주소 ‘이호일동 1962’와 구분하여 표시합니다."
+      },
+      "4": {
+        "lat": 33.47838,
+        "lng": 126.3636583,
+        "direction": "top",
+        "method": "좌표 주소 대조",
+        "address": "제주특별자치도 제주시 애월읍 신엄리 2730-3",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EB%A8%B8%EB%AC%B8%20%EA%B3%B3%204,33.47838,126.3636583",
+        "sourceDistanceM": null,
+        "description": "GPX 대표 좌표로 조회한 신엄리 해안 지점의 주소입니다."
       },
       "5": {
         "name": "가방 잃어버린 곳 · 곽지해변 화장실",
         "lat": 33.45186,
         "lng": 126.307015,
         "direction": "top",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 애월읍 곽지리 1565-48",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EA%B0%80%EB%B0%A9%20%EC%9E%83%EC%96%B4%EB%B2%84%EB%A6%B0%20%EA%B3%B3%20%C2%B7%20%EA%B3%BD%EC%A7%80%ED%95%B4%EB%B3%80%20%ED%99%94%EC%9E%A5%EC%8B%A4,33.45175,126.3069433",
+        "sourceDistanceM": null,
+        "description": "사용자가 지정한 장소 이름을 유지하고 GPX 좌표의 주소를 대조했습니다."
       },
       "6": {
         "name": "두번째 사고지점",
         "lat": 33.4422316,
         "lng": 126.289705,
         "direction": "bottom",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 한림읍 귀덕리 3027-5",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EB%91%90%EB%B2%88%EC%A7%B8%20%EC%82%AC%EA%B3%A0%EC%A7%80%EC%A0%90,33.442125,126.2894233",
+        "sourceDistanceM": null,
+        "description": "사용자가 지정한 장소 이름을 유지하고 GPX 좌표의 주소를 대조했습니다."
       },
       "7": {
         "name": "버스정류장",
         "lat": 33.4419283,
         "lng": 126.2889066,
         "direction": "left",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 한림읍 귀덕리 3028-3",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%EB%B2%84%EC%8A%A4%EC%A0%95%EB%A5%98%EC%9E%A5,33.4418916,126.28871",
+        "sourceDistanceM": null,
+        "description": "사용자가 지정한 장소 이름을 유지하고 GPX 좌표의 주소를 대조했습니다."
       },
       "8": {
         "name": "흑돼지 바당돈",
         "lat": 33.394265,
         "lng": 126.240995,
         "direction": "top",
-        "method": "사용자 지정"
+        "method": "사용자 지정",
+        "address": "제주특별자치도 제주시 한림읍 협재리 2872",
+        "checkedAt": "2026-10-12",
+        "sourceName": "GPX 좌표의 카카오 주소",
+        "sourceUrl": "https://map.kakao.com/link/map/%ED%9D%91%EB%8F%BC%EC%A7%80%20%EB%B0%94%EB%8B%B9%EB%8F%88,33.39434,126.2413166",
+        "sourceDistanceM": null,
+        "description": "사용자가 지정한 장소 이름을 유지하고 GPX 좌표의 주소를 대조했습니다."
       }
     },
     "day2": {

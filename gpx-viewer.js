@@ -67,7 +67,7 @@
     const totalAxis = () => axis === "time" ? current()?.stats.durationS || 0 : current()?.stats.distanceM || 0;
     const message = (text, error = false) => { status.textContent = text; status.classList.toggle("is-error", error); };
     const stopCache = new WeakMap(), restLayers = new Map();
-    let minimumStopS = 300, roadviewMarker;
+    let minimumStopS = 300, roadviewMarker, journal, popupStop;
     const stopsFor = (data) => {
       if (!data) return [];
       if (!stopCache.has(data)) stopCache.set(data, core.detectStops(data));
@@ -79,10 +79,25 @@
     }
     function stopTitle(stop, id = day) {
       const label = namedStop(stop, id);
-      return label ? "#" + stop.number + " " + label.name : "머문 곳 " + stop.number;
+      return label?.name ? "#" + stop.number + " " + label.name : "머문 곳 " + stop.number;
+    }
+    function stopForPoint(data, point) {
+      if (!data || data.points[point.index] !== point) return null;
+      stopsFor(data);
+      return stopCache.get(data).find((stop) => point.index >= stop.startIndex && point.index <= stop.endIndex);
+    }
+    function stopContext(stop, id = day) {
+      const item = defaults.find((entry) => entry.id === id), point = records.get(id)?.data.points[stop.index], label = namedStop(stop, id);
+      const incident = incidentDefinitions.find((entry) => entry.day === id && incidentMatch(entry)?.stop?.startIndex === stop.startIndex);
+      return { day: id, dayLabel: item.label, number: stop.number, point, name: label?.name || "머문 곳 " + stop.number,
+        title: item.label + " · " + stopTitle(stop, id), address: incident ? incident.address + " · " + incident.positionLabel : label?.address,
+        description: incident && label?.address ? "GPX 대표 좌표 주소: " + label.address + ". " + (label.description || "") : label?.description,
+        summary: "체류 기록 " + clock(stop.durationS) + " · 누적 " + value(stop.startDistanceM / 1000, " km") + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""),
+        timeRange: new Date(stop.startTime).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour12: false }) + " – " +
+          new Date(stop.endTime).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour12: false }) };
     }
     function selectedPointTitle(data, point) {
-      const stop = stopCache.get(data)?.find((item) => point.index >= item.startIndex && point.index <= item.endIndex);
+      const stop = stopForPoint(data, point);
       return config().label + " · " + (stop && namedStop(stop) ? stopTitle(stop) : "선택 지점");
     }
     const roadview = root.JejuRoadview?.create({ shell, onPosition(point) {
@@ -110,6 +125,28 @@
     const incidentDefinitions = root.JejuCourseIncidents?.locations || [], incidentCache = new WeakMap();
     const incidentSummary = element.querySelector("[data-course-incidents]");
     let incidentLayer;
+    const stopCard = root.JejuCourseStopCard?.create({
+      onRoadview(context) { showRoadview(context.point, context.title, context.summary); },
+      onAddPhotos(context) { highlight?.closePopup(); journal?.composeAt(context); },
+      onOpenPhoto(id) { journal?.openDetails(id); },
+      onRefreshPhotos() { journal?.refresh(); },
+      onLayout() { const popup = highlight?.getPopup(); if (highlight?.isPopupOpen() && popup.getContent()?.matches?.(".gpx-stop-card")) { configurePointPopup(true); popup.update(); } }
+    });
+    function configurePointPopup(isStop) {
+      if (!map || !highlight?.getPopup()) return;
+      const padding = mapPadding(), top = padding.paddingTopLeft || padding.padding || [24,24], bottom = padding.paddingBottomRight || padding.padding || [24,24];
+      Object.assign(highlight.getPopup().options, { autoPan: isStop, autoPanPaddingTopLeft: top, autoPanPaddingBottomRight: bottom,
+        maxWidth: isStop ? Math.max(160, Math.min(340, map.getSize().x - top[0] - bottom[0] - 36)) : 280,
+        maxHeight: Math.max(60, map.getSize().y - top[1] - bottom[1] - 70) });
+    }
+    function refreshStopPhotos() {
+      popupStop = null;
+      stopCard?.refresh();
+      const point = current()?.points[selectedIndex];
+      if (point && highlight?.isPopupOpen() && stopForPoint(current(), point)) {
+        configurePointPopup(true); highlight.setPopupContent(popup(point, selectedPointTitle(current(), point)));
+      }
+    }
     function incidentMatch(incident) {
       const data = records.get(incident.day)?.data;
       if (!data) return null;
@@ -195,12 +232,15 @@
       results.scrollTop = 0;
       if (media.matches) dock.scrollIntoView({ block: "start", behavior: "smooth" });
     }
-    function showStop(stop, id = day) {
+    function showStop(stop, id = day, openRoadview = true) {
+      stopPlayback(); stopCard?.close();
+      if (!openRoadview) roadview?.close();
       if (id !== day) element.querySelector('[data-map-day="' + id + '"]')?.click();
       const point = current()?.points[stop.index];
       if (!point) return;
-      select(stop.index, true, true);
-      showRoadview(point, config().label + " · " + stopTitle(stop, id),
+      if (!openRoadview && map && active) map.setView([point.lat, point.lng], Math.max(17, map.getZoom()), { animate: false });
+      select(stop.index, true, !media.matches || !openRoadview);
+      if (openRoadview) showRoadview(point, config().label + " · " + stopTitle(stop, id),
         clock(stop.durationS) + " 체류 후보 · " + value(stop.startDistanceM / 1000, " km") + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""));
     }
     function download(text, name, type) {
@@ -239,7 +279,9 @@
       attachContainer();
       map.fitBounds(L.latLngBounds(points.map((p) => [p.lat,p.lng])), { ...mapPadding(), maxZoom:15, animate:false });
     }
-    function popup(point, title) {
+    function popup(point, title, id = day) {
+      const stop = stopForPoint(records.get(id)?.data, point);
+      if (stop && stopCard) return stopCard.render(stopContext(stop, id));
       const node = document.createElement("div"), strong = document.createElement("strong"), text = document.createElement("p");
       node.className = "gpx-map-popup"; strong.textContent = title;
       text.textContent = clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km") + " · " + value(point.speedKmh, " km/h") + " · " + value(point.elevation, " m", 0);
@@ -267,10 +309,19 @@
       }
       if (highlight) {
         highlight.setLatLng([point.lat, point.lng]).setStyle({ opacity: active ? 1 : 0, fillOpacity: active ? 1 : 0 });
-        const content = popup(point, selectedPointTitle(data, point));
-        if (highlight.getPopup()) highlight.setPopupContent(content); else highlight.bindPopup(content, { autoPan: false });
+        const stop = stopForPoint(data, point);
+        if (!stop || popupStop?.data !== data || popupStop.index !== stop.index) {
+          const content = popup(point, selectedPointTitle(data, point));
+          if (!highlight.getPopup()) highlight.bindPopup(content, { autoPan: false });
+          configurePointPopup(Boolean(stop)); highlight.setPopupContent(content);
+          popupStop = stop ? { data, index: stop.index } : null;
+        }
         if (focus && active) map.panInside([point.lat, point.lng], { ...mapPadding(), animate: false });
-        if (open) highlight.openPopup();
+        if (open) {
+          const stop = stopForPoint(data, point);
+          if (media.matches && stop && stopCard) { highlight.closePopup(); stopCard.showMobile(stopContext(stop)); }
+          else highlight.openPopup();
+        }
       }
       if (roadview?.isOpen() && !playing && (open || previousIndex !== selectedIndex)) {
         root.clearTimeout(roadviewSeekTimer);
@@ -397,7 +448,7 @@
       }
       for (const [point, text] of [[data.points[0], "출발"], [data.points.at(-1), "도착"]])
         L.circleMarker([point.lat, point.lng], { pane: "uploadedGpxPane", radius: 5, color: "#fff", weight: 2, fillColor: item.color, fillOpacity: 1, bubblingMouseEvents: false })
-          .bindTooltip(item.label + " " + text).bindPopup(popup(point, item.title + " · " + text)).addTo(group);
+          .bindTooltip(item.label + " " + text).bindPopup(popup(point, item.title + " · " + text, id)).addTo(group);
       for (const lap of core.buildLaps(data)) {
         if (lap.distanceM < 4999) continue;
         const point = data.points[lap.endIndex];
@@ -452,11 +503,18 @@
         const fullTitle = item.label + " · " + stopTitle(stop, id) + " · " + clock(stop.durationS) + (stop.hasRecordingGap ? " · 기록 공백 포함" : "");
         const icon = L.divIcon({ className: "gpx-stop-icon", html: '<span style="--stop-color:' + item.color + '">Ⅱ<b>' + stop.number + '</b></span>',
           iconSize: [26, 26], iconAnchor: [13, 13] });
-        L.marker([point.lat, point.lng], { pane: "uploadedGpxPane", icon, title: fullTitle, bubblingMouseEvents: false })
+        L.marker([point.lat, point.lng], { pane: "gpxStopsPane", icon, title: fullTitle, bubblingMouseEvents: false })
+          .on("tooltipopen", (event) => {
+            if (!label) return;
+            const node = event.tooltip.getElement();
+            node.setAttribute("role", "button"); node.tabIndex = 0; node.setAttribute("aria-label", fullTitle + " · 장소와 사진 보기");
+            node.onclick = (click) => { click.preventDefault(); click.stopPropagation(); showStop(stop, id, false); };
+            node.onkeydown = (key) => { if (["Enter", " "].includes(key.key)) { key.preventDefault(); key.stopPropagation(); showStop(stop, id, false); } };
+          })
           .bindTooltip(escape(label ? stopTitle(stop, id) : fullTitle), label ? {
-            permanent: permanentStopName(id), direction: label.direction, offset: label.offset || (label.direction === "left" ? [-16, 0] : label.direction === "right" ? [16, 0] : [0, label.direction === "top" ? -16 : 16]), className: "gpx-stop-place-label gpx-stop-place-label-" + id, opacity: 1
+            pane: "gpxStopLabelsPane", permanent: permanentStopName(id), interactive: true, direction: label.direction, offset: label.offset || (label.direction === "left" ? [-16, 0] : label.direction === "right" ? [16, 0] : [0, label.direction === "top" ? -16 : 16]), className: "gpx-stop-place-label gpx-stop-place-label-" + id, opacity: 1
           } : {})
-          .on("click", () => showStop(stop, id)).addTo(group);
+          .on("click", () => showStop(stop, id, false)).addTo(group);
       }
       if (active && !layer.hasLayer(group)) layer.addLayer(group);
     }
@@ -537,7 +595,7 @@
         const text = await file.text(), data = core.parse(text, file.name);
         if (versions.get(id) !== version) return;
         records.set(id, { data, text, custom: true }); drawDay(id);
-        if (id === day) { roadview?.close(); selectedIndex = 0; windowStart = 0; windowEnd = 100; render(); fit(); }
+        if (id === day) { stopCard?.close(); roadview?.close(); selectedIndex = 0; windowStart = 0; windowEnd = 100; render(); fit(); }
         onMessage(item.label + " GPX 기록을 반영했습니다.");
         try { await store.put({ day: id, text, fileName: file.name }); if (versions.get(id) === version) message(item.label + " · 이 기기에 변경한 GPX 파일을 저장했습니다."); }
         catch { if (versions.get(id) === version) message(item.label + " · 현재 화면에 반영했습니다. 기기 저장소를 이용할 수 없습니다."); }
@@ -595,7 +653,7 @@
     const resize = new ResizeObserver(() => { root.cancelAnimationFrame(resizeFrame); resizeFrame = root.requestAnimationFrame(() => { if (active) { map?.invalidateSize({ pan: false }); drawCharts(); } }); });
     resize.observe(element);
     resize.observe(dock);
-    media.addEventListener("change", () => { attachContainer(); updateDayStyles(); if (active) root.requestAnimationFrame(() => { fit(); drawCharts(); }); });
+    media.addEventListener("change", () => { stopCard?.close(); attachContainer(); updateDayStyles(); if (active) root.requestAnimationFrame(() => { fit(); drawCharts(); }); });
     element.querySelector(".course-mobile-nav").addEventListener("click", (event) => {
       const button = event.target.closest("[data-course-mobile-screen]");
       if (!button) return;
@@ -629,6 +687,8 @@
         map = options.map; L = options.L; mapHome = map.getContainer().parentElement;
         for (const button of element.querySelectorAll("[data-gpx-fit], [data-gpx-fit-all]")) button.disabled = false;
         map.createPane("uploadedGpxPane"); map.getPane("uploadedGpxPane").style.zIndex = "450";
+        map.createPane("gpxStopsPane"); map.getPane("gpxStopsPane").style.zIndex = "695";
+        map.createPane("gpxStopLabelsPane"); map.getPane("gpxStopLabelsPane").style.zIndex = "690";
         map.createPane("gpxSelectionPane"); map.getPane("gpxSelectionPane").style.zIndex = "460";
         layer = L.layerGroup().addTo(map);
         map.createPane("courseIncidentPane"); map.getPane("courseIncidentPane").style.zIndex = "660";
@@ -644,6 +704,8 @@
         const error = document.createElement("p"); error.className = "map-load-error"; error.textContent = text;
         slot.replaceChildren(error);
       },
+      setJournal(value) { journal = value; stopCard?.setJournal(value); refreshStopPhotos(); },
+      refreshStopPhotos,
       setContextLayers(items) { contextLayers = items.filter(Boolean); },
       setActive(next) {
         const changed = active !== next; active = next; shell.classList.toggle("course-analysis-active", next);
@@ -655,9 +717,9 @@
         }
         for (const group of restLayers.values()) { if (next && !layer?.hasLayer(group)) layer?.addLayer(group); else if (!next && layer?.hasLayer(group)) layer.removeLayer(group); }
         if (map && incidentLayer) { if (next && !map.hasLayer(incidentLayer)) incidentLayer.addTo(map); else if (!next && map.hasLayer(incidentLayer)) map.removeLayer(incidentLayer); }
-        if (!next) { stopPlayback(); roadview?.close(); } select(selectedIndex);
+        if (!next) { stopPlayback(); stopCard?.close(); roadview?.close(); highlight?.closePopup(); } select(selectedIndex);
       },
-      setDay(id) { if (!defaults.some((item) => item.id === id)) return; roadview?.close(); highlight?.closePopup(); day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
+      setDay(id) { if (!defaults.some((item) => item.id === id)) return; stopCard?.close(); roadview?.close(); highlight?.closePopup(); day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
       hasDay(id) { return records.has(id); }, fit,
       getSelectedPoint() { return current()?.points[selectedIndex]; },
       getMapPadding: mapPadding,

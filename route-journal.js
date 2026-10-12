@@ -3,7 +3,14 @@
   const escape = (text) => String(text ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const dayLabel = (day) => day.replace("day","") + "일차";
   const newId = () => crypto.randomUUID();
-  function create({element,map,L,getDay,getSelectedPoint,getPadding,onPickMode=()=>{},onMessage=()=>{},showMap=()=>{}}) {
+  function recordsNear(records, day, point, radiusM = 50) {
+    const valid = (p) => p && Number.isFinite(p.lat) && Math.abs(p.lat) <= 90 && Number.isFinite(p.lng) && Math.abs(p.lng) <= 180;
+    const distance = root.JejuGpxCore?.distance;
+    if (!Array.isArray(records) || !/^day[1-4]$/.test(day) || !valid(point) || !Number.isFinite(radiusM) || radiusM < 0 || !distance) return [];
+    return records.filter((record) => record?.day === day && typeof record.id === "string" && Array.isArray(record.photos) &&
+      valid({ lat: record.latitude, lng: record.longitude }) && distance(point, { lat: record.latitude, lng: record.longitude }) <= radiusM);
+  }
+  function create({element,map,L,getDay,getSelectedPoint,getPadding,onPickMode=()=>{},onMessage=()=>{},showMap=()=>{},onChange=()=>{}}) {
     if (!element) return null;
     const base = String(root.JEJU_EVENT_API_BASE || "").replace(/\/$/,"");
     const form=element.querySelector("[data-journal-form]"), status=element.querySelector("[data-journal-status]"), message=element.querySelector("[data-journal-message]");
@@ -133,7 +140,7 @@
         status.textContent="서버 연결됨 · 사고지점·사진 "+records.length+"개 저장";
         status.classList.remove("is-error");
       } catch(error) {online=false; status.textContent=error.message; status.classList.add("is-error");}
-      finally {refreshing=false;setBusy(busy);}
+      finally {refreshing=false;setBusy(busy);onChange();}
     }
     pick.addEventListener("click",()=>{
       picking=!picking;onPickMode(picking);pick.setAttribute("aria-pressed",String(picking));
@@ -173,7 +180,7 @@
         if(pendingMarker){layer?.removeLayer(pendingMarker);pendingMarker=null;}
         coordinate.textContent="등록할 위치를 지도에서 선택하세요.";coordinate.classList.remove("is-selected");
         picking=false;onPickMode(false);pick.textContent="지도에서 위치 선택";pick.setAttribute("aria-pressed","false");changed();
-        render();status.textContent="서버 연결됨 · 사고지점·사진 "+records.length+"개 저장";
+        render();status.textContent="서버 연결됨 · 사고지점·사진 "+records.length+"개 저장";onChange();
         announce(dayLabel(day)+" 기록과 사진을 서버에 저장했습니다.");onMessage("사고지점·사진을 서버에 저장했습니다.");
         element.querySelector(".journal-compose").open=false;
         focusRecord(result.record);
@@ -194,8 +201,19 @@
       cancelPick(){picking=false;onPickMode(false);pick.textContent="지도에서 위치 선택";pick.setAttribute("aria-pressed","false");},
       handleMapClick(latlng){if(!picking||busy) return false;selectPoint(latlng);return true;},
       setDay(){if(selectedDay!==getDay()){selectedDay=getDay();point=null;picking=false;onPickMode(false);pick.textContent="지도에서 위치 선택";pick.setAttribute("aria-pressed","false");coordinate.textContent="등록할 위치를 지도에서 선택하세요.";coordinate.classList.remove("is-selected");if(pendingMarker){layer?.removeLayer(pendingMarker);pendingMarker=null;}if(!busy)changed();render();setBusy(busy);}},
+      recordsNear(day, point) { return recordsNear(records, day, point); },
+      photoUrl, getPhotoStatus() { return { online, refreshing }; },
+      openDetails(id) { const record = records.find((item) => item.id === id); if (record) showDetails(record); },
+      composeAt({day, point: selected, name}) {
+        if (busy || day !== getDay()) { onMessage("사진 저장을 마친 뒤 장소를 선택해주세요."); return false; }
+        showMap(); element.querySelector(".journal-compose").open = true; selectPoint(selected);
+        form.querySelector('[name="kind"][value="photo"]').checked = true;
+        if (!form.elements.title.value.trim()) form.elements.title.value = name;
+        changed(); element.scrollIntoView({block:"center",behavior:"smooth"}); form.elements.title.focus({preventScroll:true}); return true;
+      },
       refresh, layer
     };
   }
-  root.JejuRouteJournal={create};
+  root.JejuRouteJournal={create,recordsNear};
+  if (typeof module === "object" && module.exports) module.exports = root.JejuRouteJournal;
 })(typeof window!=="undefined"?window:globalThis);

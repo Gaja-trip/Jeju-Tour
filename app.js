@@ -2204,12 +2204,13 @@ function setupVWorldRouteEditor() {
       getDay: () => currentDay, getSelectedPoint: () => gpxViewer?.getSelectedPoint(),
       getPadding: () => gpxViewer?.getMapPadding() || { padding: [24,24] },
       onPickMode: (picking) => { journalPicking = picking; mapTarget.classList.toggle("journal-picking", picking); },
-      onMessage: showToast,
+      onMessage: showToast, onChange: () => gpxViewer?.refreshStopPhotos(),
       showMap: () => {
         gpxViewer?.showMapPage();
         if (window.matchMedia("(max-width: 760px)").matches) root.querySelector(".analysis-map-card")?.scrollIntoView({block:"start",behavior:"smooth"});
       }
     });
+    gpxViewer?.setJournal(routeJournal);
   };
   const panelMenuForView = {
     notice: "notice",
