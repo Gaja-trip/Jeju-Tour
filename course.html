@@ -153,9 +153,33 @@
         </div>
         <div class="segmented-control route-map-days ride-day-tabs" data-map-day-tabs></div>
         <p class="gpx-status" data-gpx-status role="status" aria-live="polite">1~4일차 GPX 기록을 불러오는 중입니다.</p>
+        <div class="course-mobile-nav" role="group" aria-label="모바일 코스 화면">
+          <button type="button" data-course-mobile-screen="map" aria-pressed="true">지도·사고·사진</button>
+          <button type="button" data-course-mobile-screen="analysis" aria-pressed="false">주행 분석</button>
+        </div>
         <div class="gpx-layout">
-          <div class="gpx-main">
-            <div data-gpx-results></div>
+          <div class="gpx-main" data-course-map-page>
+            <section class="route-journal" data-route-journal aria-labelledby="routeJournalHeading">
+              <div class="journal-heading"><h2 id="routeJournalHeading">사고지점 · 함께 찍은 사진</h2><button type="button" class="btn light small" data-journal-refresh>새로고침</button></div>
+              <p class="journal-status" data-journal-status role="status" aria-live="polite">저장 서버에 연결하고 있습니다.</p>
+              <details class="journal-compose"><summary>+ 사고지점·사진 등록</summary>
+                <form data-journal-form>
+                  <div class="journal-kind"><label><input type="radio" name="kind" value="accident" checked>사고지점</label><label><input type="radio" name="kind" value="photo">함께 찍은 사진</label></div>
+                  <div class="journal-position-actions"><button type="button" data-journal-pick>지도에서 위치 선택</button><button type="button" data-journal-gpx-point>GPX 선택 지점 사용</button></div>
+                  <p class="journal-coordinate" data-journal-coordinate>등록할 위치를 지도에서 선택하세요.</p>
+                  <label for="journalTitle">제목</label><input id="journalTitle" name="title" type="text" maxlength="80" required placeholder="예: 미끄러운 내리막 · 해변에서 단체사진">
+                  <label for="journalAuthor">작성자 <span>선택</span></label><input id="journalAuthor" name="author" type="text" maxlength="40" autocomplete="name">
+                  <label for="journalNote">설명 <span>선택</span></label><textarea id="journalNote" name="note" rows="3" maxlength="2000" placeholder="사고 상황이나 사진에 대한 설명을 적어주세요."></textarea>
+                  <label for="journalPhotos">사진 <span>최대 3장 · 장당 8MB</span></label><input id="journalPhotos" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple data-journal-photos>
+                  <div class="journal-previews" data-journal-previews></div>
+                  <p class="journal-save-hint">선택한 일차의 위치와 사진을 서버에 저장합니다.</p>
+                  <button class="btn dark small" type="submit" data-journal-submit disabled>서버에 저장</button>
+                  <p class="journal-message" data-journal-message role="status" aria-live="polite"></p>
+                </form>
+              </details>
+              <label class="journal-all-days"><input type="checkbox" data-journal-all>4일 전체 기록 보기</label>
+              <div class="journal-list" data-journal-list></div>
+            </section>
             <details class="ride-legacy-editor" data-legacy-course-editor><summary>기존 계획 코스 편집</summary>
         <div class="map-tool-row">
           <button class="btn dark small" type="button" data-map-mode="start">출발 선택</button>
@@ -197,7 +221,7 @@
 
             </details>
           </div>
-          <div class="gpx-sidebar">
+          <div class="gpx-sidebar" data-course-map-page>
             <div data-gpx-summary></div>
             <section class="analysis-map-card" aria-label="실제 주행 경로 지도">
               <div class="analysis-map-toolbar"><strong>주행 경로</strong><button type="button" data-gpx-fit>선택 일차</button><button type="button" data-gpx-fit-all>4일 전체</button></div>
@@ -206,6 +230,10 @@
             </section>
           </div>
         </div>
+        <section class="course-analysis-dock" data-course-analysis-dock hidden aria-label="주행 분석 하단 패널">
+          <header class="course-dock-heading"><strong>주행 분석</strong><button type="button" data-course-dock-toggle aria-expanded="true">분석 접기</button></header>
+          <div class="course-dock-body" data-gpx-results></div>
+        </section>
       </div>
       <div class="panel-view" data-panel-view="restaurants" hidden>
         <div class="route-panel-heading compact">
@@ -302,6 +330,8 @@
   <script src="gpx-route.js"></script>
   <script src="gpx-core.js"></script>
   <script src="gpx-viewer.js"></script>
+  <script src="event-config.js"></script>
+  <script src="route-journal.js"></script>
   <script src="live-location-config.js"></script>
   <script src="live-location-core.js"></script>
   <script src="invitation-core.js"></script>

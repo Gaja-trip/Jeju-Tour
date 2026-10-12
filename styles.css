@@ -4787,10 +4787,10 @@ footer {
 }
 
 /* Recorded courses: time/distance analysis with an embedded Leaflet map. */
-.course-analysis-active .route-map-panel { inset: 0; width: 100%; max-height: none; padding: 18px 30px; border: 0; border-radius: 0; background: #fff; box-shadow: none; backdrop-filter: none; transition: none; }
-.course-analysis-active .route-panel-edge-toggle { display: none; }
-.course-analysis-active .route-panel-top { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 30px; }
-.course-analysis-active .panel-nav { width: 510px; max-width: 65%; }
+.course-analysis-active.course-mobile-layout .route-map-panel { inset: 0; width: 100%; max-height: none; padding: 18px 30px; border: 0; border-radius: 0; background: #fff; box-shadow: none; backdrop-filter: none; transition: none; }
+.course-analysis-active.course-mobile-layout .route-panel-edge-toggle { display: none; }
+.course-analysis-active.course-mobile-layout .route-panel-top { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 30px; }
+.course-analysis-active.course-mobile-layout .panel-nav { width: 510px; max-width: 65%; }
 .course-analysis-view { align-content: start; grid-template-columns: minmax(0, 1fr); gap: 12px; padding-right: 8px; color: #112849; }
 .course-analysis-view [hidden] { display: none !important; }
 .ride-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 8px 0; border-bottom: 1px solid #edf0f5; }
@@ -4875,7 +4875,7 @@ footer {
 .analysis-map-toolbar strong { margin-right: auto; color: #49657d; font-weight: 600; }
 .analysis-map-toolbar button { border: 1px solid #e4e9f1; padding: 5px 8px; background: #fff; border-radius: 7px; font: inherit; font-size: .7rem; color: #527595; cursor: pointer; }
 .analysis-map-slot { position: relative; height: 325px; min-width: 0; background: #e8f3f5; }
-.course-analysis-active #vworldMap { position: relative; inset: auto; width: 100%; height: 100%; }
+.course-analysis-active.course-mobile-layout #vworldMap { position: relative; inset: auto; width: 100%; height: 100%; }
 .ride-route-legend { display: flex; flex-wrap: wrap; gap: 7px 12px; padding: 10px 13px; color: #8491a3; font-size: .68rem; }
 .ride-route-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .ride-route-legend i { width: 14px; height: 3px; border-radius: 3px; }
@@ -4895,13 +4895,13 @@ footer {
 .itinerary-marker-wrap { filter: grayscale(1); }
 @media (max-width: 1050px) {
   .gpx-layout { gap: 18px; grid-template-columns: minmax(0, 1fr) 300px; }
-  .course-analysis-active .route-map-panel { padding: 14px 18px; }
+  .course-analysis-active.course-mobile-layout .route-map-panel { padding: 14px 18px; }
   .ride-point-readout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
-  .course-analysis-active .route-map-panel { inset: 0; max-height: none; width: 100%; padding: 12px 10px; }
-  .course-analysis-active .route-panel-top { display: grid; grid-template-columns: minmax(0, 1fr); justify-content: stretch; align-items: stretch; gap: 9px; }
-  .course-analysis-active .panel-nav { width: 100%; max-width: none; }
+  .course-analysis-active.course-mobile-layout .route-map-panel { inset: 0; max-height: none; width: 100%; padding: 12px 10px; }
+  .course-analysis-active.course-mobile-layout .route-panel-top { display: grid; grid-template-columns: minmax(0, 1fr); justify-content: stretch; align-items: stretch; gap: 9px; }
+  .course-analysis-active.course-mobile-layout .panel-nav { width: 100%; max-width: none; }
   .course-analysis-view { padding-right: 2px; gap: 9px; }
   .ride-header { gap: 8px; }
   .ride-bike-icon { display: none; }
@@ -4939,4 +4939,104 @@ footer {
   .ride-laps table { min-width: 680px; font-size: .68rem; }
   .ride-laps td, .ride-laps th { padding: 12px 10px; }
   .course-analysis-active .vworld-map .leaflet-bottom.leaflet-right { bottom: 10px !important; }
+}
+
+
+/* Desktop map with a docked analysis panel; mobile map/analysis screens. */
+.course-mobile-nav { display: none; }
+.course-analysis-dock { position: absolute; z-index: 5; left: 466px; right: 18px; bottom: 18px; height: var(--course-dock-height, min(44vh, 440px)); display: flex; flex-direction: column; min-width: 0; padding: 0; border: 1px solid #d7e2e8; border-radius: 17px; background: rgba(255,255,255,.97); box-shadow: 0 10px 30px rgba(8,30,45,.2); overflow: hidden; }
+.course-analysis-dock[hidden] { display: none !important; }
+.course-dock-heading { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 9px 16px; border-bottom: 1px solid #e8edf3; color: #274b65; font-size: .82rem; background: #f6fafb; }
+.course-dock-heading button { padding: 5px 9px; border: 1px solid #dbe6ed; border-radius: 8px; background: #fff; color: #55738b; font: inherit; font-size: .72rem; cursor: pointer; }
+.course-dock-body { flex: 1 1 auto; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; display: grid; gap: 12px; align-content: start; padding: 14px 16px; overscroll-behavior: contain; }
+.course-analysis-active:not(.course-mobile-layout) { --course-dock-height: min(44vh,440px); }
+.course-analysis-active.course-dock-collapsed:not(.course-mobile-layout) { --course-dock-height: 44px; }
+.course-dock-collapsed:not(.course-mobile-layout) .course-dock-body { display: none; }
+.panel-collapsed.course-analysis-active:not(.course-mobile-layout) .course-analysis-dock { left: 64px; }
+.course-analysis-active:not(.course-mobile-layout) .gpx-layout { display: flex; flex-direction: column; gap: 14px; }
+.course-analysis-active:not(.course-mobile-layout) .gpx-main { width: 100%; }
+.course-analysis-active:not(.course-mobile-layout) .gpx-sidebar { position: static; width: 100%; order: -1; }
+.course-analysis-active:not(.course-mobile-layout) .ride-header { display: grid; gap: 8px; }
+.course-analysis-active:not(.course-mobile-layout) .ride-header h1 { font-size: 1.05rem; }
+.course-analysis-active:not(.course-mobile-layout) .ride-upload { width: 100%; max-width: none; padding: 8px 12px; }
+.course-analysis-active:not(.course-mobile-layout) .analysis-map-slot { display: none; }
+.course-analysis-active:not(.course-mobile-layout) .vworld-map .leaflet-bottom.leaflet-right { bottom: calc(var(--course-dock-height) + 34px) !important; }
+.course-analysis-active:not(.course-mobile-layout) .ride-summary-grid { padding: 14px; gap: 14px; }
+.course-analysis-active:not(.course-mobile-layout) .ride-summary-grid dd { font-size: 1rem; }
+.course-analysis-active:not(.course-mobile-layout) .ride-summary-grid dt { font-size: .72rem; }
+.course-analysis-active:not(.course-mobile-layout) .ride-secondary-grid { padding: 12px 14px; }
+.course-analysis-active:not(.course-mobile-layout) .ride-point-readout { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.vworld-map.journal-picking, .vworld-map.journal-picking .leaflet-interactive { cursor: crosshair; }
+.route-journal { padding: 13px; margin: 0; border: 1px solid #dce5ea; border-radius: 14px; background: #fff; }
+.journal-heading { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.journal-heading h2 { margin: 0; font-size: .88rem; color: #294c65; }
+.journal-heading .btn { font-size: .67rem; padding: 5px 8px; }
+.journal-status, .journal-message { margin: 8px 0; font-size: .72rem; line-height: 1.6; color: #45728a; overflow-wrap: anywhere; }
+.journal-status.is-error, .journal-message.is-error { color: #b42318; }
+.journal-compose { margin: 12px 0; border: 1px solid #dee8ec; border-radius: 11px; background: #f8fbfd; }
+.journal-compose summary { cursor: pointer; padding: 10px; color: #335c75; font-size: .77rem; font-weight: 700; }
+.journal-compose form { display: grid; gap: 7px; padding: 0 10px 10px; }
+.journal-compose form > label { font-size: .73rem; color: #365a70; font-weight: 600; }
+.journal-compose form > label span { font-weight: 400; color: #8596a3; font-size: .64rem; }
+.journal-compose form > input, .journal-compose textarea { width: 100%; min-width: 0; min-height: 34px; padding: 7px 9px; border: 1px solid #cfdde4; border-radius: 7px; background: #fff; color: #294b60; font: inherit; font-size: .77rem; }
+.journal-compose textarea { resize: vertical; }
+.journal-kind { display: flex; flex-wrap: wrap; gap: 14px; font-size: .73rem; color: #365a70; margin: 4px 0; }
+.journal-kind label { display: flex; align-items: center; gap: 6px; }
+.journal-kind input, .journal-all-days input { accent-color: #207392; }
+.journal-position-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.journal-position-actions button { border: 1px solid #c5d7e2; border-radius: 8px; padding: 8px 5px; background: #fff; color: #416b85; font: inherit; font-size: .69rem; cursor: pointer; }
+.journal-position-actions button[aria-pressed="true"] { color: #fff; background: #207392; }
+.journal-coordinate { padding: 8px; margin: 0; color: #8a6a2a; font-size: .69rem; border-radius: 7px; background: #fff7e5; }
+.journal-coordinate.is-selected { color: #23654f; background: #e9f7ef; }
+.journal-previews { display: flex; flex-wrap: wrap; gap: 7px; }
+.journal-previews img { width: 70px; height: 65px; object-fit: cover; border-radius: 8px; }
+.journal-save-hint { margin: 3px 0; color: #7b909f; font-size: .65rem; line-height: 1.5; }
+.journal-all-days { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: #55748a; }
+.journal-list { display: grid; gap: 8px; margin-top: 12px; }
+.journal-empty { color: #8b9aa5; font-size: .71rem; margin: 3px 0; }
+.journal-record { min-width: 0; border: 1px solid #e0e8ee; border-radius: 10px; overflow: hidden; }
+.journal-record-main { display: flex; gap: 8px; align-items: center; width: 100%; padding: 10px; border: 0; background: #fff; text-align: left; cursor: pointer; color: #36566c; }
+.journal-record-icon { width: 24px; font-size: 22px; }
+.journal-record-main > span:nth-child(2) { min-width: 0; flex: 1; }
+.journal-record-main strong { display: block; font-size: .78rem; overflow-wrap: anywhere; }
+.journal-record-main small { display: block; margin-top: 4px; color: #8495a0; font-size: .64rem; }
+.journal-record-main img { width: 58px; height: 48px; object-fit: cover; border-radius: 7px; }
+.journal-record-actions { display: flex; gap: 6px; padding: 0 10px 9px; }
+.journal-record-actions button { border: 0; border-radius: 7px; padding: 5px 8px; background: #eef4f8; font: inherit; font-size: .65rem; color: #55788c; cursor: pointer; }
+.journal-map-pin { display: grid; place-items: center; border: 2px solid #fff; border-radius: 50% 50% 50% 8%; transform: rotate(-45deg); background: #d94834; color: #fff; box-shadow: 0 2px 7px rgba(0,0,0,.3); font-size: 21px; text-align: center; }
+.journal-map-pin.photo { background: #235fa0; }
+.journal-map-popup strong { display: block; font-size: .83rem; }
+.journal-map-popup small { display: block; color: #738a97; margin-top: 4px; }
+.journal-map-popup p { white-space: pre-wrap; font-size: .76rem; margin: 8px 0; overflow-wrap: anywhere; max-height: 140px; overflow-y: auto; }
+.journal-popup-photo { padding: 0; border: 0; width: 100%; background: transparent; cursor: pointer; }
+.journal-popup-photo img { display: block; width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; }
+.journal-popup-open { margin-top: 8px; padding: 7px 10px; border: 0; border-radius: 7px; background: #eef4f8; color: #385e75; cursor: pointer; font: inherit; }
+.journal-photo-dialog { padding: 18px; width: min(900px,94vw); max-height: 92dvh; overflow-y: auto; border: 1px solid #d8e5ed; border-radius: 18px; color: #2b4c65; box-shadow: 0 25px 80px rgba(0,0,0,.3); }
+.journal-photo-dialog::backdrop { background: rgba(8,25,37,.7); }
+.journal-dialog-heading { display: flex; gap: 15px; align-items: center; justify-content: space-between; }
+.journal-dialog-heading h2 { margin: 0; font-size: 1.12rem; overflow-wrap: anywhere; }
+.journal-dialog-heading button { flex: 0 0 auto; padding: 7px 10px; border: 0; border-radius: 8px; background: #edf3f7; color: #385e75; cursor: pointer; }
+.journal-dialog-meta { color: #7c909f; font-size: .75rem; }
+.journal-dialog-note { white-space: pre-wrap; font-size: .88rem; }
+.journal-photo-dialog figure { margin: 15px 0; }
+.journal-photo-dialog img { display: block; max-width: 100%; max-height: 70dvh; margin: auto; border-radius: 10px; }
+.journal-photo-dialog figcaption { text-align: center; font-size: .73rem; color: #8094a4; margin-top: 7px; }
+@media (max-width: 760px) {
+  .course-mobile-nav { display: flex; gap: 6px; position: sticky; top: 0; z-index: 6; padding: 5px; border: 1px solid #dfE8ed; border-radius: 10px; background: #f5f9fb; }
+  .course-mobile-nav button { flex: 1; padding: 9px 7px; border: 0; border-radius: 7px; color: #59788d; background: transparent; font: inherit; font-size: .75rem; cursor: pointer; }
+  .course-mobile-nav button[aria-pressed="true"] { background: #207392; color: #fff; }
+  .course-mobile-layout .gpx-sidebar { display: flex; flex-direction: column; position: static; width: 100%; gap: 12px; }
+  .course-mobile-layout .gpx-sidebar > [data-gpx-summary] { order: 0; }
+  .course-mobile-layout .analysis-map-card { order: -1; position: static; width: 100%; }
+  .course-mobile-layout .analysis-map-slot { height: 320px; }
+  .course-mobile-layout .course-analysis-view { scroll-padding-top: 52px; }
+  .course-mobile-layout.course-mobile-analysis [data-course-map-page] { display: none; }
+  .course-mobile-layout .course-analysis-dock { position: static; height: auto; flex: 0 0 auto; display: flex; width: 100%; min-width: 0; border: 0; border-radius: 0; background: #fff; box-shadow: none; overflow: visible; }
+  .course-mobile-layout .course-dock-heading { display: none; }
+  .course-mobile-layout .course-dock-body { overflow: visible; padding: 0; width: 100%; }
+  .course-mobile-layout .course-analysis-dock .analysis-map-card { position: sticky; top: 50px; z-index: 4; margin-bottom: 12px; }
+  .course-mobile-layout .course-analysis-dock .analysis-map-slot { height: 185px; }
+  .course-mobile-layout .course-analysis-view { align-content: start; }
+  .journal-photo-dialog { padding: 12px; }
+  .journal-dialog-heading h2 { font-size: .95rem; }
 }

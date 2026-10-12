@@ -2196,6 +2196,21 @@ function setupVWorldRouteEditor() {
 
   const gpxViewer = window.JejuGpxViewer?.create({ element: root.querySelector("[data-gpx-viewer]"), initialDay: currentDay, onMessage: showToast });
 
+  let routeJournal = null;
+  let journalPicking = false;
+  const attachRouteJournal = () => {
+    routeJournal = window.JejuRouteJournal?.create({
+      element: root.querySelector("[data-route-journal]"), map, L: window.L,
+      getDay: () => currentDay, getSelectedPoint: () => gpxViewer?.getSelectedPoint(),
+      getPadding: () => gpxViewer?.getMapPadding() || { padding: [24,24] },
+      onPickMode: (picking) => { journalPicking = picking; mapTarget.classList.toggle("journal-picking", picking); },
+      onMessage: showToast,
+      showMap: () => {
+        gpxViewer?.showMapPage();
+        if (window.matchMedia("(max-width: 760px)").matches) root.querySelector(".analysis-map-card")?.scrollIntoView({block:"start",behavior:"smooth"});
+      }
+    });
+  };
   const panelMenuForView = {
     notice: "notice",
     "notice-lodging": "notice",
@@ -2218,6 +2233,7 @@ function setupVWorldRouteEditor() {
 
   const setPanelView = (view) => {
     currentView = view;
+    if (view !== "course") routeJournal?.cancelPick();
     gpxViewer?.setActive(view === "course");
     if (view === "baggage") {
       const frame = root.querySelector("[data-baggage-src]");
@@ -2653,6 +2669,7 @@ function setupVWorldRouteEditor() {
   });
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
+    attachRouteJournal();
     gpxViewer?.showMapError("지도를 불러오지 못했습니다. 네트워크 연결을 확인하세요.");
     const fallbackRequested = new URLSearchParams(window.location.search).get("panel");
     const fallbackPanel = fallbackRequested === "gpx" ? "course" : fallbackRequested;
@@ -2665,6 +2682,13 @@ function setupVWorldRouteEditor() {
     preferCanvas: true
   }).setView([33.38, 126.55], 10);
   const uploadedGpxLayer = gpxViewer?.attachMap({ map, L });
+  attachRouteJournal();
+  mapTarget.addEventListener("click", (event) => {
+    if (!journalPicking || event.target.closest(".leaflet-control, .leaflet-popup")) return;
+    const point = map.mouseEventToLatLng(event);
+    event.preventDefault(); event.stopImmediatePropagation();
+    routeJournal?.handleMapClick(point);
+  }, { capture: true });
   window.JejuLiveLocation?.attach({ map, L });
   const syncItineraryDistanceVisibility = () => {
     const minimumZoom = window.matchMedia("(max-width: 760px)").matches ? 13 : 12;
@@ -2917,6 +2941,7 @@ function setupVWorldRouteEditor() {
     loadSavedRoute();
     if (gpxViewer?.hasDay(currentDay)) gpxViewer.setDay(currentDay);
     else { gpxViewer?.setDay(currentDay); fitItineraryDay(currentDay); }
+    routeJournal?.setDay();
     renderOverlayViews();
   });
 
@@ -2925,7 +2950,7 @@ function setupVWorldRouteEditor() {
   });
   clearButton.addEventListener("click", clearRoute);
   saveButton.addEventListener("click", saveRoute);
-  map.on("click", (event) => { if (currentView === "course" && gpxViewer?.isEditing()) setRoutePointFromMapClick(event.latlng); });
+  map.on("click", (event) => { if (routeJournal?.handleMapClick(event.latlng)) return; if (currentView === "course" && gpxViewer?.isEditing()) setRoutePointFromMapClick(event.latlng); });
   placeApplyButtons.forEach((button) => {
     button.addEventListener("click", () => applySearchLocation(button.dataset.placeApply));
   });

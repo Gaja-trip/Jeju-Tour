@@ -54,6 +54,9 @@
     const heading = element.querySelector("[data-gpx-heading]"), meta = element.querySelector("[data-gpx-meta]");
     const input = element.querySelector("[data-gpx-file]"), drop = element.querySelector("[data-gpx-drop]");
     const slot = element.querySelector("[data-course-map-slot]"), sidebar = element.querySelector("[data-gpx-summary]"), legend = element.querySelector("[data-gpx-legend]");
+    const dock = element.querySelector("[data-course-analysis-dock]"), dockHome = dock.parentElement, mapCard = element.querySelector(".analysis-map-card"), mapCardHome = mapCard.parentElement;
+    const media = root.matchMedia("(max-width: 760px)");
+    let mobileScreen = new URLSearchParams(location.search).get("screen") === "analysis" ? "analysis" : "map";
     const shell = element.closest("[data-vworld-route-editor]"), enabled = new Set(["distanceM", "speedKmh", "elevation"]);
     let day = initialDay, map, L, layer, highlight, mapHome, active = false, contextLayers = [];
     let axis = "time", selectedIndex = 0, windowStart = 0, windowEnd = 100, pointerFrame, resizeFrame, playFrame, playing = false, seekCache;
@@ -66,12 +69,29 @@
       const url = URL.createObjectURL(new Blob([text], { type })), link = document.createElement("a");
       link.href = url; link.download = name; link.click(); root.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+    function mapPadding() {
+      if (!map || (active && media.matches)) return { padding: [24,24] };
+      const bounds = map.getContainer().getBoundingClientRect();
+      const panel = shell.querySelector("[data-route-panel]").getBoundingClientRect();
+      const bottom = active && !media.matches ? dock.getBoundingClientRect().height + 32 : media.matches ? Math.max(0, bounds.bottom-panel.top)+18 : 24;
+      return { paddingTopLeft: [media.matches ? 24 : Math.min(Math.max(24,panel.right-bounds.left+20), Math.max(24,bounds.width-120)), 32],
+        paddingBottomRight: [24,Math.min(bottom,Math.max(24,bounds.height-120))] };
+    }
     function attachContainer() {
+      shell.classList.toggle("course-mobile-layout", media.matches);
+      shell.classList.toggle("course-mobile-analysis", mobileScreen === "analysis");
+      for (const button of element.querySelectorAll("[data-course-mobile-screen]")) button.setAttribute("aria-pressed", String(button.dataset.courseMobileScreen === mobileScreen));
+      dock.hidden = !active || (media.matches && mobileScreen !== "analysis");
+      if (active && !media.matches && dock.parentElement !== shell) shell.append(dock);
+      else if ((!active || media.matches) && dock.parentElement !== dockHome) dockHome.append(dock);
+      if (active && media.matches && mobileScreen === "analysis") {
+        if (mapCard.parentElement !== dock) dock.insertBefore(mapCard, dock.querySelector(".course-dock-body"));
+      } else if (mapCard.parentElement !== mapCardHome) mapCardHome.append(mapCard);
       if (!map) return;
       const container = map.getContainer();
-      if (active && container.parentElement !== slot) slot.append(container);
-      else if (!active && container.parentElement !== mapHome) mapHome.insertBefore(container, mapHome.firstChild);
-      map.invalidateSize({ pan: false });
+      if (active && media.matches && container.parentElement !== slot) slot.append(container);
+      else if ((!active || !media.matches) && container.parentElement !== mapHome) mapHome.insertBefore(container, mapHome.firstChild);
+      map.invalidateSize({ pan:false });
     }
     function fit(all = false) {
       if (!map || !layer) return;
@@ -79,8 +99,7 @@
       if (!points?.length) return;
       if (!map.hasLayer(layer)) layer.addTo(map);
       attachContainer();
-      const padding = active ? { padding: [28, 28] } : { paddingTopLeft: [root.matchMedia("(max-width: 760px)").matches ? 25 : 460, 30], paddingBottomRight: [25, 35] };
-      map.fitBounds(L.latLngBounds(points.map((p) => [p.lat, p.lng])), { ...padding, maxZoom: 15, animate: false });
+      map.fitBounds(L.latLngBounds(points.map((p) => [p.lat,p.lng])), { ...mapPadding(), maxZoom:15, animate:false });
     }
     function popup(point, title) {
       const node = document.createElement("div"), strong = document.createElement("strong"), text = document.createElement("p");
@@ -108,7 +127,7 @@
       if (highlight) {
         highlight.setLatLng([point.lat, point.lng]).setStyle({ opacity: active ? 1 : 0, fillOpacity: active ? 1 : 0 });
         highlight.bindPopup(popup(point, config().label + " · 선택 지점"), { autoPan: false });
-        if (focus && active) map.panInside([point.lat, point.lng], { padding: [25, 25], animate: false });
+        if (focus && active) map.panInside([point.lat, point.lng], { ...mapPadding(), animate: false });
         if (open) highlight.openPopup();
       }
     }
@@ -342,6 +361,22 @@
     });
     const resize = new ResizeObserver(() => { root.cancelAnimationFrame(resizeFrame); resizeFrame = root.requestAnimationFrame(() => { if (active) { map?.invalidateSize({ pan: false }); drawCharts(); } }); });
     resize.observe(element);
+    resize.observe(dock);
+    media.addEventListener("change", () => { attachContainer(); if (active) root.requestAnimationFrame(() => { fit(); drawCharts(); }); });
+    element.querySelector(".course-mobile-nav").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-course-mobile-screen]");
+      if (!button) return;
+      mobileScreen = button.dataset.courseMobileScreen; stopPlayback(); attachContainer();
+      const url = new URL(location.href); url.searchParams.set("screen",mobileScreen); history.replaceState(history.state,"",url);
+      element.scrollTo({top:0,behavior:"instant"});
+      root.requestAnimationFrame(() => { fit(); drawCharts(); });
+    });
+    dock.querySelector("[data-course-dock-toggle]").addEventListener("click", (event) => {
+      const collapsed = shell.classList.toggle("course-dock-collapsed");
+      event.target.setAttribute("aria-expanded",String(!collapsed));
+      event.target.textContent = collapsed ? "주행 분석 펼치기" : "분석 접기";
+      root.setTimeout(() => { if (active) fit(); },100);
+    });
     document.addEventListener("visibilitychange", () => { if (document.hidden) stopPlayback(); });
     root.addEventListener("pagehide", stopPlayback);
     for (const button of element.querySelectorAll("[data-gpx-fit], [data-gpx-fit-all]")) button.disabled = true;
@@ -383,6 +418,9 @@
       },
       setDay(id) { if (!defaults.some((item) => item.id === id)) return; day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
       hasDay(id) { return records.has(id); }, fit,
+      getSelectedPoint() { return current()?.points[selectedIndex]; },
+      getMapPadding: mapPadding,
+      showMapPage() { mobileScreen = "map"; attachContainer(); },
       isEditing() { return !!element.querySelector("[data-legacy-course-editor]")?.open; }
     };
   }

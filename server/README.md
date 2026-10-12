@@ -93,7 +93,7 @@ Jeju-Tour/
 5. 새 PC의 IP·방화벽·외부 주소를 연결합니다. 두 PC를 동시에 등록용으로 열면 서로 다른 DB에 저장되므로 하나만 운영합니다.
 6. 자동 실행 작업은 새 위치에서 다시 등록합니다.
 
-**백업에서 복원**: 서버를 중지하고 현재 `data`는 별도 보관합니다. 새 빈 `data` 폴더에 완료된 백업의 `jeju-tour.sqlite`와 `participants`를 함께 복사하고 실행합니다. 기존 DB의 `-wal`/`-shm` 파일을 섞지 마세요. 운영 기간 설정은 백업의 `backup-info.json`을 참고해 `config.json`에 맞춥니다. 관리자 키는 백업에 포함하지 않으므로 기존 `config.json`을 안전하게 함께 보관하거나 새 키를 사용합니다.
+**백업에서 복원**: 서버를 중지하고 현재 `data`는 별도 보관합니다. 새 빈 `data` 폴더에 완료된 백업의 `jeju-tour.sqlite`, `participants`와 `route-posts`(폴더가 있을 때)를 함께 복사하고 실행합니다. 기존 DB의 `-wal`/`-shm` 파일을 섞지 마세요. 운영 기간 설정은 백업의 `backup-info.json`을 참고해 `config.json`에 맞춥니다. 관리자 키는 백업에 포함하지 않으므로 기존 `config.json`을 안전하게 함께 보관하거나 새 키를 사용합니다.
 
 ## 7. Windows 자동 실행(선택)
 
@@ -135,3 +135,15 @@ API 테스트는 실제 임시 DB·사진을 사용해 저장, 이름 정규화,
 - 서버 연결 안 됨: 실행 창/작업 상태, 주소, 방화벽, `event-config.js`를 확인하세요.
 - 사진 업로드 실패: 파일 종류·용량·서버 디스크 공간을 확인하세요. 프록시를 사용하는 경우 업로드 한도는 25MB 이상, 제한 시간은 60초 이상으로 설정하세요.
 - 기록이 없어 보임: 접속 서버와 `config.json`의 `dataDir`이 기존 데이터 위치인지 확인하세요. DB만 옮기고 사진 폴더를 누락하지 않았는지도 확인합니다.
+
+## 지도 사고지점·사진 기록
+
+코스 화면의 사고지점·사진 등록은 인증 챌린지와 별도의 기록으로 저장됩니다. 사건 일차는 day1~day4이며 제목, 설명, 작성자, 위도·경도 및 원본 사진을 보존합니다. 사진은 JPG/PNG/WebP 최대 3장, 장당 8MB입니다. 사고 기록의 사진은 선택이고 사진 기록에는 사진이 필요합니다.
+
+- GET /api/route-posts: 모든 지도 기록 조회. ?day=day1 등으로 일차 필터
+- POST /api/route-posts: multipart/form-data로 kind, day, title, note, author, latitude, longitude, requestId 및 photos 등록
+- GET/HEAD /api/route-photos/<사진 UUID>: 원본 이미지 제공
+
+저장 폴더는 설정된 dataDir의 route-posts/<기록 UUID>/이고, 같은 SQLite 데이터베이스에 메타데이터가 저장됩니다. 파일명은 서버가 생성한 UUID를 사용합니다. 입력 검증, 본문 용량 제한, 같은 요청 재전송의 중복 방지, 기존 허용 출처 검사를 적용합니다. 백업에는 데이터베이스, participants, route-posts를 함께 포함하고 JSON 내보내기에는 route-posts.json을 추가합니다.
+
+같은 서버의 코스 페이지에서는 별도 설정 없이 동작합니다. 다른 정적 호스팅의 화면은 event-config.js의 서버 주소를 설정하고 allowedOrigins에 해당 사이트를 등록해야 합니다. 운영 서버에는 새 server/route-store.mjs를 포함하고 서버 프로세스를 다시 시작합니다.

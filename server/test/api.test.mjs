@@ -117,7 +117,7 @@ test('photo registration, participants, persistence, backup and access boundarie
       assert.deepEqual(app.store.snapshot(), before);
       const destination = await backupData(config);
       assert.ok(existsSync(join(destination, 'BACKUP-COMPLETE.txt')));
-      assert.equal(JSON.parse(readFileSync(join(destination, 'backup-info.json'))).schemaVersion, 1);
+      assert.equal(JSON.parse(readFileSync(join(destination, 'backup-info.json'))).schemaVersion, 2);
       const restoredDir = join(root, 'another-computer', 'data');
       cpSync(destination, restoredDir, { recursive: true });
       const restored = await start({ ...config, dataDir: restoredDir });

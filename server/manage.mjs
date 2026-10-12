@@ -18,8 +18,9 @@ export async function backupData(config) {
     await backup(db, join(destination, 'jeju-tour.sqlite'));
     // Records and their files are append-only; deleting in the UI only archives records.
     cpSync(join(config.dataDir, 'participants'), join(destination, 'participants'), { recursive: true, errorOnExist: true, force: false });
-    writeFileSync(join(destination, 'backup-info.json'), JSON.stringify({ createdAt: new Date().toISOString(), eventStart: config.eventStart, eventEnd: config.eventEnd, schemaVersion: 1 }, null, 2));
-    writeFileSync(join(destination, 'BACKUP-COMPLETE.txt'), 'Database and participant files copied successfully.\n');
+    if (existsSync(join(config.dataDir, 'route-posts'))) cpSync(join(config.dataDir, 'route-posts'), join(destination, 'route-posts'), { recursive: true, errorOnExist: true, force: false });
+    writeFileSync(join(destination, 'backup-info.json'), JSON.stringify({ createdAt: new Date().toISOString(), eventStart: config.eventStart, eventEnd: config.eventEnd, schemaVersion: 2 }, null, 2));
+    writeFileSync(join(destination, 'BACKUP-COMPLETE.txt'), 'Database, participant files and route posts copied successfully.\n');
     return destination;
   } finally { db.close(); }
 }
@@ -48,6 +49,12 @@ export function exportData(config) {
       return `"${text.replaceAll('"', '""')}"`;
     };
     writeFileSync(join(destination, 'records.csv'), '\uFEFF' + csv.map((row) => row.map(escape).join(',')).join('\r\n'));
+    if (db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='route_posts'").get()) {
+      const routePosts = db.prepare('SELECT * FROM route_posts ORDER BY created_at DESC').all().map((record) => ({
+        ...record, photos: db.prepare('SELECT id,mime,size,path FROM route_photos WHERE post_id=? ORDER BY position').all(record.id)
+      }));
+      writeFileSync(join(destination, 'route-posts.json'), JSON.stringify(routePosts, null, 2));
+    }
     db.exec('COMMIT');
     return destination;
   } finally { db.close(); }

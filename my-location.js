@@ -95,7 +95,7 @@
     const sheetMedia = root.matchMedia("(max-width: 680px)");
     const mobile = () => sheetMedia.matches;
     const layout = () => controlLayout({ mapBounds: map.getContainer().getBoundingClientRect(),
-      panelBounds: panel?.getBoundingClientRect(), bottomSheet: mobile() && !shell?.classList.contains("course-analysis-active") });
+      panelBounds: panel?.getBoundingClientRect(), bottomSheet: mobile() && !map.getContainer().parentElement?.matches("[data-course-map-slot]") });
     const coveredHeight = () => layout().coveredHeight;
     function updateOffset() {
       const bounds = layout();
@@ -171,7 +171,7 @@
       onPosition: (position) => alarm?.update(position),
       focus: (latlng) => {
         map.setView(latlng, Math.max(map.getZoom(), 15));
-        if (shell?.classList.contains("course-analysis-active")) return;
+        if (map.getContainer().parentElement?.matches("[data-course-map-slot]")) return;
         const side = panel?.getBoundingClientRect();
         const bounds = map.getContainer().getBoundingClientRect();
         const width = side ? Math.max(0, side.right - Math.max(bounds.left, side.left)) : 0;

@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { timingSafeEqual } from 'node:crypto';
 import { loadConfig, SITE_DIR } from './config.mjs';
 import { openStore, HttpError, LIMITS } from './store.mjs';
+import { openRouteStore } from './route-store.mjs';
 
-const PUBLIC_FILES = new Set(['index.html', 'course.html', 'meeting.html', 'event.html', 'restaurants.html', 'schedule.html', 'live.html', 'transport.html', 'styles.css', 'app.js', 'gpx-route.js', 'gpx-core.js', 'gpx-viewer.js', 'event.js', 'event-config.js', 'logo.svg', 'live-location-config.js', 'live-location-core.js', 'live-location.js', 'my-location.js', 'arrival-alarm.js', 'invitation-core.js']);
+const PUBLIC_FILES = new Set(['index.html', 'course.html', 'meeting.html', 'event.html', 'restaurants.html', 'schedule.html', 'live.html', 'transport.html', 'styles.css', 'app.js', 'gpx-route.js', 'gpx-core.js', 'gpx-viewer.js', 'route-journal.js', 'event.js', 'event-config.js', 'logo.svg', 'live-location-config.js', 'live-location-core.js', 'live-location.js', 'my-location.js', 'arrival-alarm.js', 'invitation-core.js']);
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.pdf': 'application/pdf', '.gpx': 'application/gpx+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 
 async function readBody(req, limit) {
@@ -25,6 +26,7 @@ async function readBody(req, limit) {
 
 export function createApp(config) {
   const store = openStore(config);
+  const routeStore = openRouteStore(config, store.db);
   let activeUploads = 0;
   const json = (res, status, value) => {
     res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -69,6 +71,41 @@ export function createApp(config) {
         }
         if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
         if (req.method === 'GET' && pathname === '/api/health') return json(res, 200, { ok: true });
+        if (req.method === 'GET' && pathname === '/api/route-posts') return json(res, 200, routeStore.list(url.searchParams.get('day')));
+        if (req.method === 'POST' && pathname === '/api/route-posts') {
+          if (!/^multipart\/form-data;.*boundary=/i.test(req.headers['content-type'] || '')) throw new HttpError(415, 'multipart/form-data 형식으로 등록해주세요.');
+          if (activeUploads >= 4) throw new HttpError(503, '다른 사진을 저장 중입니다. 잠시 후 다시 등록해주세요.');
+          activeUploads += 1;
+          try {
+            const body = await readBody(req, LIMITS.maxBodyBytes);
+            let form;
+            try { form = await new Response(body, { headers: { 'Content-Type': req.headers['content-type'] } }).formData(); }
+            catch { throw new HttpError(400, '첨부파일 형식을 확인해주세요.'); }
+            const fields = ['kind', 'day', 'title', 'note', 'author', 'latitude', 'longitude', 'requestId'];
+            const allowed = new Set([...fields, 'photos']);
+            for (const key of form.keys()) if (!allowed.has(key)) throw new HttpError(400, '지원하지 않는 등록 항목입니다.');
+            const input = {};
+            for (const key of fields) {
+              if (form.getAll(key).length !== 1 || typeof form.get(key) !== 'string') throw new HttpError(400, '등록 항목을 확인해주세요.');
+              input[key] = form.get(key);
+            }
+            const files = form.getAll('photos');
+            if (files.length > LIMITS.maxPhotos) throw new HttpError(400, '사진은 최대 3장까지 첨부할 수 있습니다.');
+            const photos = [];
+            for (const file of files) {
+              if (typeof file === 'string' || !file.size) throw new HttpError(400, '사진 파일을 선택해주세요.');
+              if (file.size > LIMITS.maxPhotoBytes) throw new HttpError(400, '사진 한 장은 8MB 이하여야 합니다.');
+              photos.push({ bytes: Buffer.from(await file.arrayBuffer()) });
+            }
+            const result = routeStore.save(input, photos);
+            return json(res, result.duplicate ? 200 : 201, result);
+          } finally { activeUploads -= 1; }
+        }
+        const routePhotoMatch = pathname.match(/^\/api\/route-photos\/([a-f0-9-]{36})$/);
+        if (['GET', 'HEAD'].includes(req.method) && routePhotoMatch) {
+          const photo = routeStore.getPhoto(routePhotoMatch[1]);
+          return await serveFile(req, res, resolve(config.dataDir, photo.path), photo.mime, true);
+        }
         if (req.method === 'GET' && pathname === '/api/event') return json(res, 200, store.snapshot());
         if (req.method === 'GET' && pathname === '/api/admin') { requireAdmin(req); return json(res, 200, { ok: true }); }
         if (req.method === 'POST' && pathname === '/api/records') {
@@ -135,7 +172,7 @@ export function createApp(config) {
   server.requestTimeout = 60_000;
   server.headersTimeout = 15_000;
   server.on('close', () => store.close());
-  return { server, store };
+  return { server, store, routeStore };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
