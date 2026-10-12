@@ -10,7 +10,7 @@ const output = join(release, ".vercel", "output");
 const site = join(output, "static");
 await mkdir(site, { recursive: true });
 const files = ["index.html", "course.html", "meeting.html", "event.html", "restaurants.html",
-  "schedule.html", "live.html", "transport.html", "styles.css", "app.js", "gpx-route.js", "gpx-core.js", "gpx-viewer.js", "route-journal.js",
+  "schedule.html", "live.html", "transport.html", "styles.css", "app.js", "gpx-route.js", "gpx-core.js", "gpx-viewer.js", "roadview.js", "roadview-config.js", "route-journal.js",
   "event.js", "event-config.js", "logo.svg", "live-location-config.js", "live-location-core.js", "live-location.js", "my-location.js", "arrival-alarm.js", "invitation-core.js"];
 const types = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg", ".pdf", ".gpx", ".woff2"]);
 async function assets(directory) {

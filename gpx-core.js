@@ -211,6 +211,40 @@
       avgCadence: lap.cadenceWeight ? lap.cadenceTotal / lap.cadenceWeight : null,
       avgPower: lap.powerWeight ? lap.powerTotal / lap.powerWeight : null }));
   }
+  // A spatial cluster, rather than a low interval speed, identifies a place.
+  // Sparse recordings remain candidates; time between samples is not proof of rest.
+  function detectStops(data, { minDurationS = 300, radiusM = 40, gapThresholdS = 120 } = {}) {
+    if (![minDurationS, radiusM, gapThresholdS].every((n) => finite(n) && n > 0)) throw new Error("휴식 분석 기준을 확인해주세요.");
+    const stops = [];
+    for (const segment of data.segments || []) {
+      let cluster = [], maxGapS = 0;
+      const finish = () => {
+        if (cluster.length >= 2) {
+          const start = cluster[0], end = cluster.at(-1), durationS = (end.time - start.time) / 1000;
+          if (durationS >= minDurationS) {
+            const center = cluster.reduce((sum, p) => ({ lat: sum.lat + p.lat / cluster.length, lng: sum.lng + p.lng / cluster.length }), { lat: 0, lng: 0 });
+            let representative = start, best = Infinity;
+            for (const p of cluster) { const d = distance(center, p); if (d < best) { representative = p; best = d; } }
+            stops.push({ lat: representative.lat, lng: representative.lng, number: stops.length + 1, startIndex: start.index, endIndex: end.index, index: representative.index,
+              startTime: start.time, endTime: end.time, startElapsedS: start.elapsedS, endElapsedS: end.elapsedS,
+              startDistanceM: start.distanceM, endDistanceM: end.distanceM, durationS, sampleCount: cluster.length,
+              maxGapS, hasRecordingGap: maxGapS > gapThresholdS, radiusM });
+          }
+        }
+        cluster = []; maxGapS = 0;
+      };
+      for (const p of segment) {
+        if (!finite(p.time) || !finite(p.lat) || !finite(p.lng)) { finish(); continue; }
+        const previous = cluster.at(-1);
+        if (previous && (p.time <= previous.time || distance(cluster[0], p) > radiusM)) finish();
+        if (cluster.length) maxGapS = Math.max(maxGapS, (p.time - cluster.at(-1).time) / 1000);
+        cluster.push(p);
+      }
+      finish();
+    }
+    return stops;
+  }
+
   function toCsv(data) {
     const quote = (value) => '"' + String(value ?? "").replaceAll('"', '""') + '"';
     const rows = [["구간", "지점", "위도", "경도", "누적 거리(km)", "고도(m)", "속도(km/h)", "경사(%)", "시간(UTC)", "심박(bpm)", "케이던스(rpm)"]];
@@ -219,7 +253,7 @@
     return "\uFEFF" + rows.map((row) => row.map(quote).join(",")).join("\r\n");
   }
 
-  const api = { parse, analyzeSegments, buildLaps, distance, toCsv, MAX_FILE_BYTES, MAX_POINTS };
+  const api = { parse, analyzeSegments, buildLaps, detectStops, distance, toCsv, MAX_FILE_BYTES, MAX_POINTS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.JejuGpxCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

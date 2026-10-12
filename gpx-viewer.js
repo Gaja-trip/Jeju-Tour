@@ -59,12 +59,49 @@
     let mobileScreen = new URLSearchParams(location.search).get("screen") === "analysis" ? "analysis" : "map";
     const shell = element.closest("[data-vworld-route-editor]"), enabled = new Set(["distanceM", "speedKmh", "elevation"]);
     let day = initialDay, map, L, layer, highlight, mapHome, active = false, contextLayers = [];
-    let axis = "time", selectedIndex = 0, windowStart = 0, windowEnd = 100, pointerFrame, resizeFrame, playFrame, playing = false, seekCache;
+    let axis = "time", selectedIndex = 0, windowStart = 0, windowEnd = 100, pointerFrame, resizeFrame, playFrame, playing = false, seekCache, roadviewSeekTimer;
     const config = () => defaults.find((item) => item.id === day) || defaults[0];
     const current = () => records.get(day)?.data;
     const axisValue = (point) => axis === "time" ? point.elapsedS : point.distanceM;
     const totalAxis = () => axis === "time" ? current()?.stats.durationS || 0 : current()?.stats.distanceM || 0;
     const message = (text, error = false) => { status.textContent = text; status.classList.toggle("is-error", error); };
+    const stopCache = new WeakMap(), restLayers = new Map();
+    let minimumStopS = 300, roadviewMarker;
+    const stopsFor = (data) => {
+      if (!data) return [];
+      if (!stopCache.has(data)) stopCache.set(data, core.detectStops(data));
+      return stopCache.get(data).filter((stop) => stop.durationS >= minimumStopS);
+    };
+    const roadview = root.JejuRoadview?.create({ shell, onPosition(point) {
+      if (!map || !L) return;
+      if (roadviewMarker) { map.removeLayer(roadviewMarker); roadviewMarker = null; }
+      if (point && active) roadviewMarker = L.circleMarker([point.lat, point.lng], { pane: "gpxSelectionPane", radius: 9, color: "#0284c7", weight: 3,
+        fillColor: "#bae6fd", fillOpacity: .2, bubblingMouseEvents: false }).bindTooltip("로드뷰 촬영 위치", { direction: "top" }).addTo(map);
+    }, onClose() { root.clearTimeout(roadviewSeekTimer); if (active) select(selectedIndex, true); } });
+    function showRoadview(point, title, detail) {
+      stopPlayback();
+      const entry = Array.from(records.entries()).find(([, record]) => record.data.points[point.index] === point);
+      if (entry && entry[0] !== day) element.querySelector('[data-map-day="' + entry[0] + '"]')?.click();
+      const points = current()?.points || [];
+      let heading = null;
+      // Look beyond stationary GPS jitter to face along the actual route.
+      for (let i = point.index + 1; i < points.length && points[i].segmentIndex === point.segmentIndex; i += 1) {
+        if (core.distance(point, points[i]) >= 20) { heading = root.JejuRoadview?.bearing(point, points[i]); break; }
+      }
+      if (!finite(heading)) for (let i = point.index - 1; i >= 0 && points[i].segmentIndex === point.segmentIndex; i -= 1) {
+        if (core.distance(points[i], point) >= 20) { heading = root.JejuRoadview?.bearing(points[i], point); break; }
+      }
+      roadview?.open(point, { title, detail, heading });
+      if (entry) { if (map && active) map.setView([point.lat, point.lng], Math.max(17, map.getZoom()), { animate: false }); select(point.index, true); }
+    }
+    function showStop(stop, id = day) {
+      if (id !== day) element.querySelector('[data-map-day="' + id + '"]')?.click();
+      const point = current()?.points[stop.index];
+      if (!point) return;
+      select(stop.index, true, true);
+      showRoadview(point, config().label + " · 머문 곳 " + stop.number,
+        clock(stop.durationS) + " 체류 후보 · " + value(stop.startDistanceM / 1000, " km") + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""));
+    }
     function download(text, name, type) {
       const url = URL.createObjectURL(new Blob([text], { type })), link = document.createElement("a");
       link.href = url; link.download = name; link.click(); root.setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -75,7 +112,7 @@
       const panel = shell.querySelector("[data-route-panel]").getBoundingClientRect();
       const bottom = active && !media.matches ? dock.getBoundingClientRect().height + 32 : media.matches ? Math.max(0, bounds.bottom-panel.top)+18 : 24;
       return { paddingTopLeft: [media.matches ? 24 : Math.min(Math.max(24,panel.right-bounds.left+20), Math.max(24,bounds.width-120)), 32],
-        paddingBottomRight: [24,Math.min(bottom,Math.max(24,bounds.height-120))] };
+        paddingBottomRight: [active && roadview?.isOpen() && !media.matches && bounds.width >= 1150 ? roadview.getElement().getBoundingClientRect().width + 36 : 24,Math.min(bottom,Math.max(24,bounds.height-120))] };
     }
     function attachContainer() {
       shell.classList.toggle("course-mobile-layout", media.matches);
@@ -105,11 +142,14 @@
       const node = document.createElement("div"), strong = document.createElement("strong"), text = document.createElement("p");
       node.className = "gpx-map-popup"; strong.textContent = title;
       text.textContent = clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km") + " · " + value(point.speedKmh, " km/h") + " · " + value(point.elevation, " m", 0);
-      node.append(strong, text); return node;
+      const button = document.createElement("button"); button.type = "button"; button.className = "gpx-roadview-button"; button.textContent = "이 위치 로드뷰";
+      button.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); showRoadview(point, title, clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km")); });
+      node.append(strong, text, button); return node;
     }
     function select(index, focus = false, open = false) {
       const data = current();
       if (!data) return;
+      const previousIndex = selectedIndex;
       selectedIndex = Math.max(0, Math.min(data.points.length - 1, Math.round(index)));
       const point = data.points[selectedIndex], slider = results.querySelector("[data-gpx-position]");
       if (slider) { slider.value = selectedIndex; slider.setAttribute("aria-valuetext", clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km")); }
@@ -126,9 +166,16 @@
       }
       if (highlight) {
         highlight.setLatLng([point.lat, point.lng]).setStyle({ opacity: active ? 1 : 0, fillOpacity: active ? 1 : 0 });
-        highlight.bindPopup(popup(point, config().label + " · 선택 지점"), { autoPan: false });
+        const content = popup(point, config().label + " · 선택 지점");
+        if (highlight.getPopup()) highlight.setPopupContent(content); else highlight.bindPopup(content, { autoPan: false });
         if (focus && active) map.panInside([point.lat, point.lng], { ...mapPadding(), animate: false });
         if (open) highlight.openPopup();
+      }
+      if (roadview?.isOpen() && !playing && (open || previousIndex !== selectedIndex)) {
+        root.clearTimeout(roadviewSeekTimer);
+        const update = () => { if (active && roadview.isOpen() && current()?.points[selectedIndex] === point) roadview.open(point, {
+          title: config().label + " · 선택 지점", detail: clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km") }); };
+        if (open) update(); else roadviewSeekTimer = root.setTimeout(update, 400);
       }
     }
     function nearest(target) {
@@ -181,6 +228,13 @@
           shapes.push('<polyline points="' + positions + '" fill="none" stroke="' + metric.color + '" stroke-width="1.4" vector-effect="non-scaling-stroke"/>');
         } else shapes.push('<circle cx="' + x(sampled[0]).toFixed(2) + '" cy="' + y(sampled[0]).toFixed(2) + '" r="2" fill="' + metric.color + '"/>');
       }
+      const stopBands = stopsFor(data).map((stop) => {
+        const a = axis === "time" ? stop.startElapsedS : stop.startDistanceM, b = axis === "time" ? stop.endElapsedS : stop.endDistanceM;
+        if (!finite(a) || !finite(b) || b < start || a > end) return "";
+        const left = 44 + (Math.max(start, a) - start) / span * (width - 62), right = 44 + (Math.min(end, b) - start) / span * (width - 62);
+        return '<rect data-gpx-stop="' + stop.startIndex + '" class="ride-stop-band" x="' + left.toFixed(2) + '" y="18" width="' + Math.max(3, right - left).toFixed(2) +
+          '" height="88" fill="#f59e0b" fill-opacity=".15"><title>머문 곳 ' + stop.number + ' · ' + clock(stop.durationS) + ' · 클릭하여 로드뷰 보기</title></rect>';
+      }).join("");
       const ticks = [];
       for (let i = 0; i <= 3; i += 1) {
         const py = 18 + i / 3 * 88;
@@ -191,7 +245,7 @@
         (i === 0 ? "start" : i === 5 ? "end" : "middle") + '">' + (axis === "time" ? clock(start + span * i / 5).slice(0, 5) : value((start + span * i / 5) / 1000)) + '</text>');
       return '<section class="ride-chart-card"><div class="ride-chart-heading"><h3>' + label + '</h3><span>지점 평균 <b>' + value(sum / count) + '</b></span><span>최고 <b>' +
         value(max) + '</b></span></div><svg viewBox="0 0 ' + width + ' 136" data-chart-width="' + width + '" data-gpx-chart="' + metric.key + '" role="img" aria-label="' +
-        (axis === "time" ? "시간" : "거리") + '에 따른 ' + metric.title + ' 그래프"><g class="gpx-chart-axis">' + ticks.join("") + '</g>' + shapes.join("") +
+        (axis === "time" ? "시간" : "거리") + '에 따른 ' + metric.title + ' 그래프"><g class="gpx-chart-axis">' + ticks.join("") + '</g>' + shapes.join("") + stopBands +
         '<line data-gpx-chart-cursor x1="44" x2="44" y1="15" y2="108" stroke="#34445d" stroke-dasharray="3 3"/></svg></section>';
     }
     function drawCharts() {
@@ -231,12 +285,43 @@
           .bindTooltip(value(lap.endM / 1000, "", 0), { permanent: true, direction: "top", className: "gpx-distance-label", opacity: 1 })
           .on("click", () => { if (id !== day) element.querySelector('[data-map-day="' + id + '"]')?.click(); select(lap.endIndex, true, true); }).addTo(group);
       }
+      drawStops(id);
       if (!map.hasLayer(layer)) layer.addTo(map);
     }
     function updateDayStyles() {
       if (L) for (const [id, group] of layers) for (const item of group.getLayers()) if (item instanceof L.Polyline) item.setStyle({ weight: id === day ? 5 : 3, opacity: id === day ? .95 : .65 });
       legend.innerHTML = defaults.map((item) => '<span class="' + (item.id === day ? "is-selected" : "") + '"><i style="background:' + item.color + '"></i>' +
         item.label + '</span>').join("") + '<span><i style="background:#a1a1aa"></i>기존 코스</span>';
+    }
+    function renderStops(data) {
+      const stops = stopsFor(data);
+      return '<section class="ride-stops"><div class="ride-section-title"><h2>장시간 머문 곳 <small>' + stops.length + '곳</small></h2><label>최소 시간 <select data-gpx-stop-min aria-label="체류 후보 최소 시간">' +
+        [300, 600, 1200].map((seconds) => '<option value="' + seconds + '"' + (minimumStopS === seconds ? ' selected' : '') + '>' + seconds / 60 + '분</option>').join("") +
+        '</select></label></div><p class="ride-stop-explanation">첫 지점 반경 40 m 안의 기록을 분석합니다. 기록 공백이 있으면 실제 휴식 여부와 시간은 확인이 필요합니다.</p><div class="ride-stop-list">' +
+        (stops.length ? stops.map((stop) => '<article class="ride-stop-row"><span class="ride-stop-number">Ⅱ ' + stop.number + '</span><div><strong>' + clock(stop.durationS) + ' 체류 후보</strong><p>' +
+          clock(stop.startElapsedS) + ' – ' + clock(stop.endElapsedS) + ' · ' + value(stop.startDistanceM / 1000, ' km') + '</p><small>' +
+          new Date(stop.startTime).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour12: false }) + ' – ' +
+          new Date(stop.endTime).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour12: false }) + ' (한국 시간)' +
+          (stop.hasRecordingGap ? ' · <b>기록 공백 포함</b>' : ' · 연속 위치 기록') + '</small></div><button type="button" data-gpx-stop="' +
+          stop.startIndex + '" aria-label="머문 곳 ' + stop.number + ' 지도와 로드뷰 보기">지도 · 로드뷰</button></article>').join("") :
+          '<p class="ride-stop-empty">' + (data.stats.timedPairs ? '선택한 기준에 맞는 체류 후보가 없습니다.' : '시간 기록이 없어 체류 지점을 분석할 수 없습니다.') + '</p>') +
+        '</div></section>';
+    }
+    function drawStops(id) {
+      if (!map || !layer || !records.has(id)) return;
+      let group = restLayers.get(id);
+      if (!group) { group = L.layerGroup(); restLayers.set(id, group); }
+      group.clearLayers();
+      const data = records.get(id).data, item = defaults.find((entry) => entry.id === id);
+      for (const stop of stopsFor(data)) {
+        const point = data.points[stop.index];
+        const icon = L.divIcon({ className: "gpx-stop-icon", html: '<span style="--stop-color:' + item.color + '">' + 'Ⅱ' + '</span>',
+          iconSize: [26, 26], iconAnchor: [13, 13] });
+        L.marker([point.lat, point.lng], { pane: "uploadedGpxPane", icon, bubblingMouseEvents: false })
+          .bindTooltip(item.label + " · 머문 곳 " + stop.number + " · " + clock(stop.durationS) + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""))
+          .on("click", () => showStop(stop, id)).addTo(group);
+      }
+      if (active && !layer.hasLayer(group)) layer.addLayer(group);
     }
     function renderLaps(data) {
       return '<section class="ride-laps"><div class="ride-section-title"><h2>구간 기록 <small>5 km마다</small></h2><span>행을 누르면 지도 위치 표시</span></div><div class="ride-table-scroll"><table><thead><tr><th>구간</th><th>시간</th><th>거리</th><th>평균 / 최고 속도</th><th>평균 심박</th><th>평균 케이던스</th><th>상승 / 하강</th></tr></thead><tbody>' +
@@ -257,11 +342,11 @@
         '">거리</button></div></div><div class="ride-metric-toggles">' + metrics.map((m) => '<label style="--metric-color:' + m.color +
           '"><input type="checkbox" data-gpx-metric="' + m.key + '"' + (enabled.has(m.key) ? " checked" : "") +
           (!available.has(m.key) || (axis === "distance" && m.key === "distanceM") ? " disabled" : "") + '><span>' + m.title + '</span></label>').join("") +
-        '</div><div class="ride-charts" data-gpx-charts></div><div class="ride-brush"><label for="gpxWindowStart">분석 구간 시작</label><input id="gpxWindowStart" type="range" min="0" max="99" step=".1" value="' +
+        '</div><p class="ride-stop-chart-key"><i></i> 노란 구간: 장시간 체류 후보 · 지도와 로드뷰로 확인</p><div class="ride-charts" data-gpx-charts></div><div class="ride-brush"><label for="gpxWindowStart">분석 구간 시작</label><input id="gpxWindowStart" type="range" min="0" max="99" step=".1" value="' +
         windowStart + '" data-gpx-window-start><label for="gpxWindowEnd">분석 구간 끝</label><input id="gpxWindowEnd" type="range" min="1" max="100" step=".1" value="' +
         windowEnd + '" data-gpx-window-end><div><span data-gpx-window-label></span><button type="button" data-gpx-reset-window>↻ 전체 구간</button></div></div>' +
-        '<section class="ride-position"><div class="ride-position-heading"><label for="gpxPosition">시간별 위치 살펴보기</label><button type="button" data-gpx-play>▶ 30초 요약 재생</button></div><input id="gpxPosition" type="range" min="0" max="' +
-        (data.points.length - 1) + '" value="' + selectedIndex + '" data-gpx-position><div data-gpx-point class="ride-point-readout"></div></section>' + renderLaps(data) +
+        '<section class="ride-position"><div class="ride-position-heading"><label for="gpxPosition">시간별 위치 살펴보기</label><div class="ride-position-actions"><button type="button" data-gpx-roadview>⌖ 선택 지점 로드뷰</button><button type="button" data-gpx-play>▶ 30초 요약 재생</button></div></div><input id="gpxPosition" type="range" min="0" max="' +
+        (data.points.length - 1) + '" value="' + selectedIndex + '" data-gpx-position><div data-gpx-point class="ride-point-readout"></div></section>' + renderStops(data) + renderLaps(data) +
         '<div class="ride-file-actions"><button type="button" class="btn light small" data-gpx-download>GPX 원본</button><button type="button" class="btn light small" data-gpx-csv>기록 CSV</button><button type="button" class="btn light small" data-gpx-restore' +
         (!record.custom ? " disabled" : "") + '>첨부 코스로 복구</button></div><details class="ride-calculation"><summary>기록 정보와 계산 기준</summary><p>시간은 한국 시간입니다. 속도는 파일의 기록을 우선 사용하고, 없으면 좌표 간 거리와 시간으로 계산합니다. 이동 기준은 1 km/h이며 평균 속도에는 정지 시간이 포함됩니다. 분리된 구간 사이의 거리·시간은 제외합니다. 고도와 누적 상승·하강은 원본 GPS 기록 기준입니다.</p><p>' +
         data.points.length.toLocaleString("ko-KR") + '개 지점 · ' + data.segments.length + '개 구간 · 첫 기록 ' + timestamp(data.points[0].time) + ' · 마지막 기록 ' + timestamp(data.points.at(-1).time) +
@@ -276,14 +361,14 @@
       updateDayStyles(); drawCharts(); select(selectedIndex);
     }
     function stopPlayback() {
-      playing = false; root.cancelAnimationFrame(playFrame);
+      playing = false; root.cancelAnimationFrame(playFrame); root.clearTimeout(roadviewSeekTimer);
       const button = results.querySelector("[data-gpx-play]");
       if (button) { button.textContent = "▶ 30초 요약 재생"; button.setAttribute("aria-pressed", "false"); }
     }
     function startPlayback() {
       if (playing) { stopPlayback(); return; }
       if (!current() || !totalAxis()) return;
-      playing = true;
+      root.clearTimeout(roadviewSeekTimer); playing = true;
       const start = performance.now(), initial = windowStart, end = windowEnd;
       let last = 0;
       const button = results.querySelector("[data-gpx-play]");
@@ -302,7 +387,7 @@
       const text = await response.text(), data = core.parse(text, item.fileName);
       if ((versions.get(item.id) || 0) !== version) return;
       records.set(item.id, { data, text, custom: false }); drawDay(item.id);
-      if (item.id === day) { render(); if (active) root.requestAnimationFrame(() => fit()); }
+      if (item.id === day) { roadview?.close(); render(); if (active) root.requestAnimationFrame(() => fit()); }
     }
     async function upload(file) {
       if (!file) return;
@@ -314,7 +399,7 @@
         const text = await file.text(), data = core.parse(text, file.name);
         if (versions.get(id) !== version) return;
         records.set(id, { data, text, custom: true }); drawDay(id);
-        if (id === day) { selectedIndex = 0; windowStart = 0; windowEnd = 100; render(); fit(); }
+        if (id === day) { roadview?.close(); selectedIndex = 0; windowStart = 0; windowEnd = 100; render(); fit(); }
         onMessage(item.label + " GPX 기록을 반영했습니다.");
         try { await store.put({ day: id, text, fileName: file.name }); if (versions.get(id) === version) message(item.label + " · 이 기기에 변경한 GPX 파일을 저장했습니다."); }
         catch { if (versions.get(id) === version) message(item.label + " · 현재 화면에 반영했습니다. 기기 저장소를 이용할 수 없습니다."); }
@@ -333,6 +418,9 @@
     element.querySelector("[data-gpx-fit-all]")?.addEventListener("click", () => fit(true));
     results.addEventListener("pointermove", (event) => { if (event.pointerType !== "touch") chartPointer(event); });
     results.addEventListener("click", async (event) => {
+      const stopButton = event.target.closest("[data-gpx-stop]");
+      if (stopButton) { const stop = stopsFor(current()).find((item) => item.startIndex === Number(stopButton.dataset.gpxStop)); if (stop) showStop(stop); return; }
+      if (event.target.closest("[data-gpx-roadview]")) { const point = current()?.points[selectedIndex]; if (point) showRoadview(point, config().label + " · 선택 지점", clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km")); }
       const button = event.target.closest("[data-gpx-axis]");
       if (button) { stopPlayback(); axis = button.dataset.gpxAxis; windowStart = 0; windowEnd = 100; render(); }
       if (event.target.closest("[data-gpx-chart]")) chartPointer(event, true);
@@ -357,6 +445,7 @@
       if (event.target.matches("[data-gpx-window-end]")) { stopPlayback(); windowEnd = Math.max(Number(event.target.value), windowStart + 1); event.target.value = windowEnd; drawCharts(); }
     });
     results.addEventListener("change", (event) => {
+      if (event.target.matches("[data-gpx-stop-min]")) { minimumStopS = Number(event.target.value); results.querySelector(".ride-stops").outerHTML = renderStops(current()); for (const id of records.keys()) drawStops(id); drawCharts(); return; }
       if (event.target.matches("[data-gpx-metric]")) { if (event.target.checked) enabled.add(event.target.dataset.gpxMetric); else enabled.delete(event.target.dataset.gpxMetric); drawCharts(); }
     });
     const resize = new ResizeObserver(() => { root.cancelAnimationFrame(resizeFrame); resizeFrame = root.requestAnimationFrame(() => { if (active) { map?.invalidateSize({ pan: false }); drawCharts(); } }); });
@@ -396,9 +485,10 @@
         map = options.map; L = options.L; mapHome = map.getContainer().parentElement;
         for (const button of element.querySelectorAll("[data-gpx-fit], [data-gpx-fit-all]")) button.disabled = false;
         map.createPane("uploadedGpxPane"); map.getPane("uploadedGpxPane").style.zIndex = "450";
+        map.createPane("gpxSelectionPane"); map.getPane("gpxSelectionPane").style.zIndex = "460";
         layer = L.layerGroup().addTo(map);
         for (const id of records.keys()) drawDay(id);
-        highlight = L.circleMarker([33.5, 126.5], { pane: "uploadedGpxPane", radius: 7, color: "#172554", weight: 3, fillColor: "#fff", fillOpacity: 0, opacity: 0, bubblingMouseEvents: false }).addTo(layer);
+        highlight = L.circleMarker([33.5, 126.5], { pane: "gpxSelectionPane", radius: 7, color: "#172554", weight: 3, fillColor: "#fff", fillOpacity: 0, opacity: 0, bubblingMouseEvents: false }).addTo(layer);
         attachContainer(); select(selectedIndex); return layer;
       },
       showMapError(text) {
@@ -414,9 +504,10 @@
           else if (changed) { for (const [item, shown] of previousContext) if (shown && !map.hasLayer(item)) item.addTo(map); previousContext.clear(); }
           if (next) root.setTimeout(() => { if (active) fit(); }, 100);
         }
-        if (!next) stopPlayback(); select(selectedIndex);
+        for (const group of restLayers.values()) { if (next && !layer?.hasLayer(group)) layer?.addLayer(group); else if (!next && layer?.hasLayer(group)) layer.removeLayer(group); }
+        if (!next) { stopPlayback(); roadview?.close(); } select(selectedIndex);
       },
-      setDay(id) { if (!defaults.some((item) => item.id === id)) return; day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
+      setDay(id) { if (!defaults.some((item) => item.id === id)) return; roadview?.close(); day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
       hasDay(id) { return records.has(id); }, fit,
       getSelectedPoint() { return current()?.points[selectedIndex]; },
       getMapPadding: mapPadding,
