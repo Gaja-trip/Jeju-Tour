@@ -6,6 +6,7 @@
     { id: "day3", label: "3일차", title: "더베이제주리조트 → 아쿠아뷰티크", fileName: "더베이제주리조트_아쿠아뷰티크.gpx", url: "assets/gpx/day3-thebay-aqua.gpx", color: "#16a34a" },
     { id: "day4", label: "4일차", title: "아쿠아뷰티크 → 제주항", fileName: "아쿠아뷰티크_제주항.gpx", url: "assets/gpx/day4-aqua-jeju.gpx", color: "#9333ea" }
   ];
+  const stopLabels = root.JejuCourseStopLabels || {};
   const escape = (text) => String(text ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const finite = Number.isFinite;
   const value = (n, unit = "", digits = 1) => finite(n) ? n.toLocaleString("ko-KR", { maximumFractionDigits: digits, minimumFractionDigits: digits }) + unit : "기록 없음";
@@ -72,6 +73,18 @@
       if (!stopCache.has(data)) stopCache.set(data, core.detectStops(data));
       return stopCache.get(data).filter((stop) => stop.durationS >= minimumStopS);
     };
+    function namedStop(stop, id = day) {
+      const label = stopLabels[id]?.[stop.number];
+      return label && core.distance(stop, label) <= 50 ? label : null;
+    }
+    function stopTitle(stop, id = day) {
+      const label = namedStop(stop, id);
+      return label ? "#" + stop.number + " " + label.name : "머문 곳 " + stop.number;
+    }
+    function selectedPointTitle(data, point) {
+      const stop = stopCache.get(data)?.find((item) => point.index >= item.startIndex && point.index <= item.endIndex);
+      return config().label + " · " + (stop && namedStop(stop) ? stopTitle(stop) : "선택 지점");
+    }
     const roadview = root.JejuRoadview?.create({ shell, onPosition(point) {
       if (!map || !L) return;
       if (roadviewMarker) { map.removeLayer(roadviewMarker); roadviewMarker = null; }
@@ -94,12 +107,100 @@
       roadview?.open(point, { title, detail, heading });
       if (entry) { if (map && active) map.setView([point.lat, point.lng], Math.max(17, map.getZoom()), { animate: false }); select(point.index, true); }
     }
+    const incidentDefinitions = root.JejuCourseIncidents?.locations || [], incidentCache = new WeakMap();
+    const incidentSummary = element.querySelector("[data-course-incidents]");
+    let incidentLayer;
+    function incidentMatch(incident) {
+      const data = records.get(incident.day)?.data;
+      if (!data) return null;
+      if (!incidentCache.has(data)) incidentCache.set(data, new Map());
+      const matches = incidentCache.get(data);
+      if (!matches.has(incident.id)) matches.set(incident.id, root.JejuCourseIncidents.match(data, incident));
+      return matches.get(incident.id);
+    }
+    function incidentDetails(incident) {
+      const related = incidentMatch(incident);
+      if (!records.has(incident.day)) return "관련 GPX 기록을 불러오는 중입니다.";
+      if (!related) return "이 사고 장소 근처에 연결할 GPX 기록이 없습니다.";
+      return "관련 GPX " + clock(related.point.elapsedS) + " · " + value(related.point.distanceM / 1000, " km") +
+        (related.stop ? " · 정지 구간 " + clock(related.stop.durationS) + (related.stop.hasRecordingGap ? " (기록 공백 포함)" : "") : " · 인근 주행 지점");
+    }
+    function renderIncidentSummary() {
+      if (!incidentSummary) return;
+      incidentSummary.innerHTML = '<h2>⚠ 지정 사고 장소 <small>1일차</small></h2>' + incidentDefinitions.map((incident) =>
+        '<article><span class="incident-number">' + incident.number + '</span><div><strong>' + escape(incident.address) + '</strong><small>' +
+        escape(incident.positionLabel) + '</small><p>' + escape(incidentDetails(incident)) + '</p><div class="incident-actions"><button type="button" data-gpx-incident="' +
+        incident.id + '">지도 · 주행 분석</button><button type="button" data-gpx-incident="' + incident.id + '" data-incident-roadview>로드뷰</button></div></div></article>').join("");
+    }
+    function incidentPopup(incident) {
+      const node = document.createElement("div"); node.className = "gpx-incident-popup";
+      const heading = document.createElement("strong"); heading.textContent = incident.number + "번 사고 장소";
+      const address = document.createElement("p"); address.textContent = incident.address;
+      const source = document.createElement("small"); source.textContent = incident.positionLabel;
+      const details = document.createElement("p"); details.textContent = incidentDetails(incident);
+      const button = document.createElement("button"); button.type = "button"; button.textContent = "이 사고 장소 로드뷰";
+      button.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); showIncident(incident.id, true); });
+      node.append(heading, address, source, details, button); return node;
+    }
+    function drawIncidents() {
+      if (!incidentLayer) return;
+      incidentLayer.clearLayers();
+      for (const incident of incidentDefinitions) {
+        const icon = L.divIcon({ className: "gpx-incident-pin", html: '<span>⚠<b>' + incident.number + '</b></span>',
+          iconSize: [32, 38], iconAnchor: [16, 38], popupAnchor: [0, -32] });
+        L.marker([incident.lat, incident.lng], { icon, pane: "courseIncidentPane", title: incident.number + "번 사고 장소 · " + incident.address, bubblingMouseEvents: false })
+          .bindTooltip(incident.number + "번 사고 장소", { permanent: true, direction: "top", offset: [0, -38], className: "gpx-incident-label" })
+          .bindPopup(incidentPopup(incident), { maxWidth: 310, autoPan: false })
+          .on("click", () => showIncident(incident.id)).addTo(incidentLayer);
+      }
+    }
+    function renderIncidentBar() {
+      const items = incidentDefinitions.filter((incident) => incident.day === day);
+      return items.length ? '<div class="ride-incident-key"><strong>⚠ 사고 장소</strong>' + items.map((incident) =>
+        '<button type="button" data-gpx-incident="' + incident.id + '" title="' + escape(incident.address) + '">' + incident.number + '번 · ' +
+        escape(incident.shortAddress) + '</button>').join("") + '<small>빨간 표시: 관련 GPX 지점·정지 구간</small></div>' : "";
+    }
+    function showIncident(id, openRoadview = false) {
+      const incident = incidentDefinitions.find((item) => item.id === id);
+      if (!incident) return;
+      stopPlayback();
+      if (day !== incident.day) element.querySelector('[data-map-day="' + incident.day + '"]')?.click();
+      const related = incidentMatch(incident), data = current();
+      if (related && data) {
+        if (related.stop && data.stats.timedPairs) {
+          axis = "time";
+          const total = Math.max(1, data.stats.durationS);
+          windowStart = Math.max(0, (related.stop.startElapsedS - 300) / total * 100);
+          windowEnd = Math.min(100, (related.stop.endElapsedS + 300) / total * 100);
+          render();
+        }
+        select(related.point.index);
+      } else onMessage("이 위치 근처의 GPX 기록이 없습니다. 지정된 사고 장소를 지도에 표시합니다.");
+      if (media.matches) {
+        mobileScreen = "analysis"; attachContainer();
+        const url = new URL(location.href); url.searchParams.set("screen", "analysis"); history.replaceState(history.state, "", url);
+      }
+      if (openRoadview) roadview?.open(incident, { title: incident.number + "번 사고 장소", detail: incident.address + " · " + incident.positionLabel });
+      if (map) {
+        map.invalidateSize({ pan: false });
+        map.setView([incident.lat, incident.lng], Math.max(17, map.getZoom()), { animate: false });
+        map.panInside([incident.lat, incident.lng], { ...mapPadding(), animate: false });
+        for (const marker of incidentLayer?.getLayers() || []) if (marker.options.title?.startsWith(incident.number + "번 ")) {
+          const padding = mapPadding(), top = padding.paddingTopLeft || padding.padding || [24,24], bottom = padding.paddingBottomRight || padding.padding || [24,24];
+          Object.assign(marker.getPopup().options, { autoPan: true, autoPanPaddingTopLeft: top, autoPanPaddingBottomRight: bottom,
+            maxHeight: Math.max(60, map.getSize().y - top[1] - bottom[1] - 70) });
+          marker.openPopup();
+        }
+      }
+      results.scrollTop = 0;
+      if (media.matches) dock.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
     function showStop(stop, id = day) {
       if (id !== day) element.querySelector('[data-map-day="' + id + '"]')?.click();
       const point = current()?.points[stop.index];
       if (!point) return;
       select(stop.index, true, true);
-      showRoadview(point, config().label + " · 머문 곳 " + stop.number,
+      showRoadview(point, config().label + " · " + stopTitle(stop, id),
         clock(stop.durationS) + " 체류 후보 · " + value(stop.startDistanceM / 1000, " km") + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""));
     }
     function download(text, name, type) {
@@ -112,7 +213,7 @@
       const panel = shell.querySelector("[data-route-panel]").getBoundingClientRect();
       const bottom = active && !media.matches ? dock.getBoundingClientRect().height + 32 : media.matches ? Math.max(0, bounds.bottom-panel.top)+18 : 24;
       return { paddingTopLeft: [media.matches ? 24 : Math.min(Math.max(24,panel.right-bounds.left+20), Math.max(24,bounds.width-120)), 32],
-        paddingBottomRight: [active && roadview?.isOpen() && !media.matches && bounds.width >= 1150 ? roadview.getElement().getBoundingClientRect().width + 36 : 24,Math.min(bottom,Math.max(24,bounds.height-120))] };
+        paddingBottomRight: [active && roadview?.isOpen() && !media.matches && bounds.width >= 1150 ? bounds.right - roadview.getElement().getBoundingClientRect().left + 18 : 24,Math.min(bottom,Math.max(24,bounds.height-120))] };
     }
     function attachContainer() {
       shell.classList.toggle("course-mobile-layout", media.matches);
@@ -166,7 +267,7 @@
       }
       if (highlight) {
         highlight.setLatLng([point.lat, point.lng]).setStyle({ opacity: active ? 1 : 0, fillOpacity: active ? 1 : 0 });
-        const content = popup(point, config().label + " · 선택 지점");
+        const content = popup(point, selectedPointTitle(data, point));
         if (highlight.getPopup()) highlight.setPopupContent(content); else highlight.bindPopup(content, { autoPan: false });
         if (focus && active) map.panInside([point.lat, point.lng], { ...mapPadding(), animate: false });
         if (open) highlight.openPopup();
@@ -174,7 +275,7 @@
       if (roadview?.isOpen() && !playing && (open || previousIndex !== selectedIndex)) {
         root.clearTimeout(roadviewSeekTimer);
         const update = () => { if (active && roadview.isOpen() && current()?.points[selectedIndex] === point) roadview.open(point, {
-          title: config().label + " · 선택 지점", detail: clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km") }); };
+          title: selectedPointTitle(data, point), detail: clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km") }); };
         if (open) update(); else roadviewSeekTimer = root.setTimeout(update, 400);
       }
     }
@@ -233,7 +334,26 @@
         if (!finite(a) || !finite(b) || b < start || a > end) return "";
         const left = 44 + (Math.max(start, a) - start) / span * (width - 62), right = 44 + (Math.min(end, b) - start) / span * (width - 62);
         return '<rect data-gpx-stop="' + stop.startIndex + '" class="ride-stop-band" x="' + left.toFixed(2) + '" y="18" width="' + Math.max(3, right - left).toFixed(2) +
-          '" height="88" fill="#f59e0b" fill-opacity=".15"><title>머문 곳 ' + stop.number + ' · ' + clock(stop.durationS) + ' · 클릭하여 로드뷰 보기</title></rect>';
+          '" height="88" fill="#f59e0b" fill-opacity=".15"><title>' + escape(stopTitle(stop)) + ' · ' + clock(stop.durationS) + ' · 클릭하여 로드뷰 보기</title></rect>';
+      }).join("");
+      const incidentMarks = incidentDefinitions.filter((incident) => incident.day === day).map((incident) => {
+        const related = incidentMatch(incident), point = related?.point, position = point && axisValue(point);
+        if (!finite(position)) return "";
+        const px = 44 + (position - start) / span * (width - 62);
+        let region = "";
+        if (related.stop) {
+          const a = axis === "time" ? related.stop.startElapsedS : related.stop.startDistanceM;
+          const b = axis === "time" ? related.stop.endElapsedS : related.stop.endDistanceM;
+          if (b >= start && a <= end) {
+            const left = 44 + (Math.max(a, start) - start) / span * (width - 62), right = 44 + (Math.min(b, end) - start) / span * (width - 62);
+            region = '<rect class="ride-incident-stop-band" data-gpx-incident="' + incident.id + '" x="' + left.toFixed(2) + '" y="18" width="' +
+              Math.max(3, right - left).toFixed(2) + '" height="88" fill="#ef4444" fill-opacity=".16"><title>' + incident.number + '번 사고 장소 관련 정지 구간</title></rect>';
+          }
+        }
+        return region + (position >= start && position <= end ? '<g class="ride-incident-mark" data-gpx-incident="' + incident.id + '"><line x1="' + px.toFixed(2) +
+          '" x2="' + px.toFixed(2) + '" y1="15" y2="108" stroke="#dc2626" stroke-width="2"/><circle cx="' + px.toFixed(2) +
+          '" cy="13" r="8" fill="#dc2626"/><text x="' + px.toFixed(2) + '" y="16" text-anchor="middle" fill="#fff" font-size="10">' + incident.number +
+          '</text><title>' + incident.number + '번 사고 장소 · ' + escape(incident.address) + '</title></g>' : "");
       }).join("");
       const ticks = [];
       for (let i = 0; i <= 3; i += 1) {
@@ -245,8 +365,8 @@
         (i === 0 ? "start" : i === 5 ? "end" : "middle") + '">' + (axis === "time" ? clock(start + span * i / 5).slice(0, 5) : value((start + span * i / 5) / 1000)) + '</text>');
       return '<section class="ride-chart-card"><div class="ride-chart-heading"><h3>' + label + '</h3><span>지점 평균 <b>' + value(sum / count) + '</b></span><span>최고 <b>' +
         value(max) + '</b></span></div><svg viewBox="0 0 ' + width + ' 136" data-chart-width="' + width + '" data-gpx-chart="' + metric.key + '" role="img" aria-label="' +
-        (axis === "time" ? "시간" : "거리") + '에 따른 ' + metric.title + ' 그래프"><g class="gpx-chart-axis">' + ticks.join("") + '</g>' + shapes.join("") + stopBands +
-        '<line data-gpx-chart-cursor x1="44" x2="44" y1="15" y2="108" stroke="#34445d" stroke-dasharray="3 3"/></svg></section>';
+        (axis === "time" ? "시간" : "거리") + '에 따른 ' + metric.title + ' 그래프"><g class="gpx-chart-axis">' + ticks.join("") + '</g>' + shapes.join("") + stopBands + incidentMarks +
+        '<line data-gpx-chart-cursor pointer-events="none" x1="44" x2="44" y1="15" y2="108" stroke="#34445d" stroke-dasharray="3 3"/></svg></section>';
     }
     function drawCharts() {
       const target = results.querySelector("[data-gpx-charts]");
@@ -285,25 +405,39 @@
           .bindTooltip(value(lap.endM / 1000, "", 0), { permanent: true, direction: "top", className: "gpx-distance-label", opacity: 1 })
           .on("click", () => { if (id !== day) element.querySelector('[data-map-day="' + id + '"]')?.click(); select(lap.endIndex, true, true); }).addTo(group);
       }
-      drawStops(id);
+      drawStops(id); drawIncidents();
       if (!map.hasLayer(layer)) layer.addTo(map);
     }
+    const permanentStopName = (id) => id === day && (!media.matches || (map?.getZoom() || 0) >= 15);
     function updateDayStyles() {
       if (L) for (const [id, group] of layers) for (const item of group.getLayers()) if (item instanceof L.Polyline) item.setStyle({ weight: id === day ? 5 : 3, opacity: id === day ? .95 : .65 });
+      for (const [id, group] of restLayers) for (const marker of group.getLayers()) {
+        const tooltip = marker.getTooltip();
+        if (!tooltip?.options.className?.includes("gpx-stop-place-label") || tooltip.options.permanent === permanentStopName(id)) continue;
+        const content = tooltip.getContent(), options = { ...tooltip.options, permanent: permanentStopName(id) };
+        marker.unbindTooltip().bindTooltip(content, options);
+      }
       legend.innerHTML = defaults.map((item) => '<span class="' + (item.id === day ? "is-selected" : "") + '"><i style="background:' + item.color + '"></i>' +
         item.label + '</span>').join("") + '<span><i style="background:#a1a1aa"></i>기존 코스</span>';
+    }
+    function renderStopPlace(stop) {
+      const label = namedStop(stop);
+      if (!label?.address) return "";
+      return '<details class="ride-stop-place-details"><summary>장소·주소 확인</summary><p>' + escape(label.address) + '</p><p>' +
+        escape(label.description) + '</p><a href="' + escape(label.sourceUrl) + '" target="_blank" rel="noopener noreferrer">카카오맵 기준 장소: ' +
+        escape(label.sourceName) + (finite(label.sourceDistanceM) ? ' · 약 ' + label.sourceDistanceM + ' m' : '') + '</a></details>';
     }
     function renderStops(data) {
       const stops = stopsFor(data);
       return '<section class="ride-stops"><div class="ride-section-title"><h2>장시간 머문 곳 <small>' + stops.length + '곳</small></h2><label>최소 시간 <select data-gpx-stop-min aria-label="체류 후보 최소 시간">' +
         [300, 600, 1200].map((seconds) => '<option value="' + seconds + '"' + (minimumStopS === seconds ? ' selected' : '') + '>' + seconds / 60 + '분</option>').join("") +
-        '</select></label></div><p class="ride-stop-explanation">첫 지점 반경 40 m 안의 기록을 분석합니다. 기록 공백이 있으면 실제 휴식 여부와 시간은 확인이 필요합니다.</p><div class="ride-stop-list">' +
-        (stops.length ? stops.map((stop) => '<article class="ride-stop-row"><span class="ride-stop-number">Ⅱ ' + stop.number + '</span><div><strong>' + clock(stop.durationS) + ' 체류 후보</strong><p>' +
+        '</select></label></div><p class="ride-stop-explanation">첫 지점 반경 40 m 안의 기록을 분석합니다. 기록 공백이 있으면 실제 휴식 여부와 시간은 확인이 필요합니다. 장소 이름은 GPX 좌표와 주변 지도 정보를 대조한 위치 설명입니다.</p><div class="ride-stop-list">' +
+        (stops.length ? stops.map((stop) => '<article class="ride-stop-row"><span class="ride-stop-number">Ⅱ ' + stop.number + '</span><div><strong>' + escape(stopTitle(stop)) + '</strong><p>' + clock(stop.durationS) + ' 체류 후보 · ' +
           clock(stop.startElapsedS) + ' – ' + clock(stop.endElapsedS) + ' · ' + value(stop.startDistanceM / 1000, ' km') + '</p><small>' +
           new Date(stop.startTime).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour12: false }) + ' – ' +
           new Date(stop.endTime).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour12: false }) + ' (한국 시간)' +
-          (stop.hasRecordingGap ? ' · <b>기록 공백 포함</b>' : ' · 연속 위치 기록') + '</small></div><button type="button" data-gpx-stop="' +
-          stop.startIndex + '" aria-label="머문 곳 ' + stop.number + ' 지도와 로드뷰 보기">지도 · 로드뷰</button></article>').join("") :
+          (stop.hasRecordingGap ? ' · <b>기록 공백 포함</b>' : ' · 연속 위치 기록') + '</small>' + renderStopPlace(stop) + '</div><button type="button" data-gpx-stop="' +
+          stop.startIndex + '" aria-label="' + escape(stopTitle(stop)) + ' 지도와 로드뷰 보기">지도 · 로드뷰</button></article>').join("") :
           '<p class="ride-stop-empty">' + (data.stats.timedPairs ? '선택한 기준에 맞는 체류 후보가 없습니다.' : '시간 기록이 없어 체류 지점을 분석할 수 없습니다.') + '</p>') +
         '</div></section>';
     }
@@ -314,11 +448,14 @@
       group.clearLayers();
       const data = records.get(id).data, item = defaults.find((entry) => entry.id === id);
       for (const stop of stopsFor(data)) {
-        const point = data.points[stop.index];
-        const icon = L.divIcon({ className: "gpx-stop-icon", html: '<span style="--stop-color:' + item.color + '">' + 'Ⅱ' + '</span>',
+        const point = data.points[stop.index], label = namedStop(stop, id);
+        const fullTitle = item.label + " · " + stopTitle(stop, id) + " · " + clock(stop.durationS) + (stop.hasRecordingGap ? " · 기록 공백 포함" : "");
+        const icon = L.divIcon({ className: "gpx-stop-icon", html: '<span style="--stop-color:' + item.color + '">Ⅱ<b>' + stop.number + '</b></span>',
           iconSize: [26, 26], iconAnchor: [13, 13] });
-        L.marker([point.lat, point.lng], { pane: "uploadedGpxPane", icon, bubblingMouseEvents: false })
-          .bindTooltip(item.label + " · 머문 곳 " + stop.number + " · " + clock(stop.durationS) + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""))
+        L.marker([point.lat, point.lng], { pane: "uploadedGpxPane", icon, title: fullTitle, bubblingMouseEvents: false })
+          .bindTooltip(escape(label ? stopTitle(stop, id) : fullTitle), label ? {
+            permanent: permanentStopName(id), direction: label.direction, offset: label.offset || (label.direction === "left" ? [-16, 0] : label.direction === "right" ? [16, 0] : [0, label.direction === "top" ? -16 : 16]), className: "gpx-stop-place-label gpx-stop-place-label-" + id, opacity: 1
+          } : {})
           .on("click", () => showStop(stop, id)).addTo(group);
       }
       if (active && !layer.hasLayer(group)) layer.addLayer(group);
@@ -332,6 +469,7 @@
     }
     function render() {
       const item = config(), record = records.get(day), data = record?.data;
+      renderIncidentSummary();
       heading.textContent = item.title; heading.style.setProperty("--ride-day-color", item.color);
       meta.textContent = data ? item.label + " · " + timestamp(data.points[0].time) + " · " + data.fileName : item.label + " · 기록을 불러오는 중입니다.";
       if (!data) { results.innerHTML = '<div class="ride-empty">이 일차의 GPX 기록을 불러오는 중입니다.</div>'; sidebar.innerHTML = ""; updateDayStyles(); return; }
@@ -342,7 +480,7 @@
         '">거리</button></div></div><div class="ride-metric-toggles">' + metrics.map((m) => '<label style="--metric-color:' + m.color +
           '"><input type="checkbox" data-gpx-metric="' + m.key + '"' + (enabled.has(m.key) ? " checked" : "") +
           (!available.has(m.key) || (axis === "distance" && m.key === "distanceM") ? " disabled" : "") + '><span>' + m.title + '</span></label>').join("") +
-        '</div><p class="ride-stop-chart-key"><i></i> 노란 구간: 장시간 체류 후보 · 지도와 로드뷰로 확인</p><div class="ride-charts" data-gpx-charts></div><div class="ride-brush"><label for="gpxWindowStart">분석 구간 시작</label><input id="gpxWindowStart" type="range" min="0" max="99" step=".1" value="' +
+        '</div>' + renderIncidentBar() + '<p class="ride-stop-chart-key"><i></i> 노란 구간: 장시간 체류 후보 · 지도와 로드뷰로 확인</p><div class="ride-charts" data-gpx-charts></div><div class="ride-brush"><label for="gpxWindowStart">분석 구간 시작</label><input id="gpxWindowStart" type="range" min="0" max="99" step=".1" value="' +
         windowStart + '" data-gpx-window-start><label for="gpxWindowEnd">분석 구간 끝</label><input id="gpxWindowEnd" type="range" min="1" max="100" step=".1" value="' +
         windowEnd + '" data-gpx-window-end><div><span data-gpx-window-label></span><button type="button" data-gpx-reset-window>↻ 전체 구간</button></div></div>' +
         '<section class="ride-position"><div class="ride-position-heading"><label for="gpxPosition">시간별 위치 살펴보기</label><div class="ride-position-actions"><button type="button" data-gpx-roadview>⌖ 선택 지점 로드뷰</button><button type="button" data-gpx-play>▶ 30초 요약 재생</button></div></div><input id="gpxPosition" type="range" min="0" max="' +
@@ -361,7 +499,7 @@
       updateDayStyles(); drawCharts(); select(selectedIndex);
     }
     function stopPlayback() {
-      playing = false; root.cancelAnimationFrame(playFrame); root.clearTimeout(roadviewSeekTimer);
+      playing = false; root.cancelAnimationFrame(playFrame); root.cancelAnimationFrame(pointerFrame); root.clearTimeout(roadviewSeekTimer);
       const button = results.querySelector("[data-gpx-play]");
       if (button) { button.textContent = "▶ 30초 요약 재생"; button.setAttribute("aria-pressed", "false"); }
     }
@@ -416,11 +554,17 @@
     drop.addEventListener("drop", (event) => { event.preventDefault(); drop.classList.remove("is-dragging"); upload(event.dataTransfer.files[0]); });
     element.querySelector("[data-gpx-fit]")?.addEventListener("click", () => fit());
     element.querySelector("[data-gpx-fit-all]")?.addEventListener("click", () => fit(true));
+    incidentSummary?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-gpx-incident]");
+      if (button) showIncident(button.dataset.gpxIncident, button.hasAttribute("data-incident-roadview"));
+    });
     results.addEventListener("pointermove", (event) => { if (event.pointerType !== "touch") chartPointer(event); });
     results.addEventListener("click", async (event) => {
+      const incidentButton = event.target.closest("[data-gpx-incident]");
+      if (incidentButton) { showIncident(incidentButton.dataset.gpxIncident, incidentButton.hasAttribute("data-incident-roadview")); return; }
       const stopButton = event.target.closest("[data-gpx-stop]");
       if (stopButton) { const stop = stopsFor(current()).find((item) => item.startIndex === Number(stopButton.dataset.gpxStop)); if (stop) showStop(stop); return; }
-      if (event.target.closest("[data-gpx-roadview]")) { const point = current()?.points[selectedIndex]; if (point) showRoadview(point, config().label + " · 선택 지점", clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km")); }
+      if (event.target.closest("[data-gpx-roadview]")) { const point = current()?.points[selectedIndex]; if (point) showRoadview(point, selectedPointTitle(current(), point), clock(point.elapsedS) + " · " + value(point.distanceM / 1000, " km")); }
       const button = event.target.closest("[data-gpx-axis]");
       if (button) { stopPlayback(); axis = button.dataset.gpxAxis; windowStart = 0; windowEnd = 100; render(); }
       if (event.target.closest("[data-gpx-chart]")) chartPointer(event, true);
@@ -451,7 +595,7 @@
     const resize = new ResizeObserver(() => { root.cancelAnimationFrame(resizeFrame); resizeFrame = root.requestAnimationFrame(() => { if (active) { map?.invalidateSize({ pan: false }); drawCharts(); } }); });
     resize.observe(element);
     resize.observe(dock);
-    media.addEventListener("change", () => { attachContainer(); if (active) root.requestAnimationFrame(() => { fit(); drawCharts(); }); });
+    media.addEventListener("change", () => { attachContainer(); updateDayStyles(); if (active) root.requestAnimationFrame(() => { fit(); drawCharts(); }); });
     element.querySelector(".course-mobile-nav").addEventListener("click", (event) => {
       const button = event.target.closest("[data-course-mobile-screen]");
       if (!button) return;
@@ -487,9 +631,14 @@
         map.createPane("uploadedGpxPane"); map.getPane("uploadedGpxPane").style.zIndex = "450";
         map.createPane("gpxSelectionPane"); map.getPane("gpxSelectionPane").style.zIndex = "460";
         layer = L.layerGroup().addTo(map);
+        map.createPane("courseIncidentPane"); map.getPane("courseIncidentPane").style.zIndex = "660";
+        incidentLayer = L.layerGroup();
+        if (active) incidentLayer.addTo(map);
+        drawIncidents();
         for (const id of records.keys()) drawDay(id);
         highlight = L.circleMarker([33.5, 126.5], { pane: "gpxSelectionPane", radius: 7, color: "#172554", weight: 3, fillColor: "#fff", fillOpacity: 0, opacity: 0, bubblingMouseEvents: false }).addTo(layer);
-        attachContainer(); select(selectedIndex); return layer;
+        map.on("zoomend", updateDayStyles);
+        attachContainer(); updateDayStyles(); select(selectedIndex); return layer;
       },
       showMapError(text) {
         const error = document.createElement("p"); error.className = "map-load-error"; error.textContent = text;
@@ -505,9 +654,10 @@
           if (next) root.setTimeout(() => { if (active) fit(); }, 100);
         }
         for (const group of restLayers.values()) { if (next && !layer?.hasLayer(group)) layer?.addLayer(group); else if (!next && layer?.hasLayer(group)) layer.removeLayer(group); }
+        if (map && incidentLayer) { if (next && !map.hasLayer(incidentLayer)) incidentLayer.addTo(map); else if (!next && map.hasLayer(incidentLayer)) map.removeLayer(incidentLayer); }
         if (!next) { stopPlayback(); roadview?.close(); } select(selectedIndex);
       },
-      setDay(id) { if (!defaults.some((item) => item.id === id)) return; roadview?.close(); day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
+      setDay(id) { if (!defaults.some((item) => item.id === id)) return; roadview?.close(); highlight?.closePopup(); day = id; selectedIndex = 0; windowStart = 0; windowEnd = 100; stopPlayback(); render(); if (active) fit(); },
       hasDay(id) { return records.has(id); }, fit,
       getSelectedPoint() { return current()?.points[selectedIndex]; },
       getMapPadding: mapPadding,

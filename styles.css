@@ -5096,3 +5096,55 @@ footer {
   .ride-stop-row > div { flex-basis: calc(100% - 54px); }
   .ride-stop-row button { margin-left: 46px; }
 }
+
+/* Desktop controls: personal location above the arrival alarm. */
+@media (min-width: 761px) {
+  .vworld-map .my-location-control { flex-direction: column; align-items: flex-end; }
+  .vworld-map .my-location-control > [data-my-location] { order: 0; }
+  .vworld-map .my-location-control > [data-arrival-alarm] { order: 1; }
+  .vworld-map .my-location-control > .my-location-status { order: 2; }
+}
+.course-known-incidents { display: grid; gap: 8px; padding: 12px; border: 1px solid #f0d1cd; border-radius: 12px; background: #fff8f6; }
+.course-known-incidents h2 { margin: 0; color: #a6342b; font-size: .82rem; }
+.course-known-incidents h2 small { color: #9d7973; font-weight: 400; font-size: .67rem; }
+.course-known-incidents article { display: flex; gap: 9px; padding: 8px 0; border-top: 1px solid #f3dfdc; }
+.incident-number { display: grid; place-items: center; flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; color: #fff; background: #dc493b; font-size: .75rem; font-weight: 700; }
+.course-known-incidents article > div { flex: 1; min-width: 0; }
+.course-known-incidents strong { display: block; color: #764239; font-size: .76rem; line-height: 1.5; }
+.course-known-incidents small { display: block; color: #a77c73; font-size: .63rem; margin-top: 3px; }
+.course-known-incidents p { color: #906a63; font-size: .64rem; line-height: 1.5; margin: 4px 0 6px; }
+.incident-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.incident-actions button, .ride-incident-key button, .gpx-incident-popup button { padding: 5px 8px; border: 1px solid #e8c7c3; border-radius: 7px; background: #fff; color: #a13e35; font: inherit; font-size: .66rem; cursor: pointer; }
+.ride-incident-key { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding: 9px 11px; background: #fff4f1; border: 1px solid #f0d4ce; border-radius: 9px; }
+.ride-incident-key strong { font-size: .74rem; color: #a53d32; }
+.ride-incident-key small { font-size: .65rem; color: #ae7770; }
+.ride-incident-mark, .ride-incident-stop-band { cursor: pointer; }
+.gpx-incident-pin { background: none; border: 0; }
+.gpx-incident-pin > span { display: grid; place-items: center; width: 32px; height: 36px; border: 2px solid #fff; box-sizing: border-box; border-radius: 12px 12px 12px 2px; background: #ce3e32; color: #fff; box-shadow: 0 3px 7px #572b254d; position: relative; font-size: 19px; }
+.gpx-incident-pin b { position: absolute; right: -6px; top: -8px; display: grid; place-items: center; width: 18px; height: 18px; border: 2px solid #fff; border-radius: 50%; background: #a82620; color: #fff; font-size: 11px; }
+.gpx-incident-label { padding: 3px 7px; color: #b22f24; background: #fff9f7; border: 1px solid #e8bcb6; border-radius: 6px; font-size: .68rem; font-weight: 600; }
+.gpx-incident-popup strong { display: block; color: #b2372a; font-size: .85rem; }
+.gpx-incident-popup p { margin: 6px 0; font-size: .73rem; line-height: 1.5; }
+.gpx-incident-popup small { display: block; color: #8e7971; font-size: .66rem; }
+@media (max-width: 760px) {
+  .course-known-incidents { padding: 10px; }
+  .course-known-incidents strong { font-size: .8rem; }
+  .course-known-incidents p { font-size: .7rem; }
+}
+
+@media (min-width: 761px) {
+  .course-roadview { right: 76px; width: min(480px, calc(100% - 524px)); }
+}
+.gpx-stop-place-label { width: max-content; max-width: 180px; padding: 5px 8px; border: 1px solid #e7c79c; border-radius: 7px; background: #fffaf1; color: #8a571c; font-size: .7rem; font-weight: 600; line-height: 1.45; white-space: normal; text-align: center; box-shadow: 0 2px 6px #70451920; }
+/* Selected day's stay names use the same colors as the GPX route. */
+.gpx-stop-place-label-day2 { border-color: #b8d1fc; color: #1d4ed8; background: #eff6ff; }
+.gpx-stop-place-label-day3 { border-color: #b8e5c8; color: #15803d; background: #f0fdf4; }
+.gpx-stop-place-label-day4 { border-color: #d9c4f5; color: #7e22ce; background: #faf5ff; }
+.ride-stop-place-details { margin-top: 7px; font-size: .7rem; color: #597188; }
+.ride-stop-place-details summary { width: fit-content; cursor: pointer; color: #356888; padding: 3px 0; }
+.ride-stop-place-details summary:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; border-radius: 3px; }
+.ride-stop-place-details p { margin: 5px 0; color: #597188; line-height: 1.6; overflow-wrap: anywhere; }
+.ride-stop-place-details a { display: inline-block; color: #2563eb; font-size: .68rem; line-height: 1.6; overflow-wrap: anywhere; }
+
+.gpx-stop-icon > span { position: relative; }
+.gpx-stop-icon b { position: absolute; top: -7px; right: -6px; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 2px; box-sizing: border-box; border: 1px solid #fff; border-radius: 8px; background: var(--stop-color); color: #fff; font-size: 10px; line-height: 1; }
