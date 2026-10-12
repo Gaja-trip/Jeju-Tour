@@ -2194,6 +2194,8 @@ function setupVWorldRouteEditor() {
   let aerialMode = false;
   let aerialLabelsEnabled = readStorage(storageKeys.aerialLabels) !== "off";
 
+  const gpxViewer = window.JejuGpxViewer?.create({ element: root.querySelector("[data-gpx-viewer]"), onMessage: showToast });
+
   const panelMenuForView = {
     notice: "notice",
     "notice-lodging": "notice",
@@ -2205,7 +2207,8 @@ function setupVWorldRouteEditor() {
     restaurants: "stay-food",
     transport: "transport-course",
     participants: "transport-course",
-    course: "transport-course"
+    course: "transport-course",
+    gpx: "transport-course"
   };
 
   const renderDayTabs = () => {
@@ -2216,6 +2219,7 @@ function setupVWorldRouteEditor() {
 
   const setPanelView = (view) => {
     currentView = view;
+    gpxViewer?.setActive(view === "gpx");
     if (view === "baggage") {
       const frame = root.querySelector("[data-baggage-src]");
       if (frame && !frame.hasAttribute("src")) frame.src = frame.dataset.baggageSrc;
@@ -2641,8 +2645,17 @@ function setupVWorldRouteEditor() {
   renderOverlayViews();
   setPanelView("notice");
 
+  viewTabs.forEach((button) => {
+    button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
+  });
+  panelMenuButtons.forEach((button) => {
+    const defaultView = button.dataset.panelDefaultView;
+    if (defaultView) button.addEventListener("click", () => setPanelView(defaultView));
+  });
   if (!window.L) {
     mapTarget.innerHTML = '<div class="map-load-error">지도 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인하세요.</div>';
+    const fallbackPanel = new URLSearchParams(window.location.search).get("panel");
+    if (panelMenuForView[fallbackPanel]) setPanelView(fallbackPanel);
     return;
   }
 
@@ -2650,6 +2663,7 @@ function setupVWorldRouteEditor() {
     zoomControl: false,
     preferCanvas: true
   }).setView([33.38, 126.55], 10);
+  const uploadedGpxLayer = gpxViewer?.attachMap({ map, L });
   window.JejuLiveLocation?.attach({ map, L });
   const syncItineraryDistanceVisibility = () => {
     const minimumZoom = window.matchMedia("(max-width: 760px)").matches ? 13 : 12;
@@ -2844,6 +2858,7 @@ function setupVWorldRouteEditor() {
   L.control.layers(
     { "일반지도": baseMapLayer, "항공사진": satelliteLayer },
     {
+      ...(uploadedGpxLayer ? { "업로드한 GPX": uploadedGpxLayer } : {}),
       "1일차 코스": itineraryRouteLayers.day1,
       "2일차 코스": itineraryRouteLayers.day2,
       "3일차 코스": itineraryRouteLayers.day3,
@@ -2909,7 +2924,7 @@ function setupVWorldRouteEditor() {
   });
   clearButton.addEventListener("click", clearRoute);
   saveButton.addEventListener("click", saveRoute);
-  map.on("click", (event) => setRoutePointFromMapClick(event.latlng));
+  map.on("click", (event) => { if (currentView === "course") setRoutePointFromMapClick(event.latlng); });
   placeApplyButtons.forEach((button) => {
     button.addEventListener("click", () => applySearchLocation(button.dataset.placeApply));
   });
@@ -2919,9 +2934,7 @@ function setupVWorldRouteEditor() {
       applySearchLocation(mode);
     }
   });
-  viewTabs.forEach((button) => {
-    button.addEventListener("click", () => setPanelView(button.dataset.panelViewTab));
-  });
+
   noticeLodgingNightButtons.forEach((button) => {
     button.addEventListener("click", () => {
       noticeLodgingNightIndex = Number(button.dataset.noticeLodgingNight);
@@ -2929,10 +2942,7 @@ function setupVWorldRouteEditor() {
       button.closest("[data-panel-view]")?.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
-  panelMenuButtons.forEach((button) => {
-    const defaultView = button.dataset.panelDefaultView;
-    if (defaultView) button.addEventListener("click", () => setPanelView(defaultView));
-  });
+
   panelEdgeToggle?.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -3017,7 +3027,7 @@ function setupVWorldRouteEditor() {
     window.setTimeout(() => focusLodging(initialLodging), 260);
   } else if (initialRestaurant !== null && initialRestaurant >= 0) {
     window.setTimeout(() => focusRestaurant(initialRestaurant), 260);
-  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "lodging", "restaurants", "schedule", "transport", "participants", "plan"].includes(requestedPanel)) {
+  } else if (["notice", "notice-lodging", "baggage", "meeting", "course", "gpx", "lodging", "restaurants", "schedule", "transport", "participants", "plan"].includes(requestedPanel)) {
     setPanelView(requestedPanel);
   }
 }
