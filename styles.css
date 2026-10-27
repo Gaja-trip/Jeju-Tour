@@ -5188,3 +5188,43 @@ footer {
   .gpx-stop-dialog .has-one-photo img { height: 210px; }
   .gpx-stop-dialog .stop-card-actions button, .gpx-stop-dialog .stop-card-actions a { min-height: 42px; font-size: .8rem; }
 }
+
+/* Course map: one clear rider, legible stops, and a roadview beside the charts. */
+.gpx-rider-marker { background:none; border:0; }
+.gpx-rider-badge { display:grid; place-items:center; width:44px; height:44px; box-sizing:border-box; border:3px solid #fff; border-radius:16px; color:#fff; background:var(--rider-color,#f97316); box-shadow:0 4px 15px #16374545,0 0 0 1px #16374520; }
+.gpx-rider-badge svg { width:31px; height:31px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.gpx-rider-badge .rider-head { fill:currentColor; stroke:none; }
+.gpx-stop-icon { display:grid; place-items:center; background:none; border:0; }
+.gpx-stop-icon > span { width:28px; height:28px; border:2px solid #fff; border-radius:11px; background:var(--stop-color); color:#fff; font-size:12px; line-height:1; box-shadow:0 2px 8px #19374c35; }
+.gpx-stop-icon > span.is-group { width:44px; border-radius:12px; }
+.gpx-stop-place-label { max-width:176px; padding:6px 9px; border-radius:9px; background:#fff; border-color:#d8e4e9; color:#274b5d; font-size:.69rem; font-weight:700; box-shadow:0 3px 12px #153f511a; }
+.gpx-stop-place-label-day1 { border-left:3px solid #f97316; }
+.gpx-stop-place-label-day2 { border-left:3px solid #2563eb; color:#274b5d; background:#fff; }
+.gpx-stop-place-label-day3 { border-left:3px solid #16a34a; color:#274b5d; background:#fff; }
+.gpx-stop-place-label-day4 { border-left:3px solid #9333ea; color:#274b5d; background:#fff; }
+.gpx-stop-place-label.is-crowded { visibility:hidden; pointer-events:none; }
+.gpx-stay-group strong { color:#153c50; font-size:.9rem; }
+.gpx-stay-group p { color:#718391; font-size:.72rem; }
+.gpx-stay-group button { display:block; width:100%; margin-top:7px; padding:9px 12px; border:1px solid #d8e5eb; border-radius:9px; background:#f6fafb; color:#315b70; text-align:left; cursor:pointer; }
+@media (min-width:761px) {
+  .course-roadview-open.course-analysis-active { --course-dock-height:min(54vh,460px); --course-roadview-width:clamp(280px,26vw,360px); }
+  .course-roadview-open .course-analysis-dock .course-dock-body { padding-right:calc(var(--course-roadview-width) + 28px); }
+  .course-analysis-dock > .course-roadview { position:absolute; inset:56px 12px 12px auto; width:var(--course-roadview-width); margin:0; border:1px solid #dce7ec; border-radius:12px; box-shadow:0 3px 14px #163b4d12; }
+  .course-analysis-dock .roadview-heading { padding:9px 11px; background:#f8fbfc; }
+  .course-analysis-dock .roadview-heading h2 { font-size:.8rem; }
+  .course-analysis-dock .roadview-point { padding:6px 11px; font-size:.64rem; max-height:43px; overflow:auto; }
+  .course-analysis-dock .roadview-status { padding:6px 11px; font-size:.62rem; }
+  .course-analysis-dock .course-roadview footer { padding:7px 11px; gap:5px; }
+  .course-analysis-dock .course-roadview footer a { font-size:.66rem; }
+  .course-analysis-dock .course-roadview footer button { font-size:.6rem; }
+}
+@media (min-width:761px) and (max-width:1199px) {
+  .course-roadview-open .course-analysis-dock .course-dock-body { padding-right:16px; order:2; }
+  .course-analysis-dock > .course-roadview { position:relative; inset:auto; flex:0 0 min(25vh,210px); width:auto; margin:0 12px 8px; order:1; }
+  .course-analysis-dock .roadview-content { min-height:65px; }
+  .course-analysis-dock .roadview-point { display:none; }
+  .course-analysis-dock .roadview-status { position:absolute; bottom:34px; right:4px; max-width:calc(100% - 8px); border-radius:5px; background:#ffffffed; font-size:.57rem; }
+}
+
+.gpx-camera-marker { display:grid; place-items:center; background:#e0f2fe; border:2px solid #fff; border-radius:8px; box-shadow:0 2px 6px #07598530; color:#0284c7; font-size:16px; }
+.leaflet-gpxSelection-pane canvas { pointer-events:none; }

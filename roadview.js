@@ -34,7 +34,7 @@
     }).catch((error) => { loading = null; throw error; });
     return loading;
   }
-  function create({ shell, onPosition = () => {}, onClose = () => {} }) {
+  function create({ shell, desktopHost, onPosition = () => {}, onClose = () => {}, onLayout = () => {} }) {
     if (!shell) return null;
     const panel = document.createElement("dialog");
     panel.className = "course-roadview"; panel.setAttribute("aria-labelledby", "courseRoadviewTitle");
@@ -50,8 +50,11 @@
     function show() {
       if (panel.open) return;
       opener = document.activeElement;
+      const host = media.matches ? shell : desktopHost || shell;
+      if (panel.parentElement !== host) host.append(panel);
       if (media.matches) panel.showModal(); else panel.show();
       shell.classList.add("course-roadview-open");
+      onLayout(true);
       panel.querySelector("[data-roadview-close]").focus({ preventScroll: true });
     }
     function fail(message) {
@@ -86,17 +89,19 @@
     }
     async function open(point, options = {}) {
       if (!valid(point)) return false;
+      const retainView = panel.open && viewer && !viewport.hidden;
       const own = ++token;
       clear(); requestedPano = null; onPosition(null);
       target = { point: { ...point }, ...options };
       panel.querySelector("[data-roadview-title]").textContent = options.title || "선택 지점";
       panel.querySelector("[data-roadview-point]").textContent = (options.detail ? options.detail + " · " : "") + point.lat.toFixed(6) + ", " + point.lng.toFixed(6);
       link.href = linkUrl(point); show();
-      viewport.hidden = true; placeholder.hidden = false; status.textContent = "가까운 로드뷰를 찾는 중입니다.";
+      if (!retainView) { viewport.hidden = true; placeholder.hidden = false; }
+      status.textContent = "가까운 로드뷰를 찾는 중입니다.";
       try {
         maps = await loadSdk();
         if (own !== token || !panel.open) return false;
-        viewport.hidden = false; viewport.style.visibility = "hidden";
+        viewport.hidden = false; if (!retainView) viewport.style.visibility = "hidden";
         if (!viewer) {
           viewer = new maps.Roadview(viewport); client = new maps.RoadviewClient();
           for (const event of ["init", "panoid_changed", "position_changed"]) maps.event.addListener(viewer, event, updated);
@@ -124,7 +129,7 @@
     function close() { if (panel.open) panel.close(); }
     panel.querySelector("[data-roadview-close]").addEventListener("click", close);
     panel.querySelector("[data-roadview-retry]").addEventListener("click", () => { if (target) open(target.point, target); });
-    panel.addEventListener("close", () => { if (panel.open) return; ++token; clear(); shell.classList.remove("course-roadview-open"); onPosition(null); onClose(); if (opener?.isConnected) opener.focus({ preventScroll: true }); });
+    panel.addEventListener("close", () => { if (panel.open) return; ++token; clear(); shell.classList.remove("course-roadview-open"); onPosition(null); onLayout(false); onClose(); if (opener?.isConnected) opener.focus({ preventScroll: true }); });
     panel.addEventListener("keydown", (event) => { if (event.key === "Escape") { event.preventDefault(); close(); } });
     media.addEventListener("change", () => { if (!panel.open) return; panel.close(); show(); viewer?.relayout(); });
     new ResizeObserver(() => { if (panel.open && viewer) viewer.relayout(); }).observe(viewport);

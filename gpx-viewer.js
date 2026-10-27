@@ -50,6 +50,7 @@
   }
   function create({ element, initialDay = "day1", onMessage = () => {} }) {
     if (!element || !root.JejuGpxCore) return null;
+    const layout = root.JejuCourseMapLayout;
     const core = root.JejuGpxCore, store = createStore(), records = new Map(), versions = new Map(), layers = new Map(), previousContext = new Map();
     const results = element.querySelector("[data-gpx-results]"), status = element.querySelector("[data-gpx-status]");
     const heading = element.querySelector("[data-gpx-heading]"), meta = element.querySelector("[data-gpx-meta]");
@@ -67,7 +68,7 @@
     const totalAxis = () => axis === "time" ? current()?.stats.durationS || 0 : current()?.stats.distanceM || 0;
     const message = (text, error = false) => { status.textContent = text; status.classList.toggle("is-error", error); };
     const stopCache = new WeakMap(), restLayers = new Map();
-    let minimumStopS = 300, roadviewMarker, journal, popupStop;
+    let minimumStopS = 300, roadviewMarker, journal, popupStop, labelFrame, hoveredStop;
     const stopsFor = (data) => {
       if (!data) return [];
       if (!stopCache.has(data)) stopCache.set(data, core.detectStops(data));
@@ -100,11 +101,13 @@
       const stop = stopForPoint(data, point);
       return config().label + " · " + (stop && namedStop(stop) ? stopTitle(stop) : "선택 지점");
     }
-    const roadview = root.JejuRoadview?.create({ shell, onPosition(point) {
+    const roadview = root.JejuRoadview?.create({ shell, desktopHost: dock, onLayout(open) {
+      if (open) { dock.querySelector('.course-dock-body').scrollTop=0; shell.classList.remove('course-dock-collapsed'); dock.querySelector('[data-course-dock-toggle]').setAttribute('aria-expanded','true'); dock.querySelector('[data-course-dock-toggle]').textContent='분석 접기'; highlight?.closePopup(); }
+      root.requestAnimationFrame(() => { if (active) { drawCharts(); centerSelection(); scheduleLabels(); } });
+    }, onPosition(point) {
       if (!map || !L) return;
       if (roadviewMarker) { map.removeLayer(roadviewMarker); roadviewMarker = null; }
-      if (point && active) roadviewMarker = L.circleMarker([point.lat, point.lng], { pane: "gpxSelectionPane", radius: 9, color: "#0284c7", weight: 3,
-        fillColor: "#bae6fd", fillOpacity: .2, bubblingMouseEvents: false }).bindTooltip("로드뷰 촬영 위치", { direction: "top" }).addTo(map);
+      if (point && active) roadviewMarker = L.marker([point.lat,point.lng],{pane:'gpxSelectionPane',icon:L.divIcon({className:'gpx-camera-marker',html:'<span aria-hidden="true">▣</span>',iconSize:[24,24],iconAnchor:[12,12]}),title:'로드뷰 촬영 위치',bubblingMouseEvents:false}).bindTooltip('로드뷰 촬영 위치',{direction:'top'}).addTo(map);
     }, onClose() { root.clearTimeout(roadviewSeekTimer); if (active) select(selectedIndex, true); } });
     function showRoadview(point, title, detail) {
       stopPlayback();
@@ -120,7 +123,7 @@
         if (core.distance(points[i], point) >= 20) { heading = root.JejuRoadview?.bearing(points[i], point); break; }
       }
       roadview?.open(point, { title, detail, heading });
-      if (entry) { if (map && active) map.setView([point.lat, point.lng], Math.max(17, map.getZoom()), { animate: false }); select(point.index, true); }
+      if (entry) { if (map && active) focusPoint(point, Math.max(17, map.getZoom())); select(point.index, true); }
     }
     const incidentDefinitions = root.JejuCourseIncidents?.locations || [], incidentCache = new WeakMap();
     const incidentSummary = element.querySelector("[data-course-incidents]");
@@ -186,9 +189,9 @@
         const icon = L.divIcon({ className: "gpx-incident-pin", html: '<span>⚠<b>' + incident.number + '</b></span>',
           iconSize: [32, 38], iconAnchor: [16, 38], popupAnchor: [0, -32] });
         L.marker([incident.lat, incident.lng], { icon, pane: "courseIncidentPane", title: incident.number + "번 사고 장소 · " + incident.address, bubblingMouseEvents: false })
-          .bindTooltip(incident.number + "번 사고 장소", { permanent: true, direction: "top", offset: [0, -38], className: "gpx-incident-label" })
+          .bindTooltip(incident.number + "번 사고 장소", { permanent: false, direction: "top", offset: [0, -38], className: "gpx-incident-label" })
           .bindPopup(incidentPopup(incident), { maxWidth: 310, autoPan: false })
-          .on("click", () => showIncident(incident.id)).addTo(incidentLayer);
+          .on("click", () => showIncident(incident.id, false, true)).addTo(incidentLayer);
       }
     }
     function renderIncidentBar() {
@@ -197,7 +200,7 @@
         '<button type="button" data-gpx-incident="' + incident.id + '" title="' + escape(incident.address) + '">' + incident.number + '번 · ' +
         escape(incident.shortAddress) + '</button>').join("") + '<small>빨간 표시: 관련 GPX 지점·정지 구간</small></div>' : "";
     }
-    function showIncident(id, openRoadview = false) {
+    function showIncident(id, openRoadview = false, openDetails = false) {
       const incident = incidentDefinitions.find((item) => item.id === id);
       if (!incident) return;
       stopPlayback();
@@ -220,13 +223,12 @@
       if (openRoadview) roadview?.open(incident, { title: incident.number + "번 사고 장소", detail: incident.address + " · " + incident.positionLabel });
       if (map) {
         map.invalidateSize({ pan: false });
-        map.setView([incident.lat, incident.lng], Math.max(17, map.getZoom()), { animate: false });
-        map.panInside([incident.lat, incident.lng], { ...mapPadding(), animate: false });
+        focusPoint(related?.point || incident, Math.max(17, map.getZoom()));
         for (const marker of incidentLayer?.getLayers() || []) if (marker.options.title?.startsWith(incident.number + "번 ")) {
           const padding = mapPadding(), top = padding.paddingTopLeft || padding.padding || [24,24], bottom = padding.paddingBottomRight || padding.padding || [24,24];
           Object.assign(marker.getPopup().options, { autoPan: true, autoPanPaddingTopLeft: top, autoPanPaddingBottomRight: bottom,
             maxHeight: Math.max(60, map.getSize().y - top[1] - bottom[1] - 70) });
-          marker.openPopup();
+          if (openDetails && !openRoadview) marker.openPopup();
         }
       }
       results.scrollTop = 0;
@@ -238,8 +240,8 @@
       if (id !== day) element.querySelector('[data-map-day="' + id + '"]')?.click();
       const point = current()?.points[stop.index];
       if (!point) return;
-      if (!openRoadview && map && active) map.setView([point.lat, point.lng], Math.max(17, map.getZoom()), { animate: false });
-      select(stop.index, true, !media.matches || !openRoadview);
+      if (!openRoadview && map && active) focusPoint(point, Math.max(17, map.getZoom()));
+      select(stop.index, true, !openRoadview);
       if (openRoadview) showRoadview(point, config().label + " · " + stopTitle(stop, id),
         clock(stop.durationS) + " 체류 후보 · " + value(stop.startDistanceM / 1000, " km") + (stop.hasRecordingGap ? " · 기록 공백 포함" : ""));
     }
@@ -253,7 +255,41 @@
       const panel = shell.querySelector("[data-route-panel]").getBoundingClientRect();
       const bottom = active && !media.matches ? dock.getBoundingClientRect().height + 32 : media.matches ? Math.max(0, bounds.bottom-panel.top)+18 : 24;
       return { paddingTopLeft: [media.matches ? 24 : Math.min(Math.max(24,panel.right-bounds.left+20), Math.max(24,bounds.width-120)), 32],
-        paddingBottomRight: [active && roadview?.isOpen() && !media.matches && bounds.width >= 1150 ? bounds.right - roadview.getElement().getBoundingClientRect().left + 18 : 24,Math.min(bottom,Math.max(24,bounds.height-120))] };
+        paddingBottomRight: [media.matches ? 24 : 76,Math.min(bottom,Math.max(24,bounds.height-120))] };
+    }
+    function focusPoint(point, zoom = map?.getZoom()) {
+      if (!map || !active || !point) return;
+      const size = map.getSize(), free = layout.visibleRect(size,mapPadding());
+      const projected = map.project([point.lat,point.lng],zoom);
+      const center = projected.add([size.x/2-free.cx,size.y/2-free.cy]);
+      map.setView(map.unproject(center,zoom),zoom,{animate:false});
+    }
+    function centerSelection() { const point=current()?.points[selectedIndex]; if(point)focusPoint(point); }
+    function scheduleLabels() {
+      root.cancelAnimationFrame(labelFrame);
+      labelFrame=root.requestAnimationFrame(placeStopLabels);
+    }
+    function placeStopLabels() {
+      if (!map || !active || !layout) return;
+      const free=layout.visibleRect(map.getSize(),mapPadding()), items=[], blocked=[];
+      for(const marker of restLayers.get(day)?.getLayers()||[]) {
+        if(!marker._courseStops)continue;
+        const p=map.latLngToContainerPoint(marker.getLatLng()),tooltip=marker.getTooltip(),node=tooltip?.getElement();
+        blocked.push({id:marker._courseKey,left:p.x-19,right:p.x+19,top:p.y-17,bottom:p.y+17});
+        if(!node)continue;
+        items.push({id:marker._courseKey,x:p.x,y:p.y,width:node.offsetWidth,height:node.offsetHeight,number:marker._courseStops[0].number,
+          priority:hoveredStop===marker?100:marker._courseStops.some(s=>selectedIndex>=s.startIndex&&selectedIndex<=s.endIndex)?10:0,direction:marker._courseDirection});
+      }
+      if(highlight && active){const p=map.latLngToContainerPoint(highlight.getLatLng()),own=(restLayers.get(day)?.getLayers()||[]).find(m=>m._courseStops?.some(s=>selectedIndex>=s.startIndex&&selectedIndex<=s.endIndex));blocked.push({id:own?._courseKey,left:p.x-22,right:p.x+22,top:p.y-22,bottom:p.y+22});}
+      const positions=layout.placeLabels(items,free,blocked);
+      for(const marker of restLayers.get(day)?.getLayers()||[]) {
+        if(!marker._courseStops)continue;
+        const tooltip=marker.getTooltip(),node=tooltip?.getElement();if(!node)continue;
+        const placed=positions.get(marker._courseKey);
+        const show=Boolean(placed)&&(!media.matches||map.getZoom()>=15);
+        node.classList.toggle('is-crowded',!show); node.setAttribute('aria-hidden',String(!show));
+        if(placed){tooltip.options.direction=placed.direction;tooltip.options.offset=L.point(placed.direction==='left'?-17:placed.direction==='right'?17:0,placed.direction==='top'?-17:placed.direction==='bottom'?17:0);tooltip.update();}
+      }
     }
     function attachContainer() {
       shell.classList.toggle("course-mobile-layout", media.matches);
@@ -308,7 +344,9 @@
         cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx);
       }
       if (highlight) {
-        highlight.setLatLng([point.lat, point.lng]).setStyle({ opacity: active ? 1 : 0, fillOpacity: active ? 1 : 0 });
+        highlight.setLatLng([point.lat, point.lng]).setOpacity(active ? 1 : 0);
+        highlight.getElement()?.style.setProperty("--rider-color",config().color);
+        if (focus && !open) highlight.closePopup();
         const stop = stopForPoint(data, point);
         if (!stop || popupStop?.data !== data || popupStop.index !== stop.index) {
           const content = popup(point, selectedPointTitle(data, point));
@@ -316,11 +354,12 @@
           configurePointPopup(Boolean(stop)); highlight.setPopupContent(content);
           popupStop = stop ? { data, index: stop.index } : null;
         }
-        if (focus && active) map.panInside([point.lat, point.lng], { ...mapPadding(), animate: false });
+        if (focus && active) focusPoint(point);
+        scheduleLabels();
         if (open) {
           const stop = stopForPoint(data, point);
           if (media.matches && stop && stopCard) { highlight.closePopup(); stopCard.showMobile(stopContext(stop)); }
-          else highlight.openPopup();
+          else if (!roadview?.isOpen()) highlight.openPopup();
         }
       }
       if (roadview?.isOpen() && !playing && (open || previousIndex !== selectedIndex)) {
@@ -459,15 +498,13 @@
       drawStops(id); drawIncidents();
       if (!map.hasLayer(layer)) layer.addTo(map);
     }
-    const permanentStopName = (id) => id === day && (!media.matches || (map?.getZoom() || 0) >= 15);
     function updateDayStyles() {
       if (L) for (const [id, group] of layers) for (const item of group.getLayers()) if (item instanceof L.Polyline) item.setStyle({ weight: id === day ? 5 : 3, opacity: id === day ? .95 : .65 });
-      for (const [id, group] of restLayers) for (const marker of group.getLayers()) {
-        const tooltip = marker.getTooltip();
-        if (!tooltip?.options.className?.includes("gpx-stop-place-label") || tooltip.options.permanent === permanentStopName(id)) continue;
-        const content = tooltip.getContent(), options = { ...tooltip.options, permanent: permanentStopName(id) };
-        marker.unbindTooltip().bindTooltip(content, options);
+      for (const [id,group] of restLayers) {
+        if(active && id===day){if(!layer.hasLayer(group))layer.addLayer(group);}
+        else if(layer.hasLayer(group))layer.removeLayer(group);
       }
+      scheduleLabels();
       legend.innerHTML = defaults.map((item) => '<span class="' + (item.id === day ? "is-selected" : "") + '"><i style="background:' + item.color + '"></i>' +
         item.label + '</span>').join("") + '<span><i style="background:#a1a1aa"></i>기존 코스</span>';
     }
@@ -495,28 +532,38 @@
     function drawStops(id) {
       if (!map || !layer || !records.has(id)) return;
       let group = restLayers.get(id);
-      if (!group) { group = L.layerGroup(); restLayers.set(id, group); }
+      if (!group) { group=L.layerGroup();restLayers.set(id,group); }
       group.clearLayers();
-      const data = records.get(id).data, item = defaults.find((entry) => entry.id === id);
-      for (const stop of stopsFor(data)) {
-        const point = data.points[stop.index], label = namedStop(stop, id);
-        const fullTitle = item.label + " · " + stopTitle(stop, id) + " · " + clock(stop.durationS) + (stop.hasRecordingGap ? " · 기록 공백 포함" : "");
-        const icon = L.divIcon({ className: "gpx-stop-icon", html: '<span style="--stop-color:' + item.color + '">Ⅱ<b>' + stop.number + '</b></span>',
-          iconSize: [26, 26], iconAnchor: [13, 13] });
-        L.marker([point.lat, point.lng], { pane: "gpxStopsPane", icon, title: fullTitle, bubblingMouseEvents: false })
-          .on("tooltipopen", (event) => {
-            if (!label) return;
-            const node = event.tooltip.getElement();
-            node.setAttribute("role", "button"); node.tabIndex = 0; node.setAttribute("aria-label", fullTitle + " · 장소와 사진 보기");
-            node.onclick = (click) => { click.preventDefault(); click.stopPropagation(); showStop(stop, id, false); };
-            node.onkeydown = (key) => { if (["Enter", " "].includes(key.key)) { key.preventDefault(); key.stopPropagation(); showStop(stop, id, false); } };
-          })
-          .bindTooltip(escape(label ? stopTitle(stop, id) : fullTitle), label ? {
-            pane: "gpxStopLabelsPane", permanent: permanentStopName(id), interactive: true, direction: label.direction, offset: label.offset || (label.direction === "left" ? [-16, 0] : label.direction === "right" ? [16, 0] : [0, label.direction === "top" ? -16 : 16]), className: "gpx-stop-place-label gpx-stop-place-label-" + id, opacity: 1
-          } : {})
-          .on("click", () => showStop(stop, id, false)).addTo(group);
+      const data=records.get(id).data,item=defaults.find(entry=>entry.id===id);
+      const groups=layout.groupStops(stopsFor(data),stop=>map.latLngToContainerPoint([stop.lat,stop.lng]),core.distance);
+      for(const stays of groups){
+        const stop=stays[0],labels=stays.map(s=>namedStop(s,id)),names=[...new Set(labels.map(l=>l?.name).filter(Boolean))];
+        const numbers=stays.map(s=>s.number).join('·'),name=names.join(' / ')||'머문 곳';
+        const text='#'+numbers+' '+name,fullTitle=item.label+' · '+text+(stays.length>1?' · '+stays.length+'회 체류':' · '+clock(stop.durationS));
+        const point=stays.length===1?data.points[stop.index]:{lat:stays.reduce((sum,s)=>sum+s.lat,0)/stays.length,lng:stays.reduce((sum,s)=>sum+s.lng,0)/stays.length};
+        const icon=L.divIcon({className:'gpx-stop-icon',html:'<span class="'+(stays.length>1?'is-group':'')+'" style="--stop-color:'+item.color+'">'+numbers+'</span>',iconSize:[44,44],iconAnchor:[22,22]});
+        const choose=()=>{
+          if(stays.length===1){showStop(stop,id,false);return;}
+          if(id!==day)element.querySelector('[data-map-day="'+id+'"]').click();
+          focusPoint(point,Math.max(17,map.getZoom()));
+          const node=document.createElement('div');node.className='gpx-stay-group';
+          const title=document.createElement('strong');title.textContent=name;
+          const hint=document.createElement('p');hint.textContent='같은 장소에 머문 기록을 선택하세요.';node.append(title,hint);
+          for(const stay of stays){const button=document.createElement('button');button.type='button';button.textContent='#'+stay.number+' · '+clock(stay.durationS)+' 체류';button.addEventListener('click',()=>{map.closePopup();showStop(stay,id,false)});node.append(button);}
+          L.popup({maxWidth:280,autoPan:false}).setLatLng(point).setContent(node).openOn(map);
+        };
+        const marker=L.marker([point.lat,point.lng],{pane:'gpxStopsPane',icon,title:fullTitle,bubblingMouseEvents:false});
+        marker._courseStops=stays;marker._courseDirection=labels.find(Boolean)?.direction;marker._courseKey=id+'-'+numbers;
+        marker.on('tooltipopen',event=>{
+          const node=event.tooltip.getElement();node.setAttribute('role','button');node.tabIndex=0;node.setAttribute('aria-label',fullTitle+' · 장소와 사진 보기');
+          node.onclick=event=>{event.preventDefault();event.stopPropagation();choose()};
+          node.onkeydown=event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();choose()}};
+        }).bindTooltip(escape(text),{pane:'gpxStopLabelsPane',permanent:true,interactive:true,direction:marker._courseDirection||'top',offset:[0,-17],className:'gpx-stop-place-label gpx-stop-place-label-'+id,opacity:1})
+          .on('mouseover focus',()=>{hoveredStop=marker;scheduleLabels()}).on('mouseout blur',()=>{if(hoveredStop===marker)hoveredStop=null;scheduleLabels()})
+          .on('click',choose).addTo(group);
       }
-      if (active && !layer.hasLayer(group)) layer.addLayer(group);
+      if(active && id===day && !layer.hasLayer(group))layer.addLayer(group);
+      scheduleLabels();
     }
     function renderLaps(data) {
       return '<section class="ride-laps"><div class="ride-section-title"><h2>구간 기록 <small>5 km마다</small></h2><span>행을 누르면 지도 위치 표시</span></div><div class="ride-table-scroll"><table><thead><tr><th>구간</th><th>시간</th><th>거리</th><th>평균 / 최고 속도</th><th>평균 심박</th><th>평균 케이던스</th><th>상승 / 하강</th></tr></thead><tbody>' +
@@ -650,7 +697,7 @@
       if (event.target.matches("[data-gpx-stop-min]")) { minimumStopS = Number(event.target.value); results.querySelector(".ride-stops").outerHTML = renderStops(current()); for (const id of records.keys()) drawStops(id); drawCharts(); return; }
       if (event.target.matches("[data-gpx-metric]")) { if (event.target.checked) enabled.add(event.target.dataset.gpxMetric); else enabled.delete(event.target.dataset.gpxMetric); drawCharts(); }
     });
-    const resize = new ResizeObserver(() => { root.cancelAnimationFrame(resizeFrame); resizeFrame = root.requestAnimationFrame(() => { if (active) { map?.invalidateSize({ pan: false }); drawCharts(); } }); });
+    const resize = new ResizeObserver(() => { root.cancelAnimationFrame(resizeFrame); resizeFrame = root.requestAnimationFrame(() => { if (active) { map?.invalidateSize({ pan: false }); drawCharts(); scheduleLabels(); } }); });
     resize.observe(element);
     resize.observe(dock);
     media.addEventListener("change", () => { stopCard?.close(); attachContainer(); updateDayStyles(); if (active) root.requestAnimationFrame(() => { fit(); drawCharts(); }); });
@@ -689,15 +736,17 @@
         map.createPane("uploadedGpxPane"); map.getPane("uploadedGpxPane").style.zIndex = "450";
         map.createPane("gpxStopsPane"); map.getPane("gpxStopsPane").style.zIndex = "695";
         map.createPane("gpxStopLabelsPane"); map.getPane("gpxStopLabelsPane").style.zIndex = "690";
-        map.createPane("gpxSelectionPane"); map.getPane("gpxSelectionPane").style.zIndex = "460";
+        map.createPane("gpxSelectionPane"); map.getPane("gpxSelectionPane").style.zIndex = "698";
         layer = L.layerGroup().addTo(map);
         map.createPane("courseIncidentPane"); map.getPane("courseIncidentPane").style.zIndex = "660";
         incidentLayer = L.layerGroup();
         if (active) incidentLayer.addTo(map);
         drawIncidents();
         for (const id of records.keys()) drawDay(id);
-        highlight = L.circleMarker([33.5, 126.5], { pane: "gpxSelectionPane", radius: 7, color: "#172554", weight: 3, fillColor: "#fff", fillOpacity: 0, opacity: 0, bubblingMouseEvents: false }).addTo(layer);
-        map.on("zoomend", updateDayStyles);
+        const bicycle = '<span class="gpx-rider-badge"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="7" cy="23" r="5.5"/><circle cx="25" cy="23" r="5.5"/><path d="M7 23l6-12 7 12H7l9-9h6l3 9M11 11h5M21 14l-2-7h-4"/><circle class="rider-head" cx="19" cy="4" r="2"/></svg></span>';
+        highlight = L.marker([33.5,126.5],{pane:'gpxSelectionPane',icon:L.divIcon({className:'gpx-rider-marker',html:bicycle,iconSize:[44,44],iconAnchor:[22,22],popupAnchor:[0,-22]}),title:'주행분석 선택 위치 · 자전거',opacity:0,bubblingMouseEvents:false,zIndexOffset:1000}).addTo(layer);
+        map.on("zoomend", () => { drawStops(day); updateDayStyles(); });
+        map.on("moveend resize",scheduleLabels);
         attachContainer(); updateDayStyles(); select(selectedIndex); return layer;
       },
       showMapError(text) {
@@ -715,7 +764,7 @@
           else if (changed) { for (const [item, shown] of previousContext) if (shown && !map.hasLayer(item)) item.addTo(map); previousContext.clear(); }
           if (next) root.setTimeout(() => { if (active) fit(); }, 100);
         }
-        for (const group of restLayers.values()) { if (next && !layer?.hasLayer(group)) layer?.addLayer(group); else if (!next && layer?.hasLayer(group)) layer.removeLayer(group); }
+        for (const group of restLayers.values()) { if (next && group===restLayers.get(day) && !layer?.hasLayer(group)) layer?.addLayer(group); else if (!next && layer?.hasLayer(group)) layer.removeLayer(group); }
         if (map && incidentLayer) { if (next && !map.hasLayer(incidentLayer)) incidentLayer.addTo(map); else if (!next && map.hasLayer(incidentLayer)) map.removeLayer(incidentLayer); }
         if (!next) { stopPlayback(); stopCard?.close(); roadview?.close(); highlight?.closePopup(); } select(selectedIndex);
       },
